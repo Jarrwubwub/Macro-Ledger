@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17251f">
+<meta name="description" content="Personal food library, serving converter and daily macro tracker.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Macro Ledger</title>
+<style>
+:root{--bg:#f4f6f3;--panel:#fff;--ink:#17251f;--muted:#68766e;--line:#e2e8e3;--green:#247a53;--green2:#e5f3eb;--red:#b44242;--shadow:0 5px 20px #1833270c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{background:#17251f;color:#fff;padding:20px 18px 17px;position:sticky;top:0;z-index:5}header .top{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:22px;margin:0;font-weight:750;letter-spacing:-.5px}.sub{color:#c3d2c9;font-size:12px;margin-top:3px}
+main{max-width:760px;margin:auto;padding:15px;display:grid;gap:14px}.tabs{display:flex;gap:7px;overflow:auto;padding:2px 0}.tab{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:9px 14px;font-weight:650;white-space:nowrap}.tab.active{background:var(--green);border-color:var(--green);color:#fff}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}h2{font-size:17px;margin:0 0 12px;letter-spacing:-.2px}.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted)}
+input,select{width:100%;min-width:0;border:1px solid #d7e0d9;border-radius:11px;padding:11px 12px;background:#fff;color:var(--ink);font:inherit}label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin:0 0 5px}.field{min-width:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.btn{border:0;border-radius:11px;padding:11px 14px;background:var(--green);color:#fff;font:700 14px inherit;cursor:pointer}.btn.secondary{background:var(--green2);color:var(--green)}.btn.ghost{background:#f1f4f1;color:var(--ink);border:1px solid var(--line)}.btn.danger{background:#fff0f0;color:var(--red)}.btn:disabled{opacity:.4}.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.foodrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.foodrow:last-child{border:0}.foodrow .info{flex:1;min-width:0}.foodrow strong{display:block;font-size:14px}.pill{font-size:11px;color:var(--muted);background:#f1f4f1;padding:3px 7px;border-radius:99px;display:inline-block}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{background:#f5f8f5;border-radius:13px;padding:12px}.stat .v{font-size:24px;font-weight:800;letter-spacing:-.7px;font-variant-numeric:tabular-nums}.stat .l{font-size:12px;color:var(--muted)}.progress{height:8px;background:#e7eee8;border-radius:99px;overflow:hidden}.progress>i{height:100%;display:block;background:#26935e;border-radius:99px}.hide{display:none!important}.entry{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}.entry:last-child{border:0}.entry button{padding:6px 9px}.notice{padding:11px 12px;background:#fff8e7;border:1px solid #f1e2b7;color:#72571a;border-radius:11px;font-size:12px}.ok{color:var(--green)}.dangertext{color:var(--red)}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar>*{flex:1}.section{display:grid;gap:11px}.amountline{display:grid;grid-template-columns:1fr 100px;gap:9px;align-items:end}.result{background:#f4f8f4;border-radius:12px;padding:12px}.result strong{font-size:20px}.searchbar{position:sticky;top:0;background:#fff;padding:0 0 8px;z-index:2}.smallbtn{font-size:12px;padding:7px 10px}.footer{text-align:center;font-size:11px;color:var(--muted);padding:5px 10px 18px}
+@media(max-width:380px){.grid4{grid-template-columns:repeat(2,1fr)}.stat .v{font-size:21px}}
+</style>
+</head>
+<body>
+<header><div class="top"><div><h1>Macro Ledger</h1><div class="sub">Your food library · serving converter · daily diary</div></div><span class="pill" style="background:#294237;color:#d7eee0">Offline-ready</span></div></header>
+<main>
+<div class="tabs">
+<button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Food library</button><button class="tab" data-tab="converter">Converter</button><button class="tab" data-tab="history">History & export</button>
+</div>
+<section id="diary" class="section">
+<div class="card section">
+<div class="row between"><h2 style="margin:0">Daily totals</h2><input id="logDate" type="date" style="width:auto;max-width:155px"></div>
+<div class="stats">
+<div class="stat"><div class="l">Calories</div><div class="v" id="totalKcal">0</div><div class="tiny">kcal</div></div>
+<div class="stat"><div class="l">Protein</div><div class="v" id="totalProtein">0 g</div><div class="tiny">Target 180–200 g</div></div>
+<div class="stat"><div class="l">Carbohydrates</div><div class="v" id="totalCarbs">0 g</div><div class="tiny">Daily total</div></div>
+<div class="stat"><div class="l">Fat</div><div class="v" id="totalFat">0 g</div><div class="tiny">Daily total</div></div>
+</div>
+<div><div class="row between tiny"><span>Protein target progress</span><span id="proteinProgressLabel">0 / 200 g</span></div><div class="progress"><i id="proteinProgress" style="width:0%"></i></div></div>
+<div class="grid4 tiny"><div>Calories from macros<br><b id="macroCalories">0 kcal</b></div><div>Difference<br><b id="difference">0 kcal</b></div><div>Entries<br><b id="entryCount">0</b></div><div>Target calories<br><b>2,000–2,200</b></div></div>
+<div id="discrepancy" class="notice hide"></div>
+</div>
+<div class="card">
+<div class="row between"><h2 style="margin:0">Add food</h2><button class="btn secondary smallbtn" id="goLibrary">Browse library</button></div>
+<div class="section" style="margin-top:12px">
+<div class="field"><label>Search saved foods</label><input id="quickSearch" placeholder="Start typing e.g. chicken, rice, WPC"></div>
+<div id="quickResults"></div>
+<div class="notice">Tap a food to add its base serving. Use the converter to change the quantity before adding it.</div>
+</div>
+</div>
+<div class="card"><div class="row between"><h2 style="margin:0">Food diary</h2><button class="btn ghost smallbtn" id="clearDay">Clear day</button></div><div id="diaryEntries" class="section" style="margin-top:8px"><div class="muted tiny">No foods logged yet.</div></div></div>
+</section>
+<section id="library" class="section hide">
+<div class="card section">
+<div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
+<input id="librarySearch" placeholder="Search foods...">
+<select id="categoryFilter"><option value="All">All categories</option></select>
+<div id="foodList"></div>
+</div>
+<div class="card section">
+<h2>Add a custom food</h2>
+<div class="field"><label>Food name</label><input id="customName" placeholder="e.g. Greek yoghurt, 170 g"></div>
+<div class="grid">
+<div class="field"><label>Base serving quantity</label><input id="customQty" type="number" min="0.01" step="any" value="1"></div>
+<div class="field"><label>Unit</label><input id="customUnit" value="serve" placeholder="g, mL, serve"></div>
+</div>
+<div class="grid4">
+<div class="field"><label>kcal</label><input id="customKcal" type="number" min="0" step="any"></div>
+<div class="field"><label>Protein g</label><input id="customProtein" type="number" min="0" step="any"></div>
+<div class="field"><label>Carbs g</label><input id="customCarbs" type="number" min="0" step="any"></div>
+<div class="field"><label>Fat g</label><input id="customFat" type="number" min="0" step="any"></div>
+</div>
+<button class="btn" id="saveCustom">Save custom food</button>
+</div>
+</section>
+<section id="converter" class="section hide">
+<div class="card section">
+<h2>Serving converter</h2>
+<div class="field"><label>Choose a saved food</label><select id="convertFood"></select></div>
+<div class="amountline">
+<div class="field"><label>Quantity</label><input id="convertQty" type="number" min="0" step="any" value="1"></div>
+<div class="field"><label>Unit</label><input id="convertUnit" disabled></div>
+</div>
+<div class="tiny" id="baseInfo"></div>
+<div class="result" id="convertResult">Choose a food to calculate its macros.</div>
+<button class="btn" id="addConverted">Add converted serving to diary</button>
+</div>
+<div class="card"><h2>How the converter works</h2><p class="muted" style="margin:0">Each library item has a base serving. Change the quantity to scale its calories, protein, carbohydrates and fat proportionally. For example, 150 g of a food with a 100 g base serving multiplies every value by 1.5.</p></div>
+</section>
+<section id="history" class="section hide">
+<div class="card section">
+<h2>History & backup</h2>
+<div class="field"><label>Choose a day to view</label><input id="historyDate" type="date"></div>
+<div id="historySummary" class="result">No saved log for this date.</div>
+<div class="toolbar"><button class="btn secondary" id="loadHistory">Load day into diary</button><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportJSON">Backup JSON</button></div>
+<div class="notice">Your food library and diary are stored on this device in your browser. Export a JSON backup regularly if you want to move your data to another phone or browser.</div>
+<div class="field"><label>Restore a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div>
+</div>
+</section>
+<div class="footer">Macro Ledger · Personal estimates, not a clinical nutrition database.</div>
+</main>
+<script src="foods.js"></script><script src="app.js"></script>
+</body></html>
