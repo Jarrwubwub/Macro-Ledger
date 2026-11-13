@@ -1,7 +1,7 @@
 (()=>{
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA');
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
-let foods=load('macroFoods',window.DEFAULT_FOODS);
+let foods=load('macroFoods',window.DEFAULT_FOODS).map((f,i)=>({...f,id:f.id??`food-${i}`}));
 let logs=load('macroLogs',{});
 let currentDate=today(), converted=null;
 const num=(v)=>Number(v)||0, fmt=(v)=>Number(v.toFixed(1)).toString();
