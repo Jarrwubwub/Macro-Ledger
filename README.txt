@@ -36,3 +36,6 @@ After opening it once while online, the app files are cached and the core tracke
 - Date-based logs, CSV export and JSON backup/restore.
 
 The food values are personal estimates based on the values used in your logs, not verified nutrition-label data. Check product labels when accuracy matters.
+
+
+Latest update (v15): dark, eye-friendly colour theme; diary entries now appear directly beneath protein target progress; Add food shows the five most frequently logged foods (ties are broken by most recent use); Browse library remains available for all other foods.

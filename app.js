@@ -40,7 +40,7 @@ save();
 const entries=()=>logs[currentDate]||[];
 function addEntry(food,qty=food.baseQty,unit=food.unit){
  const factor=qty/food.baseQty;
- const entry={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),name:food.name,qty,unit,kcal:food.kcal*factor,protein:food.protein*factor,carbs:food.carbs*factor,fat:food.fat*factor};
+ const entry={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),loggedAt:Date.now(),name:food.name,qty,unit,kcal:food.kcal*factor,protein:food.protein*factor,carbs:food.carbs*factor,fat:food.fat*factor};
  logs[currentDate]=[...entries(),entry];save();renderDiary();
 }
 function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','converter','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='converter')renderConverterSelect();if(tab==='history')renderHistory()}
@@ -57,6 +57,7 @@ function renderDiary(){
  $('diaryEntries').innerHTML=entries().length?entries().map(x=>`<div class="entry"><div><b>${esc(x.name)}</b><div class="tiny">${fmt(x.qty)} ${esc(x.unit)} · ${fmt(x.kcal)} kcal · P ${fmt(x.protein)} g · C ${fmt(x.carbs)} g · F ${fmt(x.fat)} g</div></div><button class="btn danger smallbtn" data-remove="${x.id}">Remove</button></div>`).join(''):'<div class="muted tiny">No foods logged yet.</div>';
  $('diaryEntries').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{logs[currentDate]=entries().filter(x=>x.id!==b.dataset.remove);save();renderDiary()});
  $('clearDay').disabled=!entries().length;
+ renderQuick();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions">${button?`<div class="qtyadd"><input aria-label="Amount of ${esc(f.name)}" type="number" min="0.01" step="any" value="${f.baseQty}" data-foodqty="${index}"><span>${esc(f.unit)}</span><button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div>`:''}<button class="btn ghost smallbtn" data-editfood="${index}">Edit</button><button class="btn ghost smallbtn" data-duplicatefood="${index}">Duplicate</button><button class="btn danger smallbtn" data-deletefood="${index}">Delete</button></div></div>`}
@@ -102,12 +103,29 @@ $('manageCategories').onclick=()=>{
  else alert('Please enter ADD, RENAME or DELETE.');
 }
 $('librarySearch').oninput=renderLibrary;$('categoryFilter').onchange=renderLibrary;
+function foodUsage(){
+ const usage=new Map();
+ for(const [date,dayEntries] of Object.entries(logs)){
+  const dayStart=Date.parse(date+'T00:00:00')||0;
+  (Array.isArray(dayEntries)?dayEntries:[]).forEach((entry,index)=>{
+   const key=String(entry.name||'').toLocaleLowerCase();
+   if(!key)return;
+   const item=usage.get(key)||{count:0,last:0};
+   item.count++;
+   item.last=Math.max(item.last,Number(entry.loggedAt)||dayStart+index);
+   usage.set(key,item);
+  });
+ }
+ return usage;
+}
 function renderQuick(){
- const q=$('quickSearch').value.toLowerCase(),list=foods.filter(f=>f.name.toLowerCase().includes(q)).slice(0,7);
- $('quickResults').innerHTML=list.map(f=>foodRow(f,true,foods.indexOf(f))).join('');
+ const usage=foodUsage();
+ const list=foods.map((f,index)=>({f,index,stats:usage.get(f.name.toLocaleLowerCase())||{count:0,last:0}}))
+  .sort((a,b)=>b.stats.count-a.stats.count||b.stats.last-a.stats.last||a.index-b.index)
+  .slice(0,5).map(x=>x.f);
+ $('quickResults').innerHTML=list.map(f=>foodRow(f,true,foods.indexOf(f))).join('')||'<div class="tiny muted">No foods in your library yet.</div>';
  bindFoodActions($('quickResults'));
 }
-$('quickSearch').oninput=renderQuick;
 function renderConverterSelect(){
  $('convertFood').innerHTML=foods.map(f=>`<option value="${f.id}">${esc(f.name)} — ${f.baseQty} ${esc(f.unit)}</option>`).join('');
  if(!converted&&foods.length)converted=foods[0].id;
