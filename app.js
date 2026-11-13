@@ -61,11 +61,11 @@ function renderDiary(){
  renderQuick();
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions">${button?`<div class="qtyadd"><input aria-label="Amount of ${esc(f.name)}" type="number" min="0.01" step="any" value="${f.baseQty}" data-foodqty="${index}"><span>${esc(f.unit)}</span><button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div>`:''}<button class="btn ghost smallbtn" data-editfood="${index}">Edit</button><button class="btn ghost smallbtn" data-duplicatefood="${index}">Duplicate</button><button class="btn danger smallbtn" data-deletefood="${index}">Delete</button></div></div>`}
+function quantityInput(f,index){const whole=f.unit.toLowerCase()!=='g';return `<input aria-label="Amount of ${esc(f.name)}" type="number" min="0" step="${whole?'1':'0.1'}" value="${f.baseQty}" data-foodqty="${index}">`}
+function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions">${button?`<div class="qtyadd">${quantityInput(f,index)}<span>${esc(f.unit)}</span><button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div>`:''}<button class="btn ghost smallbtn" data-editfood="${index}">Edit</button><button class="btn danger smallbtn" data-deletefood="${index}">Delete</button></div></div>`}
 function bindFoodActions(container){
  container.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.addfood),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`),qty=input?num(input.value):f?.baseQty;if(f&&qty>0){addEntry(f,qty);if(container.id==='quickResults')renderQuick();setTab('diary')}});
  container.querySelectorAll('[data-editfood]').forEach(b=>b.onclick=()=>openFoodEditor(Number(b.dataset.editfood)));
- container.querySelectorAll('[data-duplicatefood]').forEach(b=>b.onclick=()=>{const f=foods[Number(b.dataset.duplicatefood)];if(!f)return;foods.splice(Number(b.dataset.duplicatefood)+1,0,{...f,id:newFoodId(),name:titleCase(f.name)+' (Copy)'});save();renderLibrary();});
  container.querySelectorAll('[data-deletefood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.deletefood);if(!foods[i])return;foods.splice(i,1);save();renderLibrary();});
 }
 function renderLibrary(){
@@ -125,8 +125,7 @@ function foodUsage(){
  return usage;
 }
 function quickFoodRow(f,index){
- const hasToday=entries().some(x=>String(x.name||'').toLocaleLowerCase()===f.name.toLocaleLowerCase());
- return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions"><div class="qtyadd"><input aria-label="Amount of ${esc(f.name)}" type="number" min="0.01" step="any" value="${f.baseQty}" data-foodqty="${index}"><span>${esc(f.unit)}</span><button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div><button class="btn danger smallbtn" data-removequick="${esc(f.name)}" ${hasToday?'':'disabled'}>Remove</button></div></div>`;
+ return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions"><div class="qtyadd">${quantityInput(f,index)}<span>${esc(f.unit)}</span><button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div></div></div>`;
 }
 function renderQuick(){
  const usage=foodUsage();
@@ -135,13 +134,7 @@ function renderQuick(){
   .slice(0,5).map(x=>x.f);
  $('quickResults').innerHTML=list.map(f=>quickFoodRow(f,foods.indexOf(f))).join('')||'<div class="tiny muted">No foods in your library yet.</div>';
  bindFoodActions($('quickResults'));
- $('quickResults').querySelectorAll('[data-removequick]').forEach(b=>b.onclick=()=>{
-  const name=b.dataset.removequick.toLocaleLowerCase();
-  const matches=entries().map((entry,index)=>({entry,index})).filter(x=>String(x.entry.name||'').toLocaleLowerCase()===name);
-  if(!matches.length)return;
-  const latest=matches.reduce((a,x)=>((Number(x.entry.loggedAt)||x.index)>(Number(a.entry.loggedAt)||a.index)?x:a));
-  logs[currentDate]=entries().filter((_,index)=>index!==latest.index);save();renderDiary();
- });
+
 }
 function renderConverterSelect(){
  $('convertFood').innerHTML=foods.map(f=>`<option value="${f.id}">${esc(f.name)} — ${f.baseQty} ${esc(f.unit)}</option>`).join('');
@@ -176,6 +169,9 @@ $('historyDate').onchange=renderHistory;$('loadHistory').onclick=()=>{currentDat
 function download(name,content,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 $('exportJSON').onclick=()=>download('macro-ledger-backup.json',JSON.stringify({foods,logs},null,2),'application/json');
 $('exportCSV').onclick=()=>{const rows=[['Date','Food','Quantity','Unit','Calories','Protein g','Carbs g','Fat g']];Object.entries(logs).forEach(([date,items])=>items.forEach(x=>rows.push([date,x.name,x.qty,x.unit,x.kcal,x.protein,x.carbs,x.fat])));const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');download('macro-ledger-history.csv',csv,'text/csv')};
+function historyExportText(){const dates=Object.keys(logs).filter(date=>Array.isArray(logs[date])&&logs[date].length).sort();if(!dates.length)return "MK's Macro Ledger\n\nNo diary entries saved.";return ["MK's Macro Ledger — Food Diary Export",'',...dates.flatMap(date=>{const items=logs[date],t=totals(items);return [date,`${items.length} entries | ${Math.round(t.kcal)} kcal | Protein ${fmt(t.protein)} g | Carbs ${fmt(t.carbs)} g | Fat ${fmt(t.fat)} g`,'',...items.map(x=>`${x.name} — ${fmt(x.qty)} ${x.unit} | ${fmt(x.kcal)} kcal | P ${fmt(x.protein)} g | C ${fmt(x.carbs)} g | F ${fmt(x.fat)} g`),'','----------------------------------------','']})].join('\n')}
+$('exportTXT').onclick=()=>download('macro-ledger-history.txt',historyExportText(),'text/plain;charset=utf-8');
+$('exportPDF').onclick=()=>{const content=historyExportText(),printWindow=window.open('','_blank');if(!printWindow){alert('Please allow pop-ups for this site to create the PDF.');return;}const safe=esc(content);printWindow.document.open();printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Macro Ledger — Food Diary</title><style>body{font:12pt/1.5 Arial,sans-serif;color:#111;margin:24mm;white-space:pre-wrap}h1{font-size:18pt}@page{size:auto;margin:18mm}</style></head><body><h1>MK's Macro Ledger</h1><pre>${safe}</pre><script>window.onload=()=>{window.focus();window.print()}</script></body></html>`);printWindow.document.close();};
 $('importJSON').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.foods)||typeof data.logs!=='object')throw Error();foods=data.foods;logs=data.logs;save();renderDiary();renderLibrary();alert('Backup restored.')}catch{alert('That file does not look like a Macro Ledger backup.')}e.target.value=''};
 
 // Barcode lookup and review flow. Nothing is saved until the user confirms.
