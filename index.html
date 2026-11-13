@@ -19,7 +19,7 @@ input,select{width:100%;min-width:0;border:1px solid #d8d8d8;border-radius:11px;
 </style>
 </head>
 <body>
-<header><div class="top"><div><h1>MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div><span class="pill" style="background:#222;color:#fff">Offline-ready</span></div></header>
+<header><div class="top"><div><h1>MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div></div></header>
 <main>
 <div class="tabs">
 <button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Food library</button><button class="tab" data-tab="converter">Converter</button><button class="tab" data-tab="history">History & export</button>
@@ -45,17 +45,6 @@ input,select{width:100%;min-width:0;border:1px solid #d8d8d8;border-radius:11px;
 <div class="notice">Enter the amount you ate beside each food, then select Add. Weigh liquids in grams; countable foods such as eggs remain in units.</div>
 </div>
 </div>
-<div class="card"><div class="row between"><h2 style="margin:0">Food diary</h2><button class="btn ghost smallbtn" id="clearDay">Clear day</button></div><div id="diaryEntries" class="section" style="margin-top:8px"><div class="muted tiny">No foods logged yet.</div></div></div>
-</section>
-<section id="library" class="section hide">
-<div class="card section">
-<div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
-<input id="librarySearch" placeholder="Search foods...">
-<select id="categoryFilter"><option value="All">All categories</option></select>
-<div class="toolbar"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button></div>
-<div id="foodList"></div>
-</div>
-
 <div class="card section">
 <h2>Scan a packaged food</h2>
 <p class="muted" style="margin:0">Scan a barcode or enter its number. We'll look up the product, then show you the details to check before saving it.</p>
@@ -84,6 +73,18 @@ input,select{width:100%;min-width:0;border:1px solid #d8d8d8;border-radius:11px;
 <div class="tiny">Source: Open Food Facts. Product data is community-contributed and may be incomplete or incorrect.</div>
 </div>
 </div>
+<div class="card"><div class="row between"><h2 style="margin:0">Food diary</h2><button class="btn ghost smallbtn" id="clearDay">Clear day</button></div><div id="diaryEntries" class="section" style="margin-top:8px"><div class="muted tiny">No foods logged yet.</div></div></div>
+</section>
+<section id="library" class="section hide">
+<div class="card section">
+<div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
+<input id="librarySearch" placeholder="Search foods...">
+<select id="categoryFilter"><option value="All">All categories</option></select>
+<div class="toolbar"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button></div>
+<div id="foodList"></div>
+</div>
+
+
 
 <div class="card section">
 <h2>Add a custom food</h2>
