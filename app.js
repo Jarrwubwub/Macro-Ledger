@@ -66,7 +66,7 @@ function bindFoodActions(container){
  container.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.addfood),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`),qty=input?num(input.value):f?.baseQty;if(f&&qty>0){addEntry(f,qty);if(container.id==='quickResults')renderQuick();setTab('diary')}});
  container.querySelectorAll('[data-editfood]').forEach(b=>b.onclick=()=>openFoodEditor(Number(b.dataset.editfood)));
  container.querySelectorAll('[data-duplicatefood]').forEach(b=>b.onclick=()=>{const f=foods[Number(b.dataset.duplicatefood)];if(!f)return;foods.splice(Number(b.dataset.duplicatefood)+1,0,{...f,id:newFoodId(),name:titleCase(f.name)+' (Copy)'});save();renderLibrary();});
- container.querySelectorAll('[data-deletefood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.deletefood),f=foods[i];if(!f)return;if(confirm(`Delete "${f.name}" from your food library? Existing diary entries will remain unchanged.`)){foods.splice(i,1);save();renderLibrary();}});
+ container.querySelectorAll('[data-deletefood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.deletefood);if(!foods[i])return;foods.splice(i,1);save();renderLibrary();});
 }
 function renderLibrary(){
  const cats=['All',...new Set([...categories,...foods.map(f=>f.category||'Custom')])],old=$('categoryFilter').value||'All';
@@ -75,8 +75,12 @@ function renderLibrary(){
  const q=$('librarySearch').value.toLowerCase(),cat=$('categoryFilter').value;
  const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q));
  $('foodCount').textContent=foods.length+' foods';
- $('foodList').innerHTML=list.map(f=>foodRow(f,true,foods.indexOf(f))).join('')||'<div class="tiny muted">No matching foods.</div>';
+ $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<div class="food-library-row"><input class="food-select" type="checkbox" aria-label="Select ${esc(f.name)} for deletion" data-selectfood="${i}"><div>${foodRow(f,true,i)}</div></div>`}).join('')||'<div class="tiny muted">No matching foods.</div>';
  bindFoodActions($('foodList'));
+ const updateSelection=()=>{const boxes=[...$('foodList').querySelectorAll('[data-selectfood]')],selected=boxes.filter(x=>x.checked).length,all=$('selectAllFoods');$('selectedFoodCount').textContent=selected+' selected';$('deleteSelectedFoods').disabled=selected===0;$('deleteSelectedFoods').textContent=`Delete selected (${selected})`;all.checked=boxes.length>0&&selected===boxes.length;all.indeterminate=selected>0&&selected<boxes.length;};
+ $('foodList').querySelectorAll('[data-selectfood]').forEach(box=>box.addEventListener('change',updateSelection));
+ $('selectAllFoods').checked=false;$('selectAllFoods').indeterminate=false;$('selectAllFoods').onchange=()=>{$('foodList').querySelectorAll('[data-selectfood]').forEach(box=>box.checked=$('selectAllFoods').checked);updateSelection()};
+ updateSelection();
 }
 function newFoodId(){return 'food-'+Date.now()+'-'+Math.random().toString(36).slice(2,9)}
 function openFoodEditor(i){
@@ -103,6 +107,7 @@ $('manageCategories').onclick=()=>{
  else if(mode==='DELETE'){const old=prompt('Exact category name to delete:\n'+existing.join('\n'));if(!old||!existing.includes(old))return;const target=prompt('Move foods in this category to which category? Enter an existing category, or leave blank for Custom.');foods.forEach(f=>{if((f.category||'Custom')===old)f.category=target&&existing.includes(target)?target:'Custom'});categories=categories.filter(c=>c!==old);save();renderLibrary();}
  else alert('Please enter ADD, RENAME or DELETE.');
 }
+$('deleteSelectedFoods').onclick=()=>{const selected=[...$('foodList').querySelectorAll('[data-selectfood]:checked')].map(box=>Number(box.dataset.selectfood)).filter(i=>Number.isInteger(i)&&foods[i]);if(!selected.length)return;selected.sort((a,b)=>b-a).forEach(i=>foods.splice(i,1));save();renderLibrary();renderConverterSelect();};
 $('librarySearch').oninput=renderLibrary;$('categoryFilter').onchange=renderLibrary;
 function foodUsage(){
  const usage=new Map();

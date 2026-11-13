@@ -21,6 +21,16 @@ input,select{width:100%;min-width:0;border:1px solid var(--line);border-radius:1
 @media(max-width:520px){.foodrow{align-items:flex-start;flex-wrap:wrap}.food-actions{width:100%;justify-content:flex-start}.food-actions .smallbtn{padding:7px 9px}}@media(max-width:380px){.grid4{grid-template-columns:repeat(2,1fr)}.stat .v{font-size:21px}}
 dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px}dialog::backdrop{background:#000a}input::placeholder{color:#89929d}select option{background:#2a3037;color:var(--ink)}
 .daily-add-food{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:44px;padding:10px 14px;border:1px solid var(--accent);border-radius:12px;background:var(--accent);color:var(--accent-ink);font:700 14px/1.2 "Manrope",system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px #0003}.daily-add-food span{font-size:19px;line-height:1}.daily-add-food:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+.library-tools{justify-content:space-between;align-items:center;flex-wrap:wrap;margin:10px 0}
+.library-select-all{padding:8px 2px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.library-select-all label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.food-library-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+.food-library-row .foodrow{border:0;margin:0;min-width:0}
+.food-select{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+#deleteSelectedFoods:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:430px){.food-library-row{grid-template-columns:24px minmax(0,1fr);gap:5px}.food-library-row .foodrow{gap:6px}.food-library-row .food-actions{gap:4px}}
+
 </style>
 </head>
 <body>
@@ -85,7 +95,8 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
 <input id="librarySearch" placeholder="Search foods...">
 <select id="categoryFilter"><option value="All">All categories</option></select>
-<div class="toolbar"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button></div>
+<div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button><button class="btn danger smallbtn" id="deleteSelectedFoods" type="button" disabled>Delete selected (0)</button></div>
+<div class="row between library-select-all"><label class="tiny"><input id="selectAllFoods" type="checkbox"> Select all visible foods</label><span class="tiny muted" id="selectedFoodCount">0 selected</span></div>
 <div id="foodList"></div>
 </div>
 
@@ -162,9 +173,19 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 
 .colour-swatch-button{width:40px;height:40px;min-width:40px;padding:0;border-radius:50%;border:2px solid #777;background:var(--accent);box-shadow:0 0 0 3px #ffffff12;cursor:pointer;flex:0 0 40px}
 .colour-swatch-button:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+
+.library-tools{justify-content:space-between;align-items:center;flex-wrap:wrap;margin:10px 0}
+.library-select-all{padding:8px 2px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.library-select-all label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.food-library-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+.food-library-row .foodrow{border:0;margin:0;min-width:0}
+.food-select{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+#deleteSelectedFoods:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:430px){.food-library-row{grid-template-columns:24px minmax(0,1fr);gap:5px}.food-library-row .foodrow{gap:6px}.food-library-row .food-actions{gap:4px}}
+
 </style>
 <script src="foods.js"></script><script src="app.js"></script>
 <script>
-(()=>{const root=document.documentElement,dialog=document.getElementById('colourDialog'),button=document.getElementById('colourButton');const valid=['monochrome','yellow','orange'];function setTheme(theme){if(theme==='amber')theme='yellow';if(!valid.includes(theme))theme='monochrome';root.dataset.theme=theme;localStorage.setItem('macroLedgerTheme',theme);button.style.backgroundColor=getComputedStyle(root).getPropertyValue('--accent').trim();button.setAttribute('aria-label','Change colour mode. Current mode: '+theme);button.title='Current colour: '+theme+'. Click to change';document.querySelectorAll('[data-theme-choice]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.themeChoice===theme)));document.querySelector('meta[name="theme-color"]').content=getComputedStyle(root).getPropertyValue('--header').trim()||'#14171b'}setTheme(localStorage.getItem('macroLedgerTheme')||'monochrome');button.addEventListener('click',()=>dialog.showModal());document.getElementById('closeColour').addEventListener('click',()=>dialog.close());document.querySelectorAll('[data-theme-choice]').forEach(el=>el.addEventListener('click',()=>{setTheme(el.dataset.themeChoice);dialog.close()}));dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()})})();
+(()=>{const root=document.documentElement,dialog=document.getElementById('colourDialog'),button=document.getElementById('colourButton');const valid=['monochrome','yellow','orange'];function setTheme(theme){if(theme==='amber')theme='yellow';if(!valid.includes(theme))theme='monochrome';root.dataset.theme=theme;localStorage.setItem('macroLedgerTheme',theme);button.style.backgroundColor=getComputedStyle(root).getPropertyValue('--accent').trim();button.setAttribute('aria-label','Change colour mode. Current mode: '+theme);button.title='Current colour: '+theme+'. Click to change';document.querySelectorAll('[data-theme-choice]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.themeChoice===theme)));document.querySelector('meta[name="theme-color"]').content=getComputedStyle(root).getPropertyValue('--header').trim()||'#14171b'}setTheme(localStorage.getItem('macroLedgerTheme')||'orange');button.addEventListener('click',()=>dialog.showModal());document.getElementById('closeColour').addEventListener('click',()=>dialog.close());document.querySelectorAll('[data-theme-choice]').forEach(el=>el.addEventListener('click',()=>{setTheme(el.dataset.themeChoice);dialog.close()}));dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()})})();
 </script>
 </body></html>
