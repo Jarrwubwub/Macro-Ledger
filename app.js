@@ -29,21 +29,21 @@ function renderDiary(){
  $('clearDay').disabled=!entries().length;
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function foodRow(f,button=true){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">${f.baseQty} ${esc(f.unit)} · ${f.kcal} kcal · P ${f.protein} g · C ${f.carbs} g · F ${f.fat} g</div><span class="pill">${esc(f.category||'Custom')}</span></div>${button?`<button class="btn secondary smallbtn" data-addfood="${f.id}">Add</button>`:''}</div>`}
+function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">${f.baseQty} ${esc(f.unit)} · ${f.kcal} kcal · P ${f.protein} g · C ${f.carbs} g · F ${f.fat} g</div><span class="pill">${esc(f.category||'Custom')}</span></div>${button?`<button class="btn secondary smallbtn" data-addfood="${index}">Add</button>`:''}</div>`}
 function renderLibrary(){
  const cats=['All',...new Set(foods.map(f=>f.category||'Custom'))], old=$('categoryFilter').value||'All';
  $('categoryFilter').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');$('categoryFilter').value=cats.includes(old)?old:'All';
  const q=$('librarySearch').value.toLowerCase(),cat=$('categoryFilter').value;
  const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q));
  $('foodCount').textContent=foods.length+' foods';
- $('foodList').innerHTML=list.map(f=>foodRow(f)).join('')||'<div class="tiny muted">No matching foods.</div>';
- $('foodList').querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const f=foods.find(x=>x.id===b.dataset.addfood);addEntry(f);setTab('diary')});
+ $('foodList').innerHTML=list.map(f=>foodRow(f,true,foods.indexOf(f))).join('')||'<div class="tiny muted">No matching foods.</div>';
+ $('foodList').querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const f=foods[Number(b.dataset.addfood)];if(f){addEntry(f);setTab('diary')}});
 }
 $('librarySearch').oninput=renderLibrary;$('categoryFilter').onchange=renderLibrary;
 function renderQuick(){
  const q=$('quickSearch').value.toLowerCase(),list=foods.filter(f=>f.name.toLowerCase().includes(q)).slice(0,7);
- $('quickResults').innerHTML=list.map(f=>foodRow(f)).join('');
- $('quickResults').querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const f=foods.find(x=>x.id===b.dataset.addfood);addEntry(f)});
+ $('quickResults').innerHTML=list.map(f=>foodRow(f,true,foods.indexOf(f))).join('');
+ $('quickResults').querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const f=foods[Number(b.dataset.addfood)];if(f)addEntry(f)});
 }
 $('quickSearch').oninput=renderQuick;
 function renderConverterSelect(){
