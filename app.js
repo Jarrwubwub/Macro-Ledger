@@ -46,6 +46,7 @@ function addEntry(food,qty=food.baseQty,unit=food.unit){
 function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','converter','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='converter')renderConverterSelect();if(tab==='history')renderHistory()}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 $('goLibrary').onclick=()=>setTab('library');
+$('dailyAddFood').onclick=()=>{$('addFoodCard').scrollIntoView({behavior:'smooth',block:'start'});};
 $('logDate').value=currentDate;$('historyDate').value=currentDate;
 $('logDate').onchange=e=>{currentDate=e.target.value||today();renderDiary()};
 function renderDiary(){
@@ -118,13 +119,24 @@ function foodUsage(){
  }
  return usage;
 }
+function quickFoodRow(f,index){
+ const hasToday=entries().some(x=>String(x.name||'').toLocaleLowerCase()===f.name.toLocaleLowerCase());
+ return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions"><div class="qtyadd"><input aria-label="Amount of ${esc(f.name)}" type="number" min="0.01" step="any" value="${f.baseQty}" data-foodqty="${index}"><span>${esc(f.unit)}</span><button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div><button class="btn danger smallbtn" data-removequick="${esc(f.name)}" ${hasToday?'':'disabled'}>Remove</button></div></div>`;
+}
 function renderQuick(){
  const usage=foodUsage();
  const list=foods.map((f,index)=>({f,index,stats:usage.get(f.name.toLocaleLowerCase())||{count:0,last:0}}))
   .sort((a,b)=>b.stats.count-a.stats.count||b.stats.last-a.stats.last||a.index-b.index)
   .slice(0,5).map(x=>x.f);
- $('quickResults').innerHTML=list.map(f=>foodRow(f,true,foods.indexOf(f))).join('')||'<div class="tiny muted">No foods in your library yet.</div>';
+ $('quickResults').innerHTML=list.map(f=>quickFoodRow(f,foods.indexOf(f))).join('')||'<div class="tiny muted">No foods in your library yet.</div>';
  bindFoodActions($('quickResults'));
+ $('quickResults').querySelectorAll('[data-removequick]').forEach(b=>b.onclick=()=>{
+  const name=b.dataset.removequick.toLocaleLowerCase();
+  const matches=entries().map((entry,index)=>({entry,index})).filter(x=>String(x.entry.name||'').toLocaleLowerCase()===name);
+  if(!matches.length)return;
+  const latest=matches.reduce((a,x)=>((Number(x.entry.loggedAt)||x.index)>(Number(a.entry.loggedAt)||a.index)?x:a));
+  logs[currentDate]=entries().filter((_,index)=>index!==latest.index);save();renderDiary();
+ });
 }
 function renderConverterSelect(){
  $('convertFood').innerHTML=foods.map(f=>`<option value="${f.id}">${esc(f.name)} — ${f.baseQty} ${esc(f.unit)}</option>`).join('');
