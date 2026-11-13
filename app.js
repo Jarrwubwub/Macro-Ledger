@@ -1,12 +1,41 @@
 (()=>{
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA');
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
-let foods=load('macroFoods',window.DEFAULT_FOODS).map((f,i)=>({...f,id:f.id??`food-${i}`}));
+function migrateFoods(list){
+  const out=[], seen=new Map();
+  for(const original of list){
+    const f={...original};
+    const originalName=f.name||'Food';
+    let name=originalName.replace(/\s*[–-]\s*\d+(?:\.\d+)?\s*(?:g|mL)\s*$/i,'').trim();
+    if(/^Eggs?\s*(?:×|x)\s*\d+$/i.test(name))name='Egg';
+    if(name==='Egg'){f.unit='egg';f.baseQty=Number(original.baseQty)||1;}
+    if(name==='Half avocado'){name='Avocado';f.unit='avocado';f.baseQty=1;f.kcal*=2;f.protein*=2;f.carbs*=2;f.fat*=2;}
+    const unit=f.unit||'serve';
+    const target=(unit==='g'||unit==='mL')?100:f.baseQty||1;
+    const key=name.toLowerCase()+'|'+unit.toLowerCase();
+    if(seen.has(key))continue;
+    const factor=target/(Number(f.baseQty)||1);
+    f.name=name;f.baseQty=target;f.kcal*=factor;f.protein*=factor;f.carbs*=factor;f.fat*=factor;
+    f.id=f.id||`food-${out.length}-${Date.now()}`;
+    seen.set(key,true);out.push(f);
+  }
+  return out;
+}
+let foods=migrateFoods(load('macroFoods',window.DEFAULT_FOODS));
+foods=foods.map(f=>{
+ if(f.unit!=='mL') return f;
+ const density=f.name==='Milk'?1.03:f.name==='Cream'?.99:1;
+ const factor=1/density;
+ return {...f,baseQty:100,unit:'g',kcal:f.kcal*factor,protein:f.protein*factor,carbs:f.carbs*factor,fat:f.fat*factor,
+ basis:((f.basis||'')+` Liquid converted to grams using approx. density ${density} g/mL.`).trim()};
+});
+let categories=load('macroCategories',[]);
 let logs=load('macroLogs',{});
 let currentDate=today(), converted=null;
 const num=(v)=>Number(v)||0, fmt=(v)=>Number(v.toFixed(1)).toString();
 const totals=items=>items.reduce((a,x)=>({kcal:a.kcal+x.kcal,protein:a.protein+x.protein,carbs:a.carbs+x.carbs,fat:a.fat+x.fat}),{kcal:0,protein:0,carbs:0,fat:0});
-const save=()=>{localStorage.setItem('macroFoods',JSON.stringify(foods));localStorage.setItem('macroLogs',JSON.stringify(logs))};
+const save=()=>{localStorage.setItem('macroFoods',JSON.stringify(foods));localStorage.setItem('macroLogs',JSON.stringify(logs));localStorage.setItem('macroCategories',JSON.stringify(categories))};
+save();
 const entries=()=>logs[currentDate]||[];
 function addEntry(food,qty=food.baseQty,unit=food.unit){
  const factor=qty/food.baseQty;
@@ -29,21 +58,53 @@ function renderDiary(){
  $('clearDay').disabled=!entries().length;
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">${f.baseQty} ${esc(f.unit)} · ${f.kcal} kcal · P ${f.protein} g · C ${f.carbs} g · F ${f.fat} g</div><span class="pill">${esc(f.category||'Custom')}</span></div>${button?`<button class="btn secondary smallbtn" data-addfood="${index}">Add</button>`:''}</div>`}
+function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${f.baseQty} ${esc(f.unit)} · ${f.kcal} kcal · P ${f.protein} g · C ${f.carbs} g · F ${f.fat} g${f.basis?' · '+esc(f.basis):''}</div><span class="pill">${esc(f.category||'Custom')}</span></div><div class="toolbar food-actions">${button?`<div class="qtyadd"><input aria-label="Amount of ${esc(f.name)}" type="number" min="0.01" step="any" value="${f.baseQty}" data-foodqty="${index}"><span>${esc(f.unit)}</span><button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div>`:''}<button class="btn ghost smallbtn" data-editfood="${index}">Edit</button><button class="btn ghost smallbtn" data-duplicatefood="${index}">Duplicate</button><button class="btn danger smallbtn" data-deletefood="${index}">Delete</button></div></div>`}
+function bindFoodActions(container){
+ container.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.addfood),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`),qty=input?num(input.value):f?.baseQty;if(f&&qty>0){addEntry(f,qty);if(container.id==='quickResults')renderQuick();setTab('diary')}});
+ container.querySelectorAll('[data-editfood]').forEach(b=>b.onclick=()=>openFoodEditor(Number(b.dataset.editfood)));
+ container.querySelectorAll('[data-duplicatefood]').forEach(b=>b.onclick=()=>{const f=foods[Number(b.dataset.duplicatefood)];if(!f)return;foods.splice(Number(b.dataset.duplicatefood)+1,0,{...f,id:newFoodId(),name:f.name+' (copy)'});save();renderLibrary();});
+ container.querySelectorAll('[data-deletefood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.deletefood),f=foods[i];if(!f)return;if(confirm(`Delete "${f.name}" from your food library? Existing diary entries will remain unchanged.`)){foods.splice(i,1);save();renderLibrary();}});
+}
 function renderLibrary(){
- const cats=['All',...new Set(foods.map(f=>f.category||'Custom'))], old=$('categoryFilter').value||'All';
+ const cats=['All',...new Set([...categories,...foods.map(f=>f.category||'Custom')])],old=$('categoryFilter').value||'All';
  $('categoryFilter').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');$('categoryFilter').value=cats.includes(old)?old:'All';
+ $('categoryOptions').innerHTML=cats.filter(c=>c!=='All').map(c=>`<option value="${esc(c)}"></option>`).join('');
  const q=$('librarySearch').value.toLowerCase(),cat=$('categoryFilter').value;
  const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q));
  $('foodCount').textContent=foods.length+' foods';
  $('foodList').innerHTML=list.map(f=>foodRow(f,true,foods.indexOf(f))).join('')||'<div class="tiny muted">No matching foods.</div>';
- $('foodList').querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const f=foods[Number(b.dataset.addfood)];if(f){addEntry(f);setTab('diary')}});
+ bindFoodActions($('foodList'));
+}
+function newFoodId(){return 'food-'+Date.now()+'-'+Math.random().toString(36).slice(2,9)}
+function openFoodEditor(i){
+ const f=foods[i];if(!f)return;$('foodEditor').dataset.index=i;
+ $('editName').value=f.name;$('editQty').value=f.baseQty;$('editUnit').value=f.unit;
+ $('editCategory').value=f.category||'Custom';$('editBasis').value=f.basis||'';$('editKcal').value=f.kcal;$('editProtein').value=f.protein;$('editCarbs').value=f.carbs;$('editFat').value=f.fat;
+ $('foodEditor').showModal();
+}
+function closeFoodEditor(){$('foodEditor').close()}
+$('closeEditor').onclick=closeFoodEditor;$('cancelEditor').onclick=closeFoodEditor;
+$('foodEditorForm').onsubmit=e=>{
+ e.preventDefault();const i=Number($('foodEditor').dataset.index),f=foods[i];if(!f)return;
+ const qty=num($('editQty').value),vals=['editKcal','editProtein','editCarbs','editFat'].map(id=>$(id).value);
+ if(!$('editName').value.trim()||qty<=0||!$('editUnit').value.trim()||vals.some(v=>v===''||num(v)<0)){alert('Check the food name, serving quantity, unit and nutrition values.');return}
+ foods[i]={...f,name:$('editName').value.trim(),baseQty:qty,unit:$('editUnit').value.trim(),category:$('editCategory').value.trim()||'Custom',basis:$('editBasis').value.trim(),kcal:num(vals[0]),protein:num(vals[1]),carbs:num(vals[2]),fat:num(vals[3])};
+ save();closeFoodEditor();renderLibrary();renderConverterSelect();
+};
+$('manageCategories').onclick=()=>{
+ const existing=[...new Set([...categories,...foods.map(f=>f.category||'Custom')])];
+ const action=prompt('Category management:\nType ADD to create a category, RENAME to rename one, or DELETE to remove one.');
+ if(!action)return;const mode=action.trim().toUpperCase();
+ if(mode==='ADD'){const name=prompt('New category name:');if(name&&name.trim()&&!existing.includes(name.trim())){categories.push(name.trim());save();renderLibrary();}}
+ else if(mode==='RENAME'){const old=prompt('Exact category name to rename:\n'+existing.join('\n'));if(!old||!existing.includes(old))return;const name=prompt('New category name:');if(name&&name.trim()){foods.forEach(f=>{if((f.category||'Custom')===old)f.category=name.trim()});categories=categories.map(c=>c===old?name.trim():c);save();renderLibrary();}}
+ else if(mode==='DELETE'){const old=prompt('Exact category name to delete:\n'+existing.join('\n'));if(!old||!existing.includes(old))return;const target=prompt('Move foods in this category to which category? Enter an existing category, or leave blank for Custom.');foods.forEach(f=>{if((f.category||'Custom')===old)f.category=target&&existing.includes(target)?target:'Custom'});categories=categories.filter(c=>c!==old);save();renderLibrary();}
+ else alert('Please enter ADD, RENAME or DELETE.');
 }
 $('librarySearch').oninput=renderLibrary;$('categoryFilter').onchange=renderLibrary;
 function renderQuick(){
  const q=$('quickSearch').value.toLowerCase(),list=foods.filter(f=>f.name.toLowerCase().includes(q)).slice(0,7);
  $('quickResults').innerHTML=list.map(f=>foodRow(f,true,foods.indexOf(f))).join('');
- $('quickResults').querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const f=foods[Number(b.dataset.addfood)];if(f)addEntry(f)});
+ bindFoodActions($('quickResults'));
 }
 $('quickSearch').oninput=renderQuick;
 function renderConverterSelect(){
@@ -67,7 +128,7 @@ $('saveCustom').onclick=()=>{
  const name=$('customName').value.trim(),qty=num($('customQty').value),unit=$('customUnit').value.trim()||'serve';
  const vals=['customKcal','customProtein','customCarbs','customFat'].map(id=>$(id).value);
  if(!name||qty<=0||vals.some(v=>v===''||num(v)<0)){alert('Enter a name, serving quantity and all four nutrition values.');return}
- const [kcal,protein,carbs,fat]=vals.map(num),f={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name,baseQty:qty,unit,kcal,protein,carbs,fat,category:'Custom'};
+ const [kcal,protein,carbs,fat]=vals.map(num),f={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name,baseQty:qty,unit,kcal,protein,carbs,fat,category:$('customCategory').value.trim()||'Custom',basis:$('customBasis').value.trim()};
  foods.push(f);save();['customName','customKcal','customProtein','customCarbs','customFat'].forEach(id=>$(id).value='');renderLibrary();alert('Food saved to your library.');
 };
 $('clearDay').onclick=()=>{if(confirm('Clear all entries for this day?')){logs[currentDate]=[];save();renderDiary()}};
@@ -80,6 +141,88 @@ function download(name,content,type){const a=document.createElement('a'),url=URL
 $('exportJSON').onclick=()=>download('macro-ledger-backup.json',JSON.stringify({foods,logs},null,2),'application/json');
 $('exportCSV').onclick=()=>{const rows=[['Date','Food','Quantity','Unit','Calories','Protein g','Carbs g','Fat g']];Object.entries(logs).forEach(([date,items])=>items.forEach(x=>rows.push([date,x.name,x.qty,x.unit,x.kcal,x.protein,x.carbs,x.fat])));const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');download('macro-ledger-history.csv',csv,'text/csv')};
 $('importJSON').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.foods)||typeof data.logs!=='object')throw Error();foods=data.foods;logs=data.logs;save();renderDiary();renderLibrary();alert('Backup restored.')}catch{alert('That file does not look like a Macro Ledger backup.')}e.target.value=''};
+
+// Barcode lookup and review flow. Nothing is saved until the user confirms.
+let scannerInstance=null, cameraStream=null, scanFrame=null, zxingLoaded=false;
+const setScannerStatus=(msg)=>{ $('scannerStatus').textContent=msg; };
+function closeBarcodeReview(){ $('barcodeReview').classList.add('hide'); }
+function showBarcodeReview(p,code){
+ const n=p.nutriments||{};
+ const kcal=n['energy-kcal_100g'] ?? (typeof n['energy_100g']==='number'?n['energy_100g']/4.184:null);
+ const protein=n.proteins_100g, carbs=n.carbohydrates_100g, fat=n.fat_100g;
+ if([kcal,protein,carbs,fat].some(v=>v===null||v===undefined||!Number.isFinite(Number(v)))){
+   setScannerStatus('Product found, but its per-100 g nutrition data is incomplete. You can enter the missing values manually in Add a custom food.');
+ }
+ $('scanName').value=p.product_name||p.product_name_en||p.generic_name||'';
+ $('scanBrand').value=p.brands||'';
+ $('scanCode').value=code;
+ $('scanKcal').value=kcal==null?'':Number(kcal).toFixed(1);
+ $('scanProtein').value=protein==null?'':Number(protein).toFixed(1);
+ $('scanCarbs').value=carbs==null?'':Number(carbs).toFixed(1);
+ $('scanFat').value=fat==null?'':Number(fat).toFixed(1);
+ $('scanBasis').value='Per 100 g, as sold'+(p.quantity?' · pack '+p.quantity:'');
+ $('scanCategory').value='Packaged foods';
+ $('barcodeReview').classList.remove('hide');
+}
+async function lookupBarcode(){
+ const code=$('barcodeInput').value.trim().replace(/\s+/g,'');
+ if(!/^\d{8,14}$/.test(code)){setScannerStatus('Enter a valid 8–14 digit barcode.');return;}
+ $('lookupBarcode').disabled=true;setScannerStatus('Looking up barcode…');closeBarcodeReview();
+ try{
+  const url=`https://world.openfoodfacts.org/api/v3/product/${encodeURIComponent(code)}.json?fields=code,product_name,product_name_en,generic_name,brands,quantity,serving_size,nutriments`;
+  const response=await fetch(url,{headers:{'Accept':'application/json'}});
+  if(!response.ok)throw new Error(`Lookup service returned ${response.status}`);
+  const data=await response.json();
+  if(!data.product||data.status===0)throw new Error('No product was found for that barcode.');
+  showBarcodeReview(data.product,code);
+  setScannerStatus('Product retrieved. Check the name and nutrition against the packaging before saving.');
+ }catch(err){setScannerStatus(err.message||'Could not retrieve this product. Check your connection or enter the food manually.');}
+ finally{$('lookupBarcode').disabled=false;}
+}
+$('lookupBarcode').onclick=lookupBarcode;
+$('barcodeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();lookupBarcode();}});
+$('saveScannedFood').onclick=()=>{
+ const name=$('scanName').value.trim(),vals=['scanKcal','scanProtein','scanCarbs','scanFat'].map(id=>$(id).value);
+ if(!name||vals.some(v=>v===''||!Number.isFinite(Number(v))||Number(v)<0)){alert('Please check the product name and enter all four nutrition values.');return;}
+ const code=$('scanCode').value;
+ if(foods.some(f=>f.barcode===code)){if(!confirm('This barcode is already in your library. Save another copy?'))return;}
+ foods.push({id:newFoodId(),name:($('scanBrand').value.trim()?$('scanBrand').value.trim()+' – ':'')+name,barcode:code,baseQty:100,unit:'g',kcal:num(vals[0]),protein:num(vals[1]),carbs:num(vals[2]),fat:num(vals[3]),category:$('scanCategory').value.trim()||'Packaged foods',basis:$('scanBasis').value.trim()||'Per 100 g, as sold'});
+ save();closeBarcodeReview();$('barcodeInput').value='';renderLibrary();setScannerStatus('Product saved to your food library.');
+};
+$('discardScannedFood').onclick=()=>{closeBarcodeReview();setScannerStatus('Product discarded. Nothing was added to your library.');};
+async function stopCameraScanner(){
+ if(scanFrame)cancelAnimationFrame(scanFrame);scanFrame=null;
+ if(scannerInstance){try{await scannerInstance.stop();await scannerInstance.clear();}catch{}scannerInstance=null;}
+ if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}
+ $('barcodeCamera').classList.add('hide');$('stopScanner').disabled=true;$('startScanner').disabled=false;
+}
+$('stopScanner').onclick=stopCameraScanner;
+$('startScanner').onclick=async()=>{
+ if(!navigator.mediaDevices?.getUserMedia){setScannerStatus('Camera access is unavailable in this browser. Enter the barcode manually.');return;}
+ $('startScanner').disabled=true;$('stopScanner').disabled=false;$('barcodeCamera').classList.remove('hide');
+ try{
+  // Native BarcodeDetector where available; use html5-qrcode as a browser fallback.
+  if('BarcodeDetector'in window){
+   const supported=await BarcodeDetector.getSupportedFormats();
+   const formats=['ean_13','ean_8','upc_a','upc_e','code_128'].filter(x=>supported.includes(x));
+   const detector=new BarcodeDetector({formats});
+   cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+   const video=document.createElement('video');video.setAttribute('playsinline','');video.muted=true;video.srcObject=cameraStream;$('barcodeCamera').replaceChildren(video);await video.play();
+   setScannerStatus('Camera active. Hold the barcode inside the frame.');
+   const tick=async()=>{if(!cameraStream)return;try{const codes=await detector.detect(video);if(codes.length){$('barcodeInput').value=codes[0].rawValue;await stopCameraScanner();lookupBarcode();return;}}catch{}scanFrame=requestAnimationFrame(tick);};
+   tick();
+  }else{
+   if(!window.Html5Qrcode){
+    await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';script.onload=resolve;script.onerror=()=>reject(new Error('Could not load camera scanning support. Enter the barcode manually.'));document.head.appendChild(script);});
+   }
+   scannerInstance=new Html5Qrcode('barcodeCamera');
+   setScannerStatus('Starting camera…');
+   await scannerInstance.start({facingMode:'environment'},{fps:10,qrbox:{width:260,height:140},formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E,Html5QrcodeSupportedFormats.CODE_128]},async(decoded)=>{$('barcodeInput').value=decoded;await stopCameraScanner();lookupBarcode();},()=>{});
+   setScannerStatus('Camera active. Hold the barcode inside the frame.');
+  }
+ }catch(err){await stopCameraScanner();setScannerStatus(err.message||'Could not start camera. Check camera permission or enter the barcode manually.');}
+};
+
 renderDiary();renderQuick();
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
