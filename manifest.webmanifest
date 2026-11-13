@@ -1,10 +1,10 @@
 {
-  "name": "Macro Ledger \u2013 Food & Macro Tracker",
-  "short_name": "Macro Ledger",
+  "name": "MK's Macro Ledger",
+  "short_name": "MK's Macro Ledger",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f4f6f3",
-  "theme_color": "#17251f",
+  "background_color": "#f5f5f5",
+  "theme_color": "#000000",
   "description": "Offline food library, serving converter and daily macro diary.",
   "icons": [
     {
