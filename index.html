@@ -14,7 +14,7 @@
 <style>
 :root{--bg:#181b1f;--panel:#22272d;--ink:#e7e9ec;--muted:#a2aab4;--line:#39414a;--green:#d8dde3;--green2:#343b43;--red:#e1a0a0;--shadow:0 5px 20px #00000024}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
-header{background:var(--header);color:var(--ink);padding:20px 18px 17px;position:sticky;top:0;z-index:5}header .top{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:22px;margin:0;font-weight:750;letter-spacing:-.5px}.sub{color:#d0d0d0;font-size:12px;margin-top:3px}
+header{background:var(--header);color:var(--ink);padding:20px 18px 17px;position:sticky;top:0;z-index:5}header .top{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:22px;margin:0;font-weight:750;letter-spacing:-.5px;cursor:pointer}h1:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:3px}.sub{color:#d0d0d0;font-size:12px;margin-top:3px}
 main{max-width:760px;margin:auto;padding:15px;display:grid;gap:14px}.tabs{display:flex;gap:7px;overflow:auto;padding:2px 0}.tab{border:1px solid var(--line);background:#252b32;color:var(--muted);border-radius:999px;padding:9px 14px;font-weight:650;white-space:nowrap}.tab.active{background:#d8dde3;border-color:#d8dde3;color:#171a1e}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}h2{font-size:17px;margin:0 0 12px;letter-spacing:-.2px}.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted)}
 input,select{width:100%;min-width:0;border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:#2a3037;color:var(--ink);font:inherit}label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin:0 0 5px}.field{min-width:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.btn{border:0;border-radius:11px;padding:11px 14px;background:var(--green);color:#171a1e;font:700 14px inherit;cursor:pointer}.btn.secondary{background:var(--green2);color:var(--ink)}.btn.ghost{background:#2b3138;color:var(--ink);border:1px solid var(--line)}.btn.danger{background:#392c30;color:#efb7bd}.btn:disabled{opacity:.4}.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.foodrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.foodrow:last-child{border:0}.qtyadd{display:flex;align-items:center;gap:5px}.qtyadd input{width:82px;padding:7px}.qtyadd span{font-size:12px;color:var(--muted)}.foodrow .info{flex:1;min-width:0}.food-actions{justify-content:flex-end;flex-wrap:wrap}.food-actions>*{flex:0 0 auto}dialog::backdrop{background:#0008}dialog input{margin-bottom:2px}.foodrow strong{display:block;font-size:14px}.pill{font-size:11px;color:var(--muted);background:#303740;padding:3px 7px;border-radius:99px;display:inline-block}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{background:#2b3138;border-radius:13px;padding:12px}.stat .v{font-size:24px;font-weight:800;letter-spacing:-.7px;font-variant-numeric:tabular-nums}.stat .l{font-size:12px;color:var(--muted)}.progress{height:8px;background:#3a424b;border-radius:99px;overflow:hidden}.progress>i{height:100%;display:block;background:#c6cdd5;border-radius:99px}.hide{display:none!important}.entry{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}.entry:last-child{border:0}.entry button{padding:6px 9px}.notice{padding:11px 12px;background:#2b3239;border:1px solid var(--line);color:var(--ink);border-radius:11px;font-size:12px}.ok{color:#c5dfce}.dangertext{color:#e1a0a0}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar>*{flex:1}.section{display:grid;gap:11px}.amountline{display:grid;grid-template-columns:1fr 100px;gap:9px;align-items:end}.result{background:#2b3138;border-radius:12px;padding:12px}.result strong{font-size:20px}.searchbar{position:sticky;top:0;background:var(--panel);padding:0 0 8px;z-index:2}.smallbtn{font-size:12px;padding:7px 10px}.footer{text-align:center;font-size:11px;color:var(--muted);padding:5px 10px 18px}
@@ -58,7 +58,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </style>
 </head>
 <body>
-<header><div class="top"><div><h1>MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div><button class="colour-swatch-button" id="colourButton" type="button" aria-label="Change colour mode" title="Change colour mode"></button></div></header>
+<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to Daily log">MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div></div></header>
 <main>
 <div class="tabs">
 <button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="converter">Converter</button><button class="tab" data-tab="scanner">Barcode scanner</button>
@@ -165,13 +165,6 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="field"><label>Choose a day to view</label><input id="historyDate" type="date"></div>
 <div id="historySummary" class="result">No saved log for this date.</div>
 <div class="toolbar"><button class="btn secondary" id="loadHistory">Load day into diary</button><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn ghost" id="exportJSON">Backup JSON</button></div>
-<div class="card section" id="driveBackupPanel" style="padding:13px;margin-top:4px">
-<h3 style="margin:0;font-size:15px">Google Drive backup</h3>
-<p class="tiny" style="margin:0">Connect the same Google account on each device to transfer your food library, diary and categories. Backups are stored privately in the app's hidden Drive app-data area.</p>
-<div class="toolbar"><button class="btn" id="driveConnect" type="button">Connect Google Drive</button><button class="btn ghost" id="driveSync" type="button" disabled>Back up now</button></div>
-<div id="driveStatus" class="notice" role="status" aria-live="polite">Not connected. Your existing data remains saved on this device.</div>
-<div class="tiny">Automatic backups run while the app is open after you make changes. Open the app on another device and connect the same Google account to retrieve the backup. Keep JSON exports as an extra safeguard.</div>
-</div>
 <div class="field"><label>Restore a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div>
 </div>
 </section>
@@ -186,13 +179,6 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="grid4"><div class="field"><label>kcal</label><input id="editKcal" type="number" min="0" step="any" required></div><div class="field"><label>Protein g</label><input id="editProtein" type="number" min="0" step="any" required></div><div class="field"><label>Carbs g</label><input id="editCarbs" type="number" min="0" step="any" required></div><div class="field"><label>Fat g</label><input id="editFat" type="number" min="0" step="any" required></div></div>
 <div class="toolbar"><button class="btn" type="submit">Save changes</button><button class="btn ghost" type="button" id="cancelEditor">Cancel</button></div>
 </form></dialog>
-<dialog id="colourDialog" class="colour-dialog">
-<div class="row between"><h2 style="margin:0">Choose a colour mode</h2><button class="btn ghost smallbtn" id="closeColour" type="button">Close</button></div>
-<div class="colour-options">
-<button type="button" class="theme-choice" data-theme-choice="monochrome"><span class="swatches"><i></i><i></i><i></i></span><strong>Monochrome</strong><small>Black, white and grey</small></button>
-<button type="button" class="theme-choice" data-theme-choice="yellow"><span class="swatches"><i></i><i></i><i></i></span><strong>Yellow</strong><small>Black and charcoal with clear yellow accents</small></button>
-<button type="button" class="theme-choice" data-theme-choice="orange"><span class="swatches"><i></i><i></i><i></i></span><strong>Orange</strong><small>Bold orange highlights</small></button>
-</div></dialog>
 <style>
  :root{--header:#080808;--accent:#f5f5f5;--accent-ink:#111;--surface2:#222;--surface3:#303030;--input:#1d1d1d;--progress:#f5f5f5}
 html[data-theme="monochrome"]{--bg:#080808;--panel:#151515;--ink:#f4f4f4;--muted:#a7a7a7;--line:#363636;--green:#f0f0f0;--green2:#292929;--header:#050505;--accent:#f5f5f5;--accent-ink:#111;--surface2:#202020;--surface3:#303030;--input:#1b1b1b;--progress:#f2f2f2}
@@ -237,10 +223,11 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 @media(min-width:601px){#foodList{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.library-item{height:100%}}
 @media(max-width:380px){.library-item{padding:11px;gap:8px}.library-item-meta{font-size:11px}.library-quantity-row{grid-template-columns:minmax(0,1fr) 66px}}
 </style>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script>window.MACRO_LEDGER_GOOGLE_CLIENT_ID="541369998829-eat13jppdubpamfu2di9u5e74ft1cehe.apps.googleusercontent.com";</script>
 <script src="foods.js"></script><script src="app.js"></script>
 <script>
-(()=>{const root=document.documentElement,dialog=document.getElementById('colourDialog'),button=document.getElementById('colourButton');const valid=['monochrome','yellow','orange'];function setTheme(theme){if(theme==='amber')theme='yellow';if(!valid.includes(theme))theme='monochrome';root.dataset.theme=theme;localStorage.setItem('macroLedgerTheme',theme);button.style.backgroundColor=getComputedStyle(root).getPropertyValue('--accent').trim();button.setAttribute('aria-label','Change colour mode. Current mode: '+theme);button.title='Current colour: '+theme+'. Click to change';document.querySelectorAll('[data-theme-choice]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.themeChoice===theme)));document.querySelector('meta[name="theme-color"]').content=getComputedStyle(root).getPropertyValue('--header').trim()||'#14171b'}setTheme(localStorage.getItem('macroLedgerTheme')||'orange');button.addEventListener('click',()=>dialog.showModal());document.getElementById('closeColour').addEventListener('click',()=>dialog.close());document.querySelectorAll('[data-theme-choice]').forEach(el=>el.addEventListener('click',()=>{setTheme(el.dataset.themeChoice);dialog.close()}));dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()})})();
+// Keep the app on its orange theme; the colour selector has been removed.
+document.documentElement.dataset.theme='orange';
+localStorage.setItem('macroLedgerTheme','orange');
+document.querySelector('meta[name="theme-color"]').content='#080808';
 </script>
 </body></html>

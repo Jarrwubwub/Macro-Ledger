@@ -40,11 +40,13 @@ The food values are personal estimates based on the values used in your logs, no
 
 Latest update (v15): dark, eye-friendly colour theme; diary entries now appear directly beneath protein target progress; Add food shows the five most frequently logged foods (ties are broken by most recent use); Browse library remains available for all other foods.
 
-Google Drive backup (v40)
-- In History & backup, select Connect Google Drive and sign in with the Google account added as an OAuth test user.
-- On the first device, if no Drive backup exists, the app uploads that device's current food library, diary and categories.
-- On another device, connect the same account. If a backup already exists, choose Restore to download it, or Cancel to keep the device's current data and replace the cloud backup.
-- Once connected in an open app session, changes are backed up automatically after a short pause. You can also select Back up now.
-- The app remembers that Google Drive was previously linked on this device and displays a Reconnect button after reload. Google access tokens are kept only in memory and must be renewed by clicking Reconnect. Each device must be linked separately.
-- If the app detects that the cloud file changed since this device last synced, it stops rather than silently overwriting the newer cloud copy. Reconnect and explicitly choose which copy to keep.
-- This is a backup/restore workflow, not simultaneous live editing or background sync while the app is closed. Keep using JSON export as an additional backup.
+
+Local-only storage (v42)
+- Google Drive backup has been removed. Food library, diary entries and categories are stored locally in this browser/device.
+- The app does not connect to Google Drive or transmit diary data to a cloud backup.
+- Use Backup JSON in History & backup to manually transfer or safeguard your data.
+- Different devices and browsers have separate local data; JSON export/import is required to transfer records.
+
+
+COLES FOOD LIBRARY ADDITION (v44)
+This release adds the approved Coles chicken, pork and beef mince entries, Coles chicken breast fillets, raw vegetable entries, Coles frozen blueberries, and Coles dry rice entries. Existing browser food-library entries and diary logs are preserved. For an existing installation, the new entries are appended once; existing entries are not overwritten. Fresh vegetables and Coles Simply White Long Grain Rice use generic composition estimates as identified in each food's basis note.
