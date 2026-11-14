@@ -56,9 +56,8 @@ function addEntry(food,qty=food.baseQty,unit=food.unit){
 function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','converter','scanner','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='converter')renderConverterSelect();if(tab==='history')renderHistory()}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 const appTitle=$('appTitle');appTitle.addEventListener('click',()=>setTab('diary'));appTitle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTab('diary')}});
-$('goLibrary').onclick=()=>setTab('library');
 $('openHistory').onclick=()=>{ $('historyDate').value=currentDate; setTab('history'); }; 
-$('dailyAddFood').onclick=()=>{$('addFoodCard').scrollIntoView({behavior:'smooth',block:'start'});};
+$('dailyAddFood').onclick=()=>{setTab('library');window.scrollTo({top:0,behavior:'smooth'});};
 $('logDate').value=currentDate;$('historyDate').value=currentDate;
 $('logDate').onchange=e=>{currentDate=e.target.value||today();renderDiary()};
 function renderDiary(){
@@ -70,8 +69,9 @@ function renderDiary(){
  $('diaryEntries').innerHTML=entries().length?entries().map(x=>`<div class="entry"><div><b>${esc(x.name)}</b><div class="tiny">${fmt(x.qty)} ${esc(x.unit)} · ${fmt(x.kcal)} kcal · P ${fmt(x.protein)} g · C ${fmt(x.carbs)} g · F ${fmt(x.fat)} g</div></div><button class="btn danger smallbtn" data-remove="${x.id}">Remove</button></div>`).join(''):'<div class="muted tiny">No foods logged yet.</div>';
  $('diaryEntries').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{logs[currentDate]=entries().filter(x=>x.id!==b.dataset.remove);save();renderDiary()});
  $('clearDay').disabled=!entries().length;
- renderQuick();
+ renderDailyHistory();
 }
+
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function quantityInput(f,index){const whole=f.unit.toLowerCase()!=='g';const qty=whole?Math.max(0,Math.round(Number(f.baseQty)||0)):(Number(f.baseQty)||0);return `<input aria-label="Amount of ${esc(f.name)}" type="number" min="0" step="${whole?'1':'0.1'}" inputmode="${whole?'numeric':'decimal'}" value="${qty}" data-foodqty="${index}" data-whole="${whole?'1':'0'}">`}
 function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions">${button?`<div class="qtyadd">${quantityInput(f,index)}<span>${esc(f.unit)}</span><button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div>`:''}<button class="btn ghost smallbtn" data-editfood="${index}">Edit</button><button class="btn danger smallbtn" data-deletefood="${index}">Delete</button></div></div>`}
@@ -85,8 +85,10 @@ function renderLibrary(){
  const cats=['All',...new Set([...categories,...foods.map(f=>f.category||'Custom')])],old=$('categoryFilter').value||'All';
  $('categoryFilter').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');$('categoryFilter').value=cats.includes(old)?old:'All';
  $('categoryOptions').innerHTML=cats.filter(c=>c!=='All').map(c=>`<option value="${esc(c)}"></option>`).join('');
- const q=$('librarySearch').value.toLowerCase(),cat=$('categoryFilter').value;
+ const q=$('librarySearch').value.toLowerCase(),cat=$('categoryFilter').value,sort=$('librarySort').value||'alphabetical';
+ const usage=foodUsage();
  const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q));
+ list.sort((a,b)=>{if(sort==='recent'){const au=usage.get(a.name.toLocaleLowerCase())||{last:0},bu=usage.get(b.name.toLocaleLowerCase())||{last:0};return bu.last-au.last||a.name.localeCompare(b.name,undefined,{sensitivity:'base'});}return a.name.localeCompare(b.name,undefined,{sensitivity:'base'});});
  $('foodCount').textContent=foods.length+' foods';
  $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item"><input class="food-select" type="checkbox" aria-label="Select ${esc(f.name)} for deletion" data-selectfood="${i}"><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row"><div class="library-quantity">${quantityInput(f,i)}<span>${esc(f.unit)}</span></div><button class="btn smallbtn library-add" data-addfood="${i}">Add</button></div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||'<div class="tiny muted">No matching foods.</div>';
  bindFoodActions($('foodList'));
@@ -121,7 +123,7 @@ $('manageCategories').onclick=()=>{
  else alert('Please enter ADD, RENAME or DELETE.');
 }
 $('deleteSelectedFoods').onclick=()=>{const selected=[...$('foodList').querySelectorAll('[data-selectfood]:checked')].map(box=>Number(box.dataset.selectfood)).filter(i=>Number.isInteger(i)&&foods[i]);if(!selected.length)return;selected.sort((a,b)=>b-a).forEach(i=>foods.splice(i,1));save();renderLibrary();renderConverterSelect();};
-$('librarySearch').oninput=renderLibrary;$('categoryFilter').onchange=renderLibrary;
+$('librarySearch').oninput=renderLibrary;$('categoryFilter').onchange=renderLibrary;$('librarySort').onchange=renderLibrary;
 function foodUsage(){
  const usage=new Map();
  for(const [date,dayEntries] of Object.entries(logs)){
@@ -189,6 +191,25 @@ $('saveCustom').onclick=()=>{
  foods.push(f);save();['customName','customKcal','customProtein','customCarbs','customFat'].forEach(id=>$(id).value='');renderLibrary();alert('Food saved to your library.');
 };
 $('clearDay').onclick=()=>{if(confirm('Clear all entries for this day?')){logs[currentDate]=[];save();renderDiary()}};
+function renderDailyHistory(){
+ const host=$('dailyHistoryList');
+ if(!host)return;
+ const days=Object.keys(logs)
+  .filter(date=>date<currentDate&&Array.isArray(logs[date])&&logs[date].length)
+  .sort((a,b)=>b.localeCompare(a));
+ if(!days.length){host.innerHTML='<div class="muted tiny">No previous days logged yet.</div>';return;}
+ host.innerHTML=days.map(date=>{
+  const dayItems=logs[date],t=totals(dayItems);
+  const label=new Date(date+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  return `<div class="daily-history-row"><div><div class="daily-history-date">${esc(label)}</div><div class="daily-history-macros">${Math.round(t.kcal).toLocaleString()} kcal · Protein ${fmt(t.protein)} g · Carbs ${fmt(t.carbs)} g · Fat ${fmt(t.fat)} g</div></div><button class="btn ghost smallbtn daily-history-view" type="button" data-history-day="${esc(date)}">View day</button></div>`;
+ }).join('');
+ host.querySelectorAll('[data-history-day]').forEach(button=>button.onclick=()=>{
+  currentDate=button.dataset.historyDay;
+  $('logDate').value=currentDate;
+  renderDiary();
+  window.scrollTo({top:0,behavior:'smooth'});
+ });
+}
 function renderHistory(){
  const date=$('historyDate').value||currentDate,items=logs[date]||[],t=totals(items);
  $('historySummary').innerHTML=items.length?`<b>${date}</b><br>${items.length} entries · ${Math.round(t.kcal)} kcal<br>Protein ${fmt(t.protein)} g · Carbs ${fmt(t.carbs)} g · Fat ${fmt(t.fat)} g`:'No saved log for this date.';
@@ -284,6 +305,6 @@ $('startScanner').onclick=async()=>{
 };
 
 
-renderDiary();renderQuick();
+renderDiary();
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();

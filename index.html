@@ -77,14 +77,12 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div id="diaryEntries" class="section" style="margin-top:2px"><div class="muted tiny">No foods logged yet.</div></div>
 <div class="grid4 tiny"><div>Calories from macros<br><b id="macroCalories">0 kcal</b></div><div>Difference<br><b id="difference">0 kcal</b></div><div>Entries<br><b id="entryCount">0</b></div><div>Target calories<br><b>2,000–2,200</b></div></div>
 <div id="discrepancy" class="notice hide"></div>
-<div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="openHistory" type="button">History</button></div>
+<div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="openHistory" type="button">History &amp; backup</button></div>
 </div>
-<div class="card" id="addFoodCard">
-<div class="row between"><h2 style="margin:0">Add food</h2><button class="btn secondary smallbtn" id="goLibrary">Browse library</button></div>
-<div class="section" style="margin-top:12px">
-<div id="quickResults"></div>
-
-</div>
+<div class="card section" id="dailyHistoryCard">
+<h2>History</h2>
+<p class="muted tiny" style="margin:0 0 10px">Daily macro totals from your previous logged days.</p>
+<div id="dailyHistoryList" class="daily-history-list"><div class="muted tiny">No previous days logged yet.</div></div>
 </div>
 </section>
 <section id="scanner" class="section hide">
@@ -121,7 +119,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="card section">
 <div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
 <input id="librarySearch" placeholder="Search foods...">
-<select id="categoryFilter"><option value="All">All categories</option></select>
+<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px"><select id="categoryFilter"><option value="All">All categories</option></select><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="recent">Recently used</option></select></div>
 <div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button><button class="btn danger smallbtn" id="deleteSelectedFoods" type="button" disabled>Delete selected (0)</button></div>
 <div class="row between library-select-all"><label class="tiny"><input id="selectAllFoods" type="checkbox"> Select all visible foods</label><span class="tiny muted" id="selectedFoodCount">0 selected</span></div>
 <div id="foodList"></div>
@@ -222,6 +220,11 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 #foodList .foodrow{display:none}
 @media(min-width:601px){#foodList{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.library-item{height:100%}}
 @media(max-width:380px){.library-item{padding:11px;gap:8px}.library-item-meta{font-size:11px}.library-quantity-row{grid-template-columns:minmax(0,1fr) 66px}}
+.daily-history-list{display:grid;gap:8px}
+.daily-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface2)}
+.daily-history-date{font-weight:700;font-size:13px}
+.daily-history-macros{font-size:12px;color:var(--muted);line-height:1.6;font-variant-numeric:tabular-nums}
+.daily-history-view{padding:7px 10px;white-space:nowrap}
 </style>
 <script src="foods.js"></script><script src="app.js"></script>
 <script>
