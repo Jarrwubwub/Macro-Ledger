@@ -1,112 +1,452 @@
-const KEY='gardenLedgerDataV1';
-const DAY=86400000;
-const SEED=[
-{id:'tomato',name:'Tomato',group:'Vegetables',gmin:5,gmax:10,hmin:60,hmax:85,flower:45},
-{id:'basil',name:'Basil',group:'Herbs',gmin:5,gmax:10,hmin:60,hmax:75,flower:55},
-{id:'lettuce',name:'Lettuce',group:'Vegetables',gmin:4,gmax:10,hmin:45,hmax:65,flower:75},
-{id:'zucchini',name:'Zucchini',group:'Vegetables',gmin:5,gmax:10,hmin:45,hmax:60,flower:35},
-{id:'carrot',name:'Carrot',group:'Vegetables',gmin:10,gmax:21,hmin:70,hmax:90},
-{id:'radish',name:'Radish',group:'Vegetables',gmin:3,gmax:7,hmin:25,hmax:35},
-{id:'beans',name:'Beans',group:'Vegetables',gmin:7,gmax:14,hmin:50,hmax:65},
-{id:'cucumber',name:'Cucumber',group:'Vegetables',gmin:3,gmax:10,hmin:50,hmax:70,flower:35},
-{id:'spinach',name:'Spinach',group:'Vegetables',gmin:5,gmax:14,hmin:40,hmax:55},
-{id:'capsicum',name:'Capsicum',group:'Vegetables',gmin:7,gmax:21,hmin:70,hmax:90,flower:60},
-{id:'parsley',name:'Parsley',group:'Herbs',gmin:14,gmax:28,hmin:70,hmax:90},
-{id:'coriander',name:'Coriander',group:'Herbs',gmin:7,gmax:14,hmin:40,hmax:50},
-{id:'peas',name:'Peas',group:'Vegetables',gmin:7,gmax:14,hmin:60,hmax:70},
-{id:'sunflower',name:'Sunflower',group:'Flowers',gmin:7,gmax:14,hmin:70,hmax:100,flower:55},
-{id:'marigold',name:'Marigold',group:'Flowers',gmin:5,gmax:10,hmin:45,hmax:60,flower:45}
-];
-const GROWING_GUIDES={
-'tomato':{method:'Warm-season crop. Start in trays in a warm, bright spot; transplant after frost risk has passed.',sun:'Full sun, ideally 6–8 hours',spacing:'45–60 cm',depth:'About 5 mm',water:'Keep evenly moist; water at soil level and avoid repeated wet-dry swings.',care:'Stake or cage; remove lower leaves touching soil. Harvest when fruit reaches full colour and gives slightly.',season:'Warm soil and nights; protect from cold.',soil:'Loose, fertile, well-drained soil with plenty of compost; aim for slightly acidic to neutral soil (about pH 6.0–6.8). Avoid waterlogged beds.',companions:'Basil, parsley, carrots, lettuce, marigolds and some other flowering herbs are commonly grown nearby. Avoid treating companion lists as guaranteed pest control; give tomatoes good airflow and rotate crops.',tips:'Harden seedlings before planting out. Bury the stem a little deeper if seedlings are leggy, install support early, and water at the base. Rotate away from other nightshades where practical.'},
-'basil':{method:'Sow in trays or direct sow once the soil is warm. Pinch growing tips to encourage bushiness.',sun:'Full sun to light afternoon shade in hot climates',spacing:'20–30 cm',depth:'About 5 mm',water:'Keep consistently moist but not waterlogged.',care:'Pinch flower buds for continued leaf growth. Harvest tips regularly.',season:'Warm conditions; sensitive to cold.',soil:'Moist, fertile, free-draining soil enriched with compost; slightly acidic to neutral is suitable. It dislikes cold, saturated soil.',companions:'Tomatoes and peppers are commonly paired with basil in kitchen gardens; lettuce can also share space. Keep enough room for airflow and avoid overcrowding.',tips:'Sow or transplant only in warm conditions. Pinch above a pair of leaves to encourage branching, and remove flower spikes if you want to prioritise leaves.'},
-'lettuce':{method:'Direct sow or raise in trays and transplant while young. Succession sow for a steady supply.',sun:'Full sun in cool weather; afternoon shade as temperatures rise',spacing:'20–30 cm',depth:'About 3–5 mm; some light helps germination',water:'Keep soil evenly moist, especially during germination.',care:'Harvest outer leaves or whole heads. Heat can cause early bolting and bitterness.',season:'Cool to mild weather; provide shade in warm spells.',soil:'Rich, moisture-retentive but well-drained soil with plenty of organic matter; close to neutral pH is suitable. Consistent moisture helps prevent bitter, stressed growth.',companions:'Radish, carrots, beetroot, spring onions and strawberries can fit well around lettuce because of differing growth habits. Avoid crowding and ensure each crop gets enough light.',tips:'Sow little and often. In warm weather choose heat-tolerant varieties and provide afternoon shade; keep the seedbed moist until emergence.'},
-'zucchini':{method:'Direct sow or start in individual pots; transplant carefully because roots dislike disturbance.',sun:'Full sun',spacing:'90–120 cm',depth:'About 2–3 cm',water:'Water deeply at the base; avoid wetting foliage.',care:'Pick regularly while fruits are young and tender. Plants are productive when harvested often.',season:'Warm soil; protect young plants from cold.',soil:'Deep, fertile soil with generous compost and good drainage. It grows vigorously in soil that holds moisture but does not remain waterlogged.',companions:'Corn and beans are traditional companions in some mixed plantings; nasturtiums are sometimes used as a trap crop. Leave ample space and monitor for competition and pests.',tips:'Wait until soil is warm. Plant on a small mound if drainage is poor, water deeply at the base, and check flowers for pollination and fruit set.'},
-'carrot':{method:'Direct sow in the final position. Prepare fine, stone-free soil; avoid transplanting.',sun:'Full sun to light shade',spacing:'3–5 cm between plants after thinning',depth:'About 5–10 mm',water:'Keep the surface consistently moist until seedlings establish.',care:'Thin early to avoid crowded roots. Harvest when roots reach a useful size.',season:'Cool to mild conditions; soil texture matters greatly.',soil:'Deep, loose, stone-free sandy loam is ideal. Avoid fresh manure and excess nitrogen, which can cause forked roots; aim for even moisture.',companions:'Leeks, onions, chives, lettuce and radishes are often interplanted with carrots. Companion effects vary; use sensible spacing and rotate root crops.',tips:'Direct-sow in finely prepared soil because carrots dislike transplanting. Keep the surface moist until germination and thin carefully to avoid disturbing neighbouring roots.'},
-'radish':{method:'Direct sow in short rows; sow small batches every couple of weeks.',sun:'Full sun to partial shade',spacing:'3–5 cm',depth:'About 1 cm',water:'Keep evenly moist for crisp roots.',care:'Harvest promptly at the expected size; roots can become woody or split if left too long.',season:'Cool to mild weather; heat speeds bolting.',soil:'Loose, friable, well-drained soil with moderate fertility. Remove stones and avoid excessive nitrogen; steady moisture produces crisp roots.',companions:'Carrots, lettuce, peas and cucurbits are common neighbours in mixed beds. Radishes can be used as quick marker crops between slower seedlings.',tips:'Sow shallowly in short succession rows. Thin promptly and harvest while roots are young; hot weather and irregular watering can make them pungent or woody.'},
-'beans':{method:'Direct sow after the soil has warmed. Provide a trellis for climbing types.',sun:'Full sun',spacing:'8–15 cm for bush types; 10–15 cm for climbing types',depth:'About 2–3 cm',water:'Water consistently during flowering and pod development.',care:'Pick pods while young and tender to encourage further production.',season:'Warm soil; avoid sowing into cold, wet ground.',soil:'Well-drained soil with moderate fertility; avoid excessive nitrogen. Beans generally prefer a soil that is not overly rich and waterlogged.',companions:"Corn and squash are the traditional 'Three Sisters' combination for some climbing beans; carrots, cucumbers and brassicas may also share a bed. Match companions to the bean type and available space.",tips:'Direct-sow once soil is warm and not wet. Handle roots gently, provide supports for climbing types before vines need them, and avoid disturbing plants when wet.'},
-'cucumber':{method:'Direct sow or start in pots and transplant young. Give vines room or provide a trellis.',sun:'Full sun',spacing:'30–45 cm on a trellis; more for sprawling plants',depth:'About 1–2 cm',water:'Water deeply and consistently; mulch to reduce moisture swings.',care:'Pick regularly while fruits are firm and before seeds enlarge.',season:'Warm conditions; protect from cold and strong wind.',soil:'Fertile, compost-rich, moisture-retentive soil with good drainage. A slightly acidic to neutral pH is suitable; mulch helps keep moisture even.',companions:'Dill, nasturtiums, beans and lettuce are commonly grown nearby. Flowering plants may attract pollinators, but avoid overcrowding vines or shading them excessively.',tips:'Wait for warm soil and nights. Train onto a sturdy trellis where possible, water consistently at soil level, and harvest frequently to maintain production.'},
-'spinach':{method:'Direct sow into moist soil. Sow successively for repeat harvests.',sun:'Full sun in cool weather; partial shade in warmer conditions',spacing:'10–15 cm',depth:'About 1–2 cm',water:'Keep soil moist and cool; mulch in warmer weather.',care:'Pick outer leaves or harvest whole plants. Heat and long days can trigger bolting.',season:'Cool weather; avoid hot conditions.',soil:'Moist, fertile, well-drained soil rich in organic matter; near-neutral pH is suitable. Keep roots cool and avoid compacted or waterlogged beds.',companions:'Radishes, strawberries, peas and beans are often grown alongside spinach. Use partial shade from taller crops only if it does not reduce airflow.',tips:'Sow in cool weather and keep moisture even. In warm conditions use shade cloth or afternoon shade; harvest outer leaves before plants bolt.'},
-'capsicum':{method:'Start in trays in a warm, protected position; transplant once nights are reliably mild.',sun:'Full sun, with shelter from strong wind',spacing:'40–50 cm',depth:'About 5 mm',water:'Water consistently, especially during flowering and fruit set.',care:'Harvest green or allow fruits to colour fully. Support heavily laden plants if needed.',season:'Long warm season; sensitive to cold.',soil:'Warm, fertile, well-drained soil enriched with compost. Slightly acidic soil is preferred; avoid cold, waterlogged beds.',companions:'Basil, carrots, onions and lettuce are commonly used as nearby crops. Keep companion plants from shading capsicums, which need plenty of sun.',tips:'Raise seedlings in warmth and harden them off before transplanting. Wait until nights are mild, mulch after the soil warms, and keep watering steady during fruit set.'},
-'parsley':{method:'Sow in trays or direct sow. Germination can be slow and uneven; keep the seedbed moist.',sun:'Full sun to partial shade',spacing:'20–30 cm',depth:'About 5 mm',water:'Keep evenly moist while establishing; water during dry spells.',care:'Harvest outer stems first to encourage new growth from the centre.',season:'Mild conditions; tolerates cool weather.',soil:'Moist, fertile, well-drained soil with plenty of organic matter. It tolerates some shade and prefers consistent moisture during establishment.',companions:'Tomatoes, carrots, chives and other herbs are common neighbours. Allow some plants to flower if you want to attract beneficial insects.',tips:'Soak seed briefly if desired and be patient with slow germination. Keep the seedbed moist, then harvest outer stems from the base.'},
-'coriander':{method:'Direct sow where it is to grow; it dislikes root disturbance. Succession sow small batches.',sun:'Full sun in cool weather; partial shade in warm weather',spacing:'10–15 cm',depth:'About 5–10 mm',water:'Keep evenly moist; avoid letting plants dry out.',care:'Harvest leaves regularly. Warmth and long days encourage flowering and seed production.',season:'Cool to mild weather; prone to bolting in heat.',soil:'Light, fertile, well-drained soil that retains some moisture. Avoid hot, dry root conditions; excessive fertility is unnecessary.',companions:'Lettuce, spinach, peas and other cool-season crops can share space. Let a few plants flower if attracting beneficial insects is useful, while recognising coriander bolts readily in heat.',tips:'Direct-sow in place and succession-sow small batches. Provide afternoon shade in warm weather and keep moisture consistent to delay bolting.'},
-'peas':{method:'Direct sow where plants will grow. Provide support for climbing varieties.',sun:'Full sun; light shade in warmer conditions',spacing:'5–8 cm',depth:'About 3–5 cm',water:'Water regularly during flowering and pod fill; avoid waterlogging.',care:'Pick pods frequently. Harvest sugar snap and snow peas while pods are tender.',season:'Cool season; protect flowers from heat.',soil:'Well-drained, moderately fertile soil with compost; avoid fresh manure and excessive nitrogen. Peas prefer cool roots and dislike waterlogging.',companions:'Carrots, radishes, lettuce, spinach and cucumbers are common neighbours. Avoid planting peas immediately after other legumes in the same bed where possible.',tips:'Direct-sow into cool soil and install supports early for climbing types. Protect young shoots from birds and keep moisture steady during flowering and pod fill.'},
-'sunflower':{method:'Direct sow after frost risk has passed; sow where plants are to flower because they dislike root disturbance.',sun:'Full sun',spacing:'30–60 cm depending on variety',depth:'About 2–3 cm',water:'Water deeply while establishing and during dry periods.',care:'Timing and final height vary widely by variety. Support tall plants in exposed sites.',season:'Warm conditions; choose spacing to suit the variety.',soil:'Ordinary well-drained garden soil is usually sufficient. Very rich soil can encourage leafy growth at the expense of sturdy stems; avoid waterlogging.',companions:'Corn, cucumbers and climbing beans are sometimes grown near sunflowers, but tall plants can shade neighbours. Position them on the north side of beds in the Southern Hemisphere when possible.',tips:'Direct-sow where they will grow after cold risk has passed. Choose spacing for the mature height and head size, and stake tall varieties in exposed sites.'},
-'marigold':{method:'Sow in trays or direct sow after frost risk has passed. Deadhead for repeat flowering.',sun:'Full sun',spacing:'20–30 cm depending on variety',depth:'About 5 mm',water:'Water while establishing; then water when the soil begins to dry.',care:'Deadhead spent blooms. Dwarf and tall varieties differ substantially in size.',season:'Warm conditions; protect from frost.',soil:'Adaptable, well-drained soil of moderate fertility. They flower well in ordinary garden soil and do not need heavy feeding.',companions:'Marigolds are commonly interplanted with tomatoes and vegetables as flowering companions. Evidence for pest-repelling effects in home gardens is mixed; value them also for flowers and pollinator habitat.',tips:'Sow after cold weather or raise seedlings in trays. Deadhead regularly for continued blooms and avoid overfeeding with nitrogen.'}
+(()=>{
+const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
+const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
+const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
+function migrateFoods(list){
+  const out=[], seen=new Map();
+  for(const original of list){
+    const f={...original};
+    const originalName=f.name||'Food';
+    let name=originalName.replace(/\s*[–-]\s*\d+(?:\.\d+)?\s*(?:g|mL)\s*$/i,'').trim();
+    name=name.replace(/^raw\s+/i,'').replace(/\s*[–-]\s*raw$/i,'').trim();
+    if(/^Eggs?\s*(?:×|x)\s*\d+$/i.test(name))name='Egg';
+    if(name==='Egg'){f.unit='egg';f.baseQty=Number(original.baseQty)||1;}
+    if(name==='Half avocado'){name='Avocado';f.unit='avocado';f.baseQty=1;f.kcal*=2;f.protein*=2;f.carbs*=2;f.fat*=2;}
+    const unit=f.unit||'serve';
+    const canonicalUnit=isGramUnit(unit)?'g':unit;
+    f.unit=canonicalUnit;
+    const target=(isGramUnit(unit)||unit==='mL')?100:f.baseQty||1;
+    const key=name.toLowerCase()+'|'+canonicalUnit.toLowerCase();
+    if(seen.has(key))continue;
+    const factor=target/(Number(f.baseQty)||1);
+    f.name=titleCase(name);f.baseQty=target;f.kcal*=factor;f.protein*=factor;f.carbs*=factor;f.fat*=factor;
+    f.id=f.id||`food-${out.length}-${Date.now()}`;
+    seen.set(key,true);out.push(f);
+  }
+  return out;
+}
+const storedFoods=load('macroFoods',null);
+let foods=migrateFoods(storedFoods??window.DEFAULT_FOODS);
+// One-time, additive Coles library seed. Existing foods and diary entries are preserved.
+const COLES_SEED_KEY='macroColesLibrarySeedV1';
+if(!localStorage.getItem(COLES_SEED_KEY)){
+ const existing=new Set(foods.map(f=>String(f.name||'').trim().toLocaleLowerCase()));
+ const additions=(window.COLES_FOODS||[]).filter(f=>!existing.has(String(f.name||'').trim().toLocaleLowerCase()));
+ foods=migrateFoods([...foods,...additions]);
+ localStorage.setItem(COLES_SEED_KEY,'1');
+}
+foods=foods.map(f=>{
+ if(f.unit!=='mL') return f;
+ const density=f.name==='Milk'?1.03:f.name==='Cream'?.99:1;
+ const factor=1/density;
+ return {...f,baseQty:100,unit:'g',kcal:f.kcal*factor,protein:f.protein*factor,carbs:f.carbs*factor,fat:f.fat*factor,
+ basis:((f.basis||'')+` Liquid converted to grams using approx. density ${density} g/mL.`).trim()};
+});
+let categories=load('macroCategories',[]);
+let logs=load('macroLogs',{});
+let weightLogs=load('macroWeightLogs',[]);
+if(!Array.isArray(weightLogs))weightLogs=[];
+let weightTarget=load('macroWeightTarget',null);
+// Editable daily nutrition targets. Keep the existing calorie/protein defaults; carbs and fat are optional.
+let macroTargets=load('macroTargets',{kcal:2100,protein:200,carbs:null,fat:null});
+if(!macroTargets||typeof macroTargets!=='object')macroTargets={kcal:2100,protein:200,carbs:null,fat:null};
+macroTargets={kcal:validTarget(macroTargets.kcal)?Number(macroTargets.kcal):2100,protein:validTarget(macroTargets.protein)?Number(macroTargets.protein):200,carbs:validTarget(macroTargets.carbs)?Number(macroTargets.carbs):null,fat:validTarget(macroTargets.fat)?Number(macroTargets.fat):null};
+localStorage.setItem('macroTargets',JSON.stringify(macroTargets));
+let weightChartRange='30';
+let currentDate=today();
+const num=(v)=>Number(v)||0, fmt=(v)=>Number(v.toFixed(1)).toFixed(1);
+function validTarget(v){return v!==null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>0;}
+function titleCase(value){const acronyms=new Set(['WPC','TVP','BBQ','BCAA','DHA','EPA']);return String(value).trim().split(/\s+/).map(word=>word.split(/([-/])/).map(part=>{if(acronyms.has(part.toUpperCase()))return part.toUpperCase();if(/^[A-Z0-9]{2,3}$/.test(part))return part.toUpperCase();return part.charAt(0).toLocaleUpperCase()+part.slice(1).toLocaleLowerCase()}).join('')).join(' ')}
+const totals=items=>items.reduce((a,x)=>({kcal:a.kcal+x.kcal,protein:a.protein+x.protein,carbs:a.carbs+x.carbs,fat:a.fat+x.fat}),{kcal:0,protein:0,carbs:0,fat:0});
+const save=()=>{localStorage.setItem('macroFoods',JSON.stringify(foods));localStorage.setItem('macroLogs',JSON.stringify(logs));localStorage.setItem('macroCategories',JSON.stringify(categories))};
+save();
+const entries=()=>logs[currentDate]||[];
+function addEntry(food,qty=food.baseQty,unit=food.unit){
+ const isServe=unit==='serve'&&Number(food.serveGrams)>0;
+ const effectiveQty=isServe?qty*Number(food.serveGrams):qty;
+ const factor=effectiveQty/(Number(food.baseQty)||1);
+ const entry={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),loggedAt:Date.now(),name:food.name,qty,unit,displayUnit:isServe?`${food.serveName||'Serve'} (${fmt(food.serveGrams)} g)`:unit,kcal:food.kcal*factor,protein:food.protein*factor,carbs:food.carbs*factor,fat:food.fat*factor};
+ logs[currentDate]=[...entries(),entry];save();renderDiary();
+}
+function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','scanner','weight','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='history')renderHistory();if(tab==='weight')renderWeight()}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+const appTitle=$('appTitle');appTitle.addEventListener('click',()=>setTab('diary'));appTitle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTab('diary')}});
+$('openHistory').onclick=()=>{ $('historyDate').value=currentDate; setTab('history'); }; 
+$('dailyAddFood').onclick=()=>{setTab('library');window.scrollTo({top:0,behavior:'smooth'});};
+$('logDate').value=currentDate;$('historyDate').value=currentDate;
+$('logDate').onchange=e=>{currentDate=e.target.value||today();renderDiary()};
+function renderDiary(){
+ const t=totals(entries()), macro=t.protein*4+t.carbs*4+t.fat*9, diff=t.kcal-macro;
+ $('totalKcal').textContent=Math.round(t.kcal).toLocaleString();$('totalProtein').textContent=fmt(t.protein)+' g';$('totalCarbs').textContent=fmt(t.carbs)+' g';$('totalFat').textContent=fmt(t.fat)+' g';
+ renderMacroTargetProgress(t);
+ $('macroCalories').textContent=Math.round(macro)+' kcal';$('difference').textContent=(diff>0?'+':'')+Math.round(diff)+' kcal';$('entryCount').textContent=entries().length;
+ const notice=$('discrepancy');notice.classList.toggle('hide',entries().length===0||Math.abs(diff)<25);notice.textContent=`Your supplied food calories differ from calories calculated from macros by ${Math.round(diff)} kcal. Supplied calorie values are preserved.`;
+ $('diaryEntries').innerHTML=entries().length?entries().map(x=>`<div class="entry" data-entry-id="${esc(x.id)}"><div class="entry-drag-area" role="button" tabindex="0" aria-label="Hold and drag to reorder ${esc(x.name)}" title="Hold and drag to reorder"><b>${esc(x.name)}</b><div class="tiny">${fmt(x.qty)} ${esc(x.displayUnit||x.unit)} · ${fmt(x.kcal)} kcal · P ${fmt(x.protein)} g · C ${fmt(x.carbs)} g · F ${fmt(x.fat)} g</div></div><button class="btn danger smallbtn" data-remove="${esc(x.id)}">Remove</button></div>`).join(''):'<div class="muted tiny">No foods logged yet.</div>';
+ $('diaryEntries').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{logs[currentDate]=entries().filter(x=>x.id!==b.dataset.remove);save();renderDiary()});
+ enableLongPressReorder($('diaryEntries'),'.entry','.entry-drag-area',()=>{const byId=new Map(entries().map(x=>[String(x.id),x]));logs[currentDate]=[...$('diaryEntries').querySelectorAll('[data-entry-id]')].map(row=>byId.get(row.dataset.entryId)).filter(Boolean);save();});
+ $('clearDay').disabled=!entries().length;
+ renderDailyHistory();
+}
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const reorderControllers=new WeakMap();
+function enableLongPressReorder(container,rowSelector,handleSelector,onCommit){
+ // Each render replaces the previous listeners instead of accumulating document handlers.
+ reorderControllers.get(container)?.abort();
+ const controller=new AbortController(),signal=controller.signal;
+ reorderControllers.set(container,controller);
+ let timer=null,active=false,pointerId=null,row=null,activeHandle=null,moved=false,startX=0,startY=0;
+ const clear=()=>{if(timer)clearTimeout(timer);timer=null;};
+ container.querySelectorAll(handleSelector).forEach(handle=>{
+  handle.addEventListener('pointerdown',e=>{
+   if(e.button!==undefined&&e.button!==0)return;
+   clear();active=false;moved=false;pointerId=e.pointerId;row=handle.closest(rowSelector);activeHandle=handle;startX=e.clientX;startY=e.clientY;
+   timer=setTimeout(()=>{active=true;row?.classList.add('is-dragging');handle.classList.add('is-grabbing');},260);
+   e.preventDefault();
+  },{signal});
+ });
+ const move=e=>{
+  if(pointerId!==e.pointerId)return;
+  if(!active){if(Math.abs(e.clientX-startX)>12||Math.abs(e.clientY-startY)>18)clear();return;}
+  e.preventDefault();
+  const under=document.elementFromPoint(e.clientX,e.clientY),target=under?.closest(rowSelector);
+  if(!target||target===row||!container.contains(target))return;
+  const rect=target.getBoundingClientRect();
+  if(e.clientY<rect.top+rect.height/2)container.insertBefore(row,target);
+  else container.insertBefore(row,target.nextSibling);
+  moved=true;
+ };
+ const finish=e=>{
+  if(pointerId!==e.pointerId)return;
+  clear();
+  if(active){row?.classList.remove('is-dragging');activeHandle?.classList.remove('is-grabbing');if(moved)onCommit();}
+  active=false;pointerId=null;row=null;activeHandle=null;moved=false;
+ };
+ document.addEventListener('pointermove',move,{passive:false,signal});
+ document.addEventListener('pointerup',finish,{signal});
+ document.addEventListener('pointercancel',finish,{signal});
+}
+function quantityInput(f,index){const gram=isGramUnit(f.unit);const whole=!gram;const qty=whole?Math.max(0,Math.round(Number(f.baseQty)||0)):(Number(f.baseQty)||0);return `<input aria-label="Amount of ${esc(f.name)}" type="number" min="0" step="${whole?'1':'0.1'}" inputmode="${whole?'numeric':'decimal'}" value="${qty}" data-foodqty="${index}" data-whole="${whole?'1':'0'}">`}
+function addControls(f,index){const hasServe=isGramUnit(f.unit)&&Number(f.serveGrams)>0;return `<div class="qtyadd">${quantityInput(f,index)}${hasServe?`<select aria-label="Measurement unit for ${esc(f.name)}" data-foodunit="${index}"><option value="g">Grams (g)</option><option value="serve">${esc(f.serveName||'Serve')} (${fmt(f.serveGrams)} g)</option></select>`:`<span>${esc(f.unit)}</span>`}<button class="btn library-add smallbtn" data-addfood="${index}">Add</button></div>`}
+function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions">${button?`<div class="qtyadd">${quantityInput(f,index)}<span>${esc(f.unit)}</span><button class="btn library-add smallbtn" data-addfood="${index}">Add</button></div>`:''}<button class="btn ghost smallbtn" data-editfood="${index}">Edit</button><button class="btn danger smallbtn" data-deletefood="${index}">Delete</button></div></div>`}
+function bindFoodActions(container){
+ container.querySelectorAll('[data-foodqty][data-whole="1"]').forEach(input=>input.addEventListener('change',()=>{input.value=String(Math.max(0,Math.round(Number(input.value)||0)))}));
+ container.querySelectorAll('[data-foodunit]').forEach(select=>select.addEventListener('change',()=>{const i=Number(select.dataset.foodunit),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`);if(!f||!input)return;input.value=select.value==='serve'?'1':String(f.baseQty);input.step=select.value==='serve'?'0.1':(isGramUnit(f.unit)?'0.1':'1');input.inputMode=select.value==='serve'?'decimal':(isGramUnit(f.unit)?'decimal':'numeric')}));
+ container.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.addfood),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`),unitSelect=container.querySelector(`[data-foodunit="${i}"]`),qty=input?num(input.value):f?.baseQty,unit=unitSelect?.value||f?.unit;if(f&&qty>0){addEntry(f,qty,unit);if(container.id==='foodList'){showToast('Item added')}else{if(container.id==='quickResults')renderQuick();setTab('diary')}}});
+ container.querySelectorAll('[data-editfood]').forEach(b=>b.onclick=()=>openFoodEditor(Number(b.dataset.editfood)));
+ container.querySelectorAll('[data-deletefood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.deletefood);if(!foods[i])return;foods.splice(i,1);save();renderLibrary();});
+}
+function renderLibrary(){
+ const cats=['All',...new Set([...categories,...foods.map(f=>f.category||'Custom')])],old=$('categoryFilter').value||'All';
+ $('categoryFilter').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');$('categoryFilter').value=cats.includes(old)?old:'All';
+ $('categoryOptions').innerHTML=cats.filter(c=>c!=='All').map(c=>`<option value="${esc(c)}"></option>`).join('');
+ const q=$('librarySearch').value.toLowerCase(),cat=$('categoryFilter').value,sort=$('librarySort').value||'alphabetical';
+ const usage=foodUsage();
+ const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q));
+ if(sort==='recent')list.sort((a,b)=>{const au=usage.get(a.name.toLocaleLowerCase())||{last:0},bu=usage.get(b.name.toLocaleLowerCase())||{last:0};return bu.last-au.last||a.name.localeCompare(b.name,undefined,{sensitivity:'base'});});
+ else if(sort==='alphabetical')list.sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
+ // Custom order deliberately preserves the underlying Library array order.
+ $('foodCount').textContent=foods.length+' foods';
+ $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item" data-food-id="${esc(f.id)}"><div class="library-card-top">${sort==='custom'?`<button class="drag-handle library-drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(f.name)}" title="Hold, then drag to reorder">⠿</button>`:''}<input class="food-select" type="checkbox" aria-label="Select ${esc(f.name)} for deletion" data-selectfood="${i}"></div><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||'<div class="tiny muted">No matching foods.</div>';
+ bindFoodActions($('foodList'));
+ if(sort==='custom')enableLongPressReorder($('foodList'),'.library-item','.library-drag-handle',()=>{const visible=[...$('foodList').querySelectorAll('[data-food-id]')].map(x=>x.dataset.foodId),visibleSet=new Set(visible),ordered=foods.filter(f=>visibleSet.has(String(f.id))),byId=new Map(ordered.map(f=>[String(f.id),f])),ranked=visible.map(id=>byId.get(id)).filter(Boolean);let cursor=0;foods=foods.map(f=>visibleSet.has(String(f.id))?ranked[cursor++]:f);save();renderLibrary();});
+ const updateSelection=()=>{const boxes=[...$('foodList').querySelectorAll('[data-selectfood]')],selected=boxes.filter(x=>x.checked).length;$('selectedFoodCount').textContent=selected+' selected';$('deleteSelectedFoods').disabled=selected===0;$('deleteSelectedFoods').textContent=`Delete selected (${selected})`;};
+ $('foodList').querySelectorAll('[data-selectfood]').forEach(box=>box.addEventListener('change',updateSelection));
+ updateSelection();
+}
+function newFoodId(){return 'food-'+Date.now()+'-'+Math.random().toString(36).slice(2,9)}
+function openFoodEditor(i){
+ const f=foods[i];if(!f)return;$('foodEditor').dataset.index=i;
+ $('editName').value=f.name;$('editQty').value=f.baseQty;$('editUnit').value=f.unit;
+ $('editCategory').value=f.category||'Custom';$('editBasis').value=f.basis||'';$('editServeName').value=f.serveName||'';$('editServeGrams').value=f.serveGrams||'';$('editKcal').value=f.kcal;$('editProtein').value=f.protein;$('editCarbs').value=f.carbs;$('editFat').value=f.fat;
+ $('foodEditor').showModal();
+}
+function closeFoodEditor(){$('foodEditor').close()}
+$('closeEditor').onclick=closeFoodEditor;$('cancelEditor').onclick=closeFoodEditor;
+$('foodEditorForm').onsubmit=e=>{
+ e.preventDefault();const i=Number($('foodEditor').dataset.index),f=foods[i];if(!f)return;
+ const qty=num($('editQty').value),vals=['editKcal','editProtein','editCarbs','editFat'].map(id=>$(id).value);
+ if(!$('editName').value.trim()||qty<=0||!$('editUnit').value.trim()||vals.some(v=>v===''||num(v)<0)){alert('Check the food name, serving quantity, unit and nutrition values.');return}
+ const serveName=$('editServeName').value.trim(),serveGrams=num($('editServeGrams').value);if(serveGrams<0||($('editServeGrams').value.trim()!==''&&serveGrams<=0)){alert('Enter a serving weight greater than zero, or leave it blank.');return}
+ foods[i]={...f,name:titleCase($('editName').value.trim()),baseQty:qty,unit:isGramUnit($('editUnit').value)?'g':$('editUnit').value.trim(),category:$('editCategory').value.trim()||'Custom',basis:$('editBasis').value.trim(),serveName:serveGrams>0?(serveName||'Serve'):'',serveGrams:serveGrams>0?serveGrams:null,kcal:num(vals[0]),protein:num(vals[1]),carbs:num(vals[2]),fat:num(vals[3])};
+ save();closeFoodEditor();renderLibrary();
 };
-const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-const dateObj=s=>new Date(`${s}T12:00:00`);
-const addDays=(s,n)=>{const d=dateObj(s);d.setDate(d.getDate()+n);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-const fmt=s=>dateObj(s).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
-const daysBetween=(a,b)=>Math.floor((dateObj(b)-dateObj(a))/DAY);
-let data=load(); data.settings=data.settings||{}; if(!data.settings.locationKey)data.settings.locationKey='melbourne';
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY))||{plantings:[],customPlants:[],settings:{}};d.plantings=(d.plantings||[]).map(p=>({...p,events:p.events||[],photos:p.photos||[],observations:p.observations||[]}));return d}catch{return {plantings:[],customPlants:[],settings:{}}}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(data));return true}catch(e){toast('Storage is full. Export a backup and remove some photos.');return false}}
-
-const LOCATIONS={melbourne:{name:'Melbourne, Victoria, Australia',hemisphere:'south',lat:-37.81,lon:144.96},sydney:{name:'Sydney, NSW, Australia',hemisphere:'south',lat:-33.87,lon:151.21},brisbane:{name:'Brisbane, Queensland, Australia',hemisphere:'south',lat:-27.47,lon:153.03},perth:{name:'Perth, WA, Australia',hemisphere:'south',lat:-31.95,lon:115.86},adelaide:{name:'Adelaide, SA, Australia',hemisphere:'south',lat:-34.93,lon:138.60},hobart:{name:'Hobart, Tasmania, Australia',hemisphere:'south',lat:-42.88,lon:147.33},darwin:{name:'Darwin, NT, Australia',hemisphere:'south',lat:-12.46,lon:130.84},canberra:{name:'Canberra, ACT, Australia',hemisphere:'south',lat:-35.28,lon:149.13},auckland:{name:'Auckland, New Zealand',hemisphere:'south',lat:-36.85,lon:174.76},london:{name:'London, UK',hemisphere:'north',lat:51.51,lon:-.13},newyork:{name:'New York, USA',hemisphere:'north',lat:40.71,lon:-74.01},losangeles:{name:'Los Angeles, USA',hemisphere:'north',lat:34.05,lon:-118.24},'other-north':{name:'Other location',hemisphere:'north'},'other-south':{name:'Other location',hemisphere:'south'}};
-function currentSeason(key,date=new Date()){const l=LOCATIONS[key]||LOCATIONS.melbourne,m=date.getMonth()+1;return l.hemisphere==='south'?(m>=3&&m<=5?'Autumn':m>=6&&m<=8?'Winter':m>=9&&m<=11?'Spring':'Summer'):(m>=3&&m<=5?'Spring':m>=6&&m<=8?'Summer':m>=9&&m<=11?'Autumn':'Winter')}
-const SEASONAL={Spring:{good:['Tomato','Basil','Zucchini','Cucumber','Beans','Capsicum','Sunflower','Marigold'],caution:['Carrot','Lettuce','Parsley','Coriander']},Summer:{good:['Basil','Beans','Cucumber','Zucchini','Capsicum','Tomato','Marigold'],caution:['Carrot','Lettuce']},Autumn:{good:['Carrot','Lettuce','Radish','Spinach','Coriander','Parsley','Peas'],caution:['Beans','Basil']},Winter:{good:['Peas','Spinach','Lettuce','Radish','Carrot','Coriander','Parsley'],caution:['Beans']}};
-function regionSeason(){const key=data.settings.locationKey||'melbourne';return {key,season:currentSeason(key),loc:LOCATIONS[key]||LOCATIONS.melbourne}}
-function renderRecommendations(){const {season,loc}=regionSeason(),r=SEASONAL[season];document.getElementById('recommendSeason').textContent=season+' · '+loc.name;document.getElementById('recommendations').innerHTML=r.good.map(n=>`<div class="recommend-card"><b>${n} <span class="status">Good time to plant</span></b><div class="tiny">Generally suitable for ${season.toLowerCase()} in this region. Check variety and local conditions.</div></div>`).join('')+r.caution.map(n=>`<div class="recommend-card"><b>${n} <span class="status pending">Check conditions</span></b><div class="tiny">May be suitable depending on temperatures, variety and protection.</div></div>`).join('')+'<div class="notice">Seasonal guidance is approximate. Regional microclimates, frost, heat and variety can change the best planting window.</div>'}
-function syncSettingsUI(){const s=data.settings||{},key=s.locationKey||'melbourne';document.getElementById('gardenName').value=s.name||'';document.getElementById('locationPreset').value=LOCATIONS[key]?key:'melbourne';document.getElementById('locationDetail').value=s.locationDetail||'';document.getElementById('environment').value=s.environment||'mixed';document.getElementById('microclimate').value=s.microclimate||'default';const {season,loc}=regionSeason();document.getElementById('seasonInfo').textContent=`Current season: ${season}. Calculated automatically for ${loc.name}.`;document.getElementById('seasonLabel').textContent=season;renderRecommendations()}
-
-function allSpecies(){return [...SEED,...data.customPlants]}
-function species(id){return allSpecies().find(p=>p.id===id)}
-function toast(s){const t=document.getElementById('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
-function milestoneList(p){const s=species(p.speciesId);if(!s)return[];const out=[{type:'Germination',min:s.gmin,max:s.gmax}];if(s.flower)out.push({type:'First flowers',min:s.flower,max:s.flower+10});out.push({type:'Harvest window',min:s.hmin,max:s.hmax});return out.map(m=>({...m,start:addDays(p.date,m.min),end:addDays(p.date,m.max)}))}
-function status(p){if(p.actualSprout)return 'Sprouted';const ms=milestoneList(p)[0];const now=todayISO();if(now>ms.end)return 'Overdue';if(now>=ms.start)return 'Due now';return 'Pending'}
-function render(){
- const now=todayISO();document.getElementById('todayLabel').textContent=fmt(now);
- syncSettingsUI();
- const active=data.plantings.filter(p=>!p.archived);
- const spr=active.filter(p=>{const m=milestoneList(p)[0];return !p.actualSprout&&now>=m.start&&now<=m.end}).length;
- const har=active.filter(p=>{const m=milestoneList(p).slice(-1)[0];return now>=m.start&&now<=m.end}).length;
- document.getElementById('plantCount').textContent=active.length;document.getElementById('sproutCount').textContent=spr;document.getElementById('harvestCount').textContent=har;
- document.getElementById('plantingList').innerHTML=active.length?active.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(p=>plantCard(p)).join(''):'<div class="empty">No plantings yet. Add your first planting to start your garden diary.</div>';
- const events=active.flatMap(p=>milestoneList(p).map(m=>({p,m}))).filter(x=>x.m.end>=now).sort((a,b)=>a.m.start.localeCompare(b.m.start)).slice(0,8);
- document.getElementById('upcomingList').innerHTML=events.length?events.map(x=>`<div class="event"><div class="event-date">${fmt(x.m.start)}${x.m.start!==x.m.end?' – '+fmt(x.m.end):''}</div><div><b>${esc(species(x.p.speciesId)?.name||'Plant')}</b><div class="tiny">${x.m.type} · ${esc(x.p.location||x.p.method)}</div></div></div>`).join(''):'<div class="empty">Your upcoming milestones will appear here.</div>';
- renderSpecies();renderCalendar();renderHistory();populateSelect();
+$('manageCategories').onclick=()=>{
+ const existing=[...new Set([...categories,...foods.map(f=>f.category||'Custom')])];
+ const action=prompt('Category management:\nType ADD to create a category, RENAME to rename one, or DELETE to remove one.');
+ if(!action)return;const mode=action.trim().toUpperCase();
+ if(mode==='ADD'){const name=prompt('New category name:');if(name&&name.trim()&&!existing.includes(name.trim())){categories.push(name.trim());save();renderLibrary();}}
+ else if(mode==='RENAME'){const old=prompt('Exact category name to rename:\n'+existing.join('\n'));if(!old||!existing.includes(old))return;const name=prompt('New category name:');if(name&&name.trim()){foods.forEach(f=>{if((f.category||'Custom')===old)f.category=name.trim()});categories=categories.map(c=>c===old?name.trim():c);save();renderLibrary();}}
+ else if(mode==='DELETE'){const old=prompt('Exact category name to delete:\n'+existing.join('\n'));if(!old||!existing.includes(old))return;const target=prompt('Move foods in this category to which category? Enter an existing category, or leave blank for Custom.');foods.forEach(f=>{if((f.category||'Custom')===old)f.category=target&&existing.includes(target)?target:'Custom'});categories=categories.filter(c=>c!==old);save();renderLibrary();}
+ else alert('Please enter ADD, RENAME or DELETE.');
 }
-function plantCard(p){const s=species(p.speciesId),m=milestoneList(p)[0],st=status(p);const label=st==='Overdue'?'Overdue':st==='Due now'?'Sprouting window':st;const cls=st==='Overdue'?'overdue':st==='Pending'?'pending':'';return `<div class="plant-row"><div><div class="plant-name">${esc(s?.name||'Unknown plant')}${p.variety?' · '+esc(p.variety):''}</div><div class="plant-meta">Planted ${fmt(p.date)} · ${daysBetween(p.date,todayISO())} days ago · ${esc(p.location||p.method)}</div><div class="plant-meta">Expected sprouting: ${fmt(m.start)} – ${fmt(m.end)}</div></div><div style="display:grid;gap:7px;justify-items:end"><span class="status ${cls}">${label}</span><button class="btn secondary" data-action="sprout" data-id="${p.id}" style="font-size:11px;padding:6px 8px">${p.actualSprout?'View sprout':'Record sprout'}</button><button class="btn ghost" data-action="detail" data-id="${p.id}" style="font-size:11px;padding:6px 8px">Details</button></div></div>`}
-const PLANT_ART={tomato:0,basil:1,lettuce:2,zucchini:3,carrot:4,radish:5,beans:6,cucumber:7,spinach:8,capsicum:9,parsley:10,coriander:11,peas:12,sunflower:13,marigold:14};
-function plantArt(id,cls='plant-art'){const n=PLANT_ART[id];if(n===undefined)return '';const x=n%5,y=Math.floor(n/5);return `<div class="${cls}" role="img" aria-label="${esc(species(id)?.name||'Plant')} illustration" style="background-position:${x*25}% ${y*50}%"></div>`}
-function renderSpecies(){const q=(document.getElementById('plantSearch').value||'').toLowerCase();const list=allSpecies().filter(p=>{const g=GROWING_GUIDES[p.id]||{};return [p.name,p.group,g.method,g.sun,g.season,g.soil,g.companions,g.tips].join(' ').toLowerCase().includes(q)});document.getElementById('speciesCount').textContent=list.length+' plants';document.getElementById('speciesList').innerHTML=list.map(p=>`<div class="plant-row"><div class="plant-library-main">${plantArt(p.id)}<div><div class="plant-name">${esc(p.name)}</div><div class="plant-meta">${esc(p.group)} · Germination ${p.gmin}–${p.gmax} days · Harvest ${p.hmin}–${p.hmax} days</div><div class="plant-meta">${esc((GROWING_GUIDES[p.id]||{}).season||'Growing details not yet added')}</div></div></div><div class="library-actions"><button class="btn secondary" data-action="info" data-id="${p.id}">Growing guide</button><button class="btn" data-action="choose" data-id="${p.id}">Plant</button></div></div>`).join('')||'<div class="empty">No plants match that search.</div>'}
-function openPlantGuide(id){const p=species(id);if(!p)return;const g=GROWING_GUIDES[id];document.getElementById('guideTitle').textContent=p.name;document.getElementById('guideBody').innerHTML=g?`${plantArt(id,'plant-art guide-art')}<div class="guide-grid"><div><div class="tiny">Germination estimate</div><b>${p.gmin}–${p.gmax} days</b></div><div><div class="tiny">Harvest estimate</div><b>${p.hmin}–${p.hmax} days</b></div><div><div class="tiny">Sunlight</div><b>${esc(g.sun)}</b></div><div><div class="tiny">Spacing</div><b>${esc(g.spacing)}</b></div><div><div class="tiny">Sowing depth</div><b>${esc(g.depth)}</b></div></div><div class="guide-section"><b>How to sow</b><p>${esc(g.method)}</p></div><div class="guide-section"><b>Soil</b><p>${esc(g.soil||'Use fertile, well-drained soil suited to the crop.')}</p></div><div class="guide-section"><b>Planting tips</b><p>${esc(g.tips||g.method)}</p></div><div class="guide-section"><b>Companion planting</b><p>${esc(g.companions||'Companion options vary by variety and growing conditions.')}</p></div><div class="guide-section"><b>Watering</b><p>${esc(g.water)}</p></div><div class="guide-section"><b>Care and harvest</b><p>${esc(g.care)}</p></div><div class="guide-section"><b>Season and conditions</b><p>${esc(g.season)}</p></div><div class="notice">Timing and companion planting are general guidance, not guarantees. Variety, soil temperature, local climate and growing conditions can change results. Companion effects are not always proven; use the suggestions as starting points, not pest-control promises. Follow the seed packet or plant label for variety-specific advice.</div>`:`<div class="notice">This is a custom plant. Add its growing details to your notes or use the seed packet as your reference. Its saved germination and harvest ranges are used for predictions.</div>`;document.getElementById('guideDialog').showModal()}
-function renderCalendar(){const events=data.plantings.filter(p=>!p.archived).flatMap(p=>milestoneList(p).map(m=>({p,m}))).sort((a,b)=>a.m.start.localeCompare(b.m.start));document.getElementById('calendarList').innerHTML=events.length?events.map(({p,m})=>`<div class="event"><div class="event-date">${fmt(m.start)}${m.start!==m.end?'<br>to '+fmt(m.end):''}</div><div><b>${esc(species(p.speciesId)?.name||'Plant')} · ${m.type}</b><div class="tiny">Planted ${fmt(p.date)}${p.actualSprout&&m.type==='Germination'?' · Sprouted '+fmt(p.actualSprout):''}</div></div></div>`).join(''):'<div class="empty">No growth milestones to show yet.</div>'}
-function renderHistory(){const list=data.plantings.slice().sort((a,b)=>b.date.localeCompare(a.date));document.getElementById('historyList').innerHTML=list.length?list.map(p=>`<div class="plant-row"><div><div class="plant-name">${esc(species(p.speciesId)?.name||'Plant')} ${p.variety?'· '+esc(p.variety):''}</div><div class="plant-meta">Planted ${fmt(p.date)} · ${p.quantity} · ${p.method}${p.actualSprout?' · Sprouted '+fmt(p.actualSprout):''}</div></div><button class="btn ghost" data-action="archive" data-id="${p.id}">${p.archived?'Restore':'Archive'}</button></div>`).join(''):'<div class="empty">Your planting history will appear here.</div>'}
-function populateSelect(){document.getElementById('plantSpecies').innerHTML=allSpecies().map(p=>`<option value="${p.id}">${esc(p.name)} (${p.group})</option>`).join('')}
-function openPlant(id){populateSelect();if(id)document.getElementById('plantSpecies').value=id;document.getElementById('plantedDate').value=todayISO();document.getElementById('plantDialog').showModal()}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('main>section').forEach(s=>s.classList.toggle('hide',s.id!==b.dataset.tab));if(b.dataset.tab==='garden')render()}));
-document.getElementById('addPlantTop').onclick=()=>openPlant();document.getElementById('plantForm').addEventListener('submit',e=>{if(e.submitter?.id!=='savePlant')return;e.preventDefault();const p={id:crypto.randomUUID(),speciesId:document.getElementById('plantSpecies').value,variety:document.getElementById('variety').value.trim(),date:document.getElementById('plantedDate').value,quantity:Math.max(1,+document.getElementById('quantity').value||1),method:document.getElementById('plantMethod').value,location:document.getElementById('plantLocation').value.trim(),environment:data.settings.environment||'mixed',microclimate:data.settings.microclimate||'default',notes:document.getElementById('plantNotes').value.trim(),actualSprout:'',archived:false};if(!p.date){toast('Choose a planting date');return}data.plantings.push(p);save();document.getElementById('plantDialog').close();e.target.reset();render();toast('Planting saved')});
-document.getElementById('plantingList').addEventListener('click',e=>action(e));document.getElementById('speciesList').addEventListener('click',e=>action(e));document.getElementById('historyList').addEventListener('click',e=>action(e));
-function action(e){const b=e.target.closest('[data-action]');if(!b)return;const p=data.plantings.find(x=>x.id===b.dataset.id);if(b.dataset.action==='info')openPlantGuide(b.dataset.id);if(b.dataset.action==='choose')openPlant(b.dataset.id);if(!p)return;if(b.dataset.action==='sprout'){if(!p.actualSprout){p.actualSprout=todayISO();save();render();toast('Sprouting recorded')}else alert('Recorded sprouting date: '+fmt(p.actualSprout))}if(b.dataset.action==='detail')openDetail(p.id);if(b.dataset.action==='archive'){p.archived=!p.archived;save();render()}}
-document.getElementById('plantSearch').addEventListener('input',renderSpecies);
-document.getElementById('saveCustomPlant').onclick=()=>{const name=document.getElementById('customPlantName').value.trim(),gmin=+document.getElementById('customMin').value,gmax=+document.getElementById('customMax').value,hmin=+document.getElementById('customHarvestMin').value,hmax=+document.getElementById('customHarvestMax').value;if(!name||!gmin||!gmax||!hmin||!hmax||gmax<gmin||hmax<hmin){toast('Check the plant name and day ranges');return}data.customPlants.push({id:'custom-'+crypto.randomUUID(),name,group:'Custom',gmin,gmax,hmin,hmax});save();document.getElementById('customPlantName').value='';render();toast('Custom plant saved')};
-document.getElementById('saveSettings').onclick=()=>{data.settings={...(data.settings||{}),name:document.getElementById('gardenName').value.trim(),locationKey:document.getElementById('locationPreset').value,locationDetail:document.getElementById('locationDetail').value.trim(),environment:document.getElementById('environment').value,microclimate:document.getElementById('microclimate').value};save();syncSettingsUI();toast('Garden settings saved')};
-document.getElementById('locationPreset').addEventListener('change',()=>{data.settings.locationKey=document.getElementById('locationPreset').value;syncSettingsUI()});
-document.getElementById('weatherButton').onclick=async()=>{const {loc}=regionSeason(),box=document.getElementById('weatherResult');if(!loc.lat){box.textContent='Choose a supported city to retrieve weather.';return}box.textContent='Retrieving current weather…';try{const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,relative_humidity_2m,precipitation&daily=temperature_2m_min,temperature_2m_max&timezone=auto&forecast_days=3`;const res=await fetch(url);if(!res.ok)throw Error();const w=await res.json(),c=w.current,d=w.daily;box.innerHTML=`<b>Current conditions · ${loc.name}</b><br>${Math.round(c.temperature_2m)}°C · Humidity ${c.relative_humidity_2m}% · Precipitation ${c.precipitation} mm<br><span class="tiny">Next three days: ${d.temperature_2m_min.map((v,i)=>`${Math.round(v)}–${Math.round(d.temperature_2m_max[i])}°C`).join(' · ')}</span><br><span class="tiny">Weather is displayed as guidance; it does not yet automatically alter existing growth estimates.</span>`}catch{box.textContent='Weather unavailable. Check your connection and try again.'}};
-document.getElementById('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({format:'garden-ledger-backup',version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='garden-ledger-backup-'+todayISO()+'.json';a.click();URL.revokeObjectURL(a.href);document.getElementById('backupStatus').textContent='Backup exported.'};
-document.getElementById('importButton').onclick=()=>document.getElementById('importFile').click();
-document.getElementById('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(x.format!=='garden-ledger-backup'||!x.data||!Array.isArray(x.data.plantings))throw Error();if(!confirm('Replace the garden data on this device with this backup?'))return;data=x.data;save();render();document.getElementById('backupStatus').textContent='Backup restored.'}catch{alert('This file does not look like a valid Garden Ledger backup.')}e.target.value=''};
-document.getElementById('clearAll').onclick=()=>{if(confirm('Permanently delete all Garden Ledger records from this browser? Export a backup first if you want to keep them.')){data={plantings:[],customPlants:[],settings:{}};save();render();toast('Garden data cleared')}};
-let selectedPlantId=null;
-function openDetail(id){selectedPlantId=id;document.getElementById('milestoneDate').value=todayISO();document.getElementById('detailDialog').showModal();renderDetail()}
-function stageKey(title){if(/^planted$/i.test(title))return 'Planted';if(/sprout|germinat/i.test(title))return 'Sprouted';if(/flower/i.test(title))return 'Flowered';if(/harvest/i.test(title))return 'Harvested';if(/transplant/i.test(title))return 'Transplanted';if(/other/i.test(title))return 'Other';return title}
-function photosForStage(p,stage){const key=stageKey(stage);return (p.photos||[]).filter(ph=>stageKey(ph.stage||'General')===key)}
-function stagePhotos(p,stage){const photos=photosForStage(p,stage);return photos.length?`<div class="stage-photos">${photos.map(ph=>`<figure><img src="${ph.data}" alt="${esc(stage)} photo"><figcaption>${fmt(ph.date)}</figcaption></figure>`).join('')}</div>`:''}
-function renderDetail(){const p=data.plantings.find(x=>x.id===selectedPlantId);if(!p)return;const s=species(p.speciesId)||{name:'Plant'};document.getElementById('detailTitle').textContent=s.name+(p.variety?' · '+p.variety:'');document.getElementById('detailSubtitle').textContent=`Planted ${fmt(p.date)} · ${p.quantity} · ${p.method}${p.location?' · '+p.location:''}`;
- const predicted=milestoneList(p);const actual=(p.events||[]).map(e=>({date:e.date,title:e.type,note:e.note,actual:true}));if(p.actualSprout&&!actual.some(e=>e.title==='Sprouted'))actual.push({date:p.actualSprout,title:'Sprouted',note:'Recorded sprouting',actual:true});
- const timeline=[{date:p.date,title:'Planted',note:`${p.quantity} · ${p.method}`,actual:true},...actual,...predicted.map(m=>({date:m.start,title:`Expected ${m.type.toLowerCase()}`,note:m.start===m.end?fmt(m.start):`${fmt(m.start)} – ${fmt(m.end)}`,actual:false}))].sort((a,b)=>a.date.localeCompare(b.date));
- document.getElementById('detailBody').innerHTML=`<div class="card section"><div class="row between"><h2 style="margin:0">Growth timeline</h2><span class="pill">${status(p)}</span></div><div class="timeline">${timeline.map(t=>`<div class="timeline-item ${t.actual?'':'pending'}"><b>${esc(t.title)}</b><div class="tiny">${fmt(t.date)}${t.note?' · '+esc(t.note):''}</div>${stagePhotos(p,t.title)}</div>`).join('')}</div></div><div class="card section"><h2>Planting details</h2><div class="grid"><div><div class="tiny">Variety</div><b>${esc(p.variety||'Not specified')}</b></div><div><div class="tiny">Location</div><b>${esc(p.location||'Not specified')}</b></div><div><div class="tiny">Growing method</div><b>${esc(p.method)}</b></div><div><div class="tiny">Quantity</div><b>${p.quantity}</b></div></div>${p.notes?`<div class="notice">${esc(p.notes)}</div>`:''}</div>`;
- document.getElementById('photoGrid').innerHTML=(p.photos||[]).length?p.photos.map((ph,i)=>`<div><img src="${ph.data}" alt="${esc(ph.stage||'Garden progress')} photo"><div class="tiny">${esc(ph.stage||'General')} · ${fmt(ph.date)} <button class="btn ghost" data-remove-photo="${i}" style="padding:3px 6px">Remove</button></div></div>`).join(''):'<div class="empty" style="grid-column:1/-1">No photos added yet.</div>';
- document.getElementById('observationList').innerHTML=(p.observations||[]).slice().reverse().map(o=>`<div class="observation"><div class="row between"><b class="tiny">${fmt(o.date)}</b><button class="btn ghost" data-remove-observation="${o.id}" style="padding:3px 6px">Delete</button></div><div style="font-size:13px">${esc(o.text)}</div></div>`).join('')||'<div class="empty">No observations recorded yet.</div>';
+$('deleteSelectedFoods').onclick=()=>{const selected=[...$('foodList').querySelectorAll('[data-selectfood]:checked')].map(box=>Number(box.dataset.selectfood)).filter(i=>Number.isInteger(i)&&foods[i]);if(!selected.length)return;selected.sort((a,b)=>b-a).forEach(i=>foods.splice(i,1));save();renderLibrary();};
+$('librarySearch').oninput=renderLibrary;$('categoryFilter').onchange=renderLibrary;$('librarySort').onchange=renderLibrary;
+function foodUsage(){
+ const usage=new Map();
+ for(const [date,dayEntries] of Object.entries(logs)){
+  const dayStart=Date.parse(date+'T00:00:00')||0;
+  (Array.isArray(dayEntries)?dayEntries:[]).forEach((entry,index)=>{
+   const key=String(entry.name||'').toLocaleLowerCase();
+   if(!key)return;
+   const item=usage.get(key)||{count:0,last:0};
+   item.count++;
+   item.last=Math.max(item.last,Number(entry.loggedAt)||dayStart+index);
+   usage.set(key,item);
+  });
+ }
+ return usage;
 }
-document.getElementById('closeDetail').onclick=()=>document.getElementById('detailDialog').close();
-document.getElementById('saveMilestone').onclick=()=>{const p=data.plantings.find(x=>x.id===selectedPlantId);if(!p)return;const type=document.getElementById('milestoneType').value,date=document.getElementById('milestoneDate').value||todayISO(),note=document.getElementById('milestoneNote').value.trim();p.events=p.events||[];p.events.push({id:crypto.randomUUID(),type,date,note});if(type==='Sprouted')p.actualSprout=date;save();document.getElementById('milestoneNote').value='';render();renderDetail();toast('Milestone recorded')};
-document.getElementById('saveObservation').onclick=()=>{const p=data.plantings.find(x=>x.id===selectedPlantId),field=document.getElementById('observationText');if(!p||!field.value.trim())return;p.observations=p.observations||[];p.observations.push({id:crypto.randomUUID(),date:todayISO(),text:field.value.trim()});if(save()){field.value='';renderDetail();toast('Observation saved')}};
-document.getElementById('photoInput').onchange=async e=>{const file=e.target.files[0],p=data.plantings.find(x=>x.id===selectedPlantId);if(!file||!p)return;try{const dataUrl=await resizePhoto(file);p.photos=p.photos||[];p.photos.push({id:crypto.randomUUID(),date:todayISO(),stage:document.getElementById('photoStage').value||'General',data:dataUrl});if(save()){renderDetail();toast('Photo added to journal')}}catch{toast('Could not process this photo')}e.target.value=''};
-function resizePhoto(file){return new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const scale=Math.min(1,1000/Math.max(img.width,img.height)),canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);URL.revokeObjectURL(url);resolve(canvas.toDataURL('image/jpeg',.72))};img.onerror=()=>{URL.revokeObjectURL(url);reject()};img.src=url})}
-document.getElementById('detailDialog').addEventListener('click',e=>{const photo=e.target.closest('[data-remove-photo]'),obs=e.target.closest('[data-remove-observation]'),p=data.plantings.find(x=>x.id===selectedPlantId);if(!p)return;if(photo&&confirm('Remove this photo?')){p.photos.splice(+photo.dataset.removePhoto,1);save();renderDetail()}if(obs&&confirm('Delete this observation?')){p.observations=p.observations.filter(o=>o.id!==obs.dataset.removeObservation);save();renderDetail()}});
-render();
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>reg.update()).catch(()=>{}));
+function quickFoodRow(f,index){
+ return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions">${addControls(f,index)}</div></div>`;
+}
+function renderQuick(){
+ const usage=foodUsage();
+ const list=foods.map((f,index)=>({f,index,stats:usage.get(f.name.toLocaleLowerCase())||{count:0,last:0}}))
+  .sort((a,b)=>b.stats.count-a.stats.count||b.stats.last-a.stats.last||a.index-b.index)
+  .slice(0,5).map(x=>x.f);
+ $('quickResults').innerHTML=list.map(f=>quickFoodRow(f,foods.indexOf(f))).join('')||'<div class="tiny muted">No foods in your library yet.</div>';
+ bindFoodActions($('quickResults'));
+
+}
+$('saveCustom').onclick=()=>{
+ const name=titleCase($('customName').value.trim()),qty=num($('customQty').value),unit=$('customUnit').value.trim()||'serve';
+ const vals=['customKcal','customProtein','customCarbs','customFat'].map(id=>$(id).value);
+ if(!name||qty<=0||vals.some(v=>v===''||num(v)<0)){alert('Enter a name, serving quantity and all four nutrition values.');return}
+ const [kcal,protein,carbs,fat]=vals.map(num),f={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name,baseQty:qty,unit,kcal,protein,carbs,fat,category:$('customCategory').value.trim()||'Custom',basis:$('customBasis').value.trim()};
+ foods.push(f);save();['customName','customKcal','customProtein','customCarbs','customFat'].forEach(id=>$(id).value='');renderLibrary();alert('Food saved to your library.');
+};
+$('clearDay').onclick=()=>{if(confirm('Clear all entries for this day?')){logs[currentDate]=[];save();renderDiary()}};
+function renderDailyHistory(){
+ const host=$('dailyHistoryList');
+ if(!host)return;
+ const days=Object.keys(logs)
+  .filter(date=>date<currentDate&&Array.isArray(logs[date])&&logs[date].length)
+  .sort((a,b)=>b.localeCompare(a));
+ if(!days.length){host.innerHTML='<div class="muted tiny">No previous days logged yet.</div>';return;}
+ host.innerHTML=days.map(date=>{
+  const dayItems=logs[date],t=totals(dayItems);
+  const label=new Date(date+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  return `<div class="daily-history-row"><div><div class="daily-history-date">${esc(label)}</div><div class="daily-history-macros">${Math.round(t.kcal).toLocaleString()} kcal · Protein ${fmt(t.protein)} g · Carbs ${fmt(t.carbs)} g · Fat ${fmt(t.fat)} g</div></div><button class="btn ghost smallbtn daily-history-view" type="button" data-history-day="${esc(date)}">View day</button></div>`;
+ }).join('');
+ host.querySelectorAll('[data-history-day]').forEach(button=>button.onclick=()=>{
+  currentDate=button.dataset.historyDay;
+  $('logDate').value=currentDate;
+  renderDiary();
+  window.scrollTo({top:0,behavior:'smooth'});
+ });
+}
+function dateAtNoon(date){return new Date(String(date)+'T12:00:00');}
+function mondayOf(date){const d=dateAtNoon(date);const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return d;}
+function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function renderWeeklyReports(){
+ const host=$('weeklyReports');if(!host)return;
+ const dates=Object.keys(logs).filter(date=>/^\d{4}-\d{2}-\d{2}$/.test(date)&&Array.isArray(logs[date])&&logs[date].length);
+ if(!dates.length){host.innerHTML='<div class="muted tiny">Your weekly summaries will appear here once you have logged food.</div>';return;}
+ const weeks=new Map();
+ dates.forEach(date=>{const start=mondayOf(date),key=dateKey(start);if(!weeks.has(key))weeks.set(key,{start,dates:[]});weeks.get(key).dates.push(date);});
+ const ordered=[...weeks.values()].sort((a,b)=>b.start-a.start);
+ host.innerHTML=ordered.map(week=>{
+  const start=week.start,end=new Date(start);end.setDate(end.getDate()+6);
+  const dayTotals=week.dates.map(date=>({date,total:totals(logs[date])}));
+  const sum=dayTotals.reduce((a,x)=>({kcal:a.kcal+x.total.kcal,protein:a.protein+x.total.protein,carbs:a.carbs+x.total.carbs,fat:a.fat+x.total.fat}),{kcal:0,protein:0,carbs:0,fat:0});
+  const count=dayTotals.length,avg={kcal:sum.kcal/count,protein:sum.protein/count,carbs:sum.carbs/count,fat:sum.fat/count};
+  const weekStartKey=dateKey(start),weekEndKey=dateKey(end);
+  const weights=weightLogs.filter(x=>x&&String(x.date)>=weekStartKey&&String(x.date)<=weekEndKey&&Number.isFinite(Number(x.weight))).map(x=>Number(x.weight));
+  const weightAvg=weights.length?weights.reduce((a,b)=>a+b,0)/weights.length:null;
+  const label=`${start.toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${end.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}`;
+  const isCurrent= dateKey(mondayOf(today()))===dateKey(start);
+  return `<article class="weekly-report"><div class="weekly-report-head"><div class="weekly-report-title">${esc(label)}${isCurrent?' · Current week':''}</div><div class="weekly-report-days">${count} of 7 days logged</div></div><div class="weekly-report-grid"><div class="weekly-report-stat"><b>${Math.round(avg.kcal).toLocaleString()} kcal</b><span>Average calories / logged day</span></div><div class="weekly-report-stat"><b>${fmt(avg.protein)} g</b><span>Average protein / logged day</span></div><div class="weekly-report-stat"><b>${fmt(avg.carbs)} g</b><span>Average carbs / logged day</span></div><div class="weekly-report-stat"><b>${fmt(avg.fat)} g</b><span>Average fat / logged day</span></div></div><div class="weekly-report-foot">${Math.round(sum.kcal).toLocaleString()} kcal total across ${count} logged days${weightAvg===null?'':` · Average weigh-in ${fmt(weightAvg)} kg (${weights.length} ${weights.length===1?'entry':'entries'})`}</div></article>`;
+ }).join('');
+}
+function renderHistory(){
+ const date=$('historyDate').value||currentDate,items=logs[date]||[],t=totals(items);
+ $('historySummary').innerHTML=items.length?`<b>${date}</b><br>${items.length} entries · ${Math.round(t.kcal)} kcal<br>Protein ${fmt(t.protein)} g · Carbs ${fmt(t.carbs)} g · Fat ${fmt(t.fat)} g`:'No saved log for this date.';
+ renderWeeklyReports();renderBackupStatus();
+}
+$('historyDate').onchange=renderHistory;$('loadHistory').onclick=()=>{currentDate=$('historyDate').value||today();$('logDate').value=currentDate;setTab('diary');renderDiary()};
+function download(name,content,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function makeBackup(){return {app:'MK\'s Macro Ledger',backupFormat:2,exportedAt:new Date().toISOString(),foods,logs,categories,weightLogs,weightTarget,macroTargets,localPreferences:{librarySort:$('librarySort')?.value||'alphabetical',colesLibrarySeeded:!!localStorage.getItem(COLES_SEED_KEY)}};}
+function renderBackupStatus(){const host=$('backupStatus');if(!host)return;const stamp=Number(localStorage.getItem('macroLastBackupAt')||0);if(!stamp){host.classList.add('needs-backup');host.textContent='No JSON backup recorded on this browser yet. Download a backup periodically and keep a copy somewhere safe.';return;}const age=Math.floor((Date.now()-stamp)/86400000),label=new Date(stamp).toLocaleString();host.classList.toggle('needs-backup',age>=30);host.textContent=`Last JSON backup downloaded: ${label}.${age>=30?' It has been 30 days or more — consider downloading a fresh copy.':' Remember to keep the downloaded file somewhere safe.'}`;}
+function exportFullBackup(){const backup=makeBackup();download('mk-macro-ledger-backup.json',JSON.stringify(backup,null,2),'application/json');localStorage.setItem('macroLastBackupAt',String(Date.now()));renderBackupStatus();}
+$('exportJSON').onclick=exportFullBackup;
+$('exportCSV').onclick=()=>{const rows=[['Date','Food','Quantity','Unit','Calories','Protein g','Carbs g','Fat g']];Object.entries(logs).forEach(([date,items])=>items.forEach(x=>rows.push([date,x.name,x.qty,x.displayUnit||x.unit,x.kcal,x.protein,x.carbs,x.fat])));const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');download('macro-ledger-history.csv',csv,'text/csv')};
+function historyExportText(){const dates=Object.keys(logs).filter(date=>Array.isArray(logs[date])&&logs[date].length).sort();if(!dates.length)return "MK's Macro Ledger\n\nNo diary entries saved.";return ["MK's Macro Ledger — Food Diary Export",'',...dates.flatMap(date=>{const items=logs[date],t=totals(items);return [date,`${items.length} entries | ${Math.round(t.kcal)} kcal | Protein ${fmt(t.protein)} g | Carbs ${fmt(t.carbs)} g | Fat ${fmt(t.fat)} g`,'',...items.map(x=>`${x.name} — ${fmt(x.qty)} ${x.displayUnit||x.unit} | ${fmt(x.kcal)} kcal | P ${fmt(x.protein)} g | C ${fmt(x.carbs)} g | F ${fmt(x.fat)} g`),'','----------------------------------------','']})].join('\n')}
+$('exportTXT').onclick=()=>download('macro-ledger-history.txt',historyExportText(),'text/plain;charset=utf-8');
+$('exportPDF').onclick=()=>{const content=historyExportText(),printWindow=window.open('','_blank');if(!printWindow){alert('Please allow pop-ups for this site to create the PDF.');return;}const safe=esc(content);printWindow.document.open();printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Macro Ledger — Food Diary</title><style>body{font:12pt/1.5 Arial,sans-serif;color:#111;margin:24mm;white-space:pre-wrap}h1{font-size:18pt}@page{size:auto;margin:18mm}</style></head><body><h1>MK's Macro Ledger</h1><pre>${safe}</pre><script>window.onload=()=>{window.focus();window.print()}</script></body></html>`);printWindow.document.close();};
+$('importJSON').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.foods)||!data.logs||typeof data.logs!=='object'||Array.isArray(data.logs))throw Error('invalid');if(data.foods.some(f=>!f||typeof f.name!=='string'||!Number.isFinite(Number(f.kcal))||!Number.isFinite(Number(f.protein))||!Number.isFinite(Number(f.carbs))||!Number.isFinite(Number(f.fat))))throw Error('invalid');if(data.weightLogs!==undefined&&!Array.isArray(data.weightLogs))throw Error('invalid');if(data.categories!==undefined&&!Array.isArray(data.categories))throw Error('invalid');if(!confirm('Restore this backup? This will replace the current food Library, diary and any settings included in the backup. Before replacing them, the app will download a safety backup of your current data.')){e.target.value='';return;}
+ // Download a complete snapshot of the current browser data before any replacement.
+ exportFullBackup();
+ foods=data.foods;logs=data.logs;if(Array.isArray(data.categories))categories=data.categories;if(Array.isArray(data.weightLogs))weightLogs=data.weightLogs;if(data.weightTarget===null||Number.isFinite(Number(data.weightTarget))&&Number(data.weightTarget)>0)weightTarget=data.weightTarget===null?null:Number(data.weightTarget);if(data.macroTargets&&typeof data.macroTargets==='object'){macroTargets={kcal:validTarget(data.macroTargets.kcal)?Number(data.macroTargets.kcal):null,protein:validTarget(data.macroTargets.protein)?Number(data.macroTargets.protein):null,carbs:validTarget(data.macroTargets.carbs)?Number(data.macroTargets.carbs):null,fat:validTarget(data.macroTargets.fat)?Number(data.macroTargets.fat):null};localStorage.setItem('macroTargets',JSON.stringify(macroTargets));}localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));localStorage.setItem('macroWeightTarget',JSON.stringify(weightTarget));save();renderDiary();renderLibrary();renderWeight();renderHistory();alert('Backup restored. Your previous data was downloaded first as a safety backup.')}catch{alert('That file does not look like a valid Macro Ledger backup. No data was intentionally replaced.')}e.target.value=''};
+
+// Weight diary and progress chart: stored independently from food logs.
+function weightDateValue(value){const d=new Date(String(value)+'T12:00:00');return Number.isNaN(d.getTime())?null:d;}
+function weightAverage(items){return items.length?items.reduce((sum,x)=>sum+Number(x.weight),0)/items.length:null;}
+function renderWeightChart(items){
+ const host=$('weightChart');if(!host)return;
+ const now=weightDateValue(today());
+ let visible=items;
+ if(weightChartRange!=='all'&&now){const cutoff=new Date(now);cutoff.setDate(cutoff.getDate()-Number(weightChartRange));visible=items.filter(x=>{const d=weightDateValue(x.date);return d&&d>=cutoff&&d<=now;});}
+ if(!visible.length){host.innerHTML='<div class="weight-chart-empty">No weigh-ins in this period. Try a longer range or log a new weight.</div>';return;}
+ const W=640,H=250,L=48,R=18,T=18,B=42,plotW=W-L-R,plotH=H-T-B;
+ const vals=visible.map(x=>Number(x.weight)).filter(Number.isFinite);let min=Math.min(...vals),max=Math.max(...vals);
+ if(weightTarget!==null&&Number.isFinite(Number(weightTarget))){min=Math.min(min,Number(weightTarget));max=Math.max(max,Number(weightTarget));}
+ const span=Math.max(1,max-min),pad=Math.max(.5,span*.18);min-=pad;max+=pad;
+ const dates=visible.map(x=>weightDateValue(x.date)).filter(Boolean);let t0=Math.min(...dates.map(d=>d.getTime())),t1=Math.max(...dates.map(d=>d.getTime()));if(t0===t1){t0-=86400000;t1+=86400000;}
+ const x=d=>L+((d.getTime()-t0)/(t1-t0))*plotW, y=v=>T+((max-v)/(max-min))*plotH;
+ const ticks=4;let grid='';for(let i=0;i<=ticks;i++){const v=min+(max-min)*i/ticks,yy=y(v);grid+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="var(--line)" stroke-width="1"/><text x="${L-8}" y="${yy+4}" text-anchor="end" fill="var(--muted)" font-size="11">${v.toFixed(1)}</text>`;}
+ const points=visible.map(item=>({item,date:weightDateValue(item.date)})).filter(p=>p.date).sort((a,b)=>a.date-b.date);
+ const coords=points.map(p=>`${x(p.date)},${y(Number(p.item.weight))}`).join(' ');
+ const line=points.length>1?`<polyline points="${coords}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`:'';
+ const circles=points.map(p=>`<circle cx="${x(p.date)}" cy="${y(Number(p.item.weight))}" r="4.5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2"><title>${p.date.toLocaleDateString()} · ${fmt(Number(p.item.weight))} kg</title></circle>`).join('');
+ const target=weightTarget!==null&&Number.isFinite(Number(weightTarget))?`<line x1="${L}" y1="${y(Number(weightTarget))}" x2="${W-R}" y2="${y(Number(weightTarget))}" stroke="#9da6b0" stroke-width="1.5" stroke-dasharray="6 5"/><text x="${W-R}" y="${y(Number(weightTarget))-6}" text-anchor="end" fill="var(--muted)" font-size="11">Target ${fmt(Number(weightTarget))} kg</text>`:'';
+ const first=points[0].date,last=points[points.length-1].date;
+ const dateLabel=d=>d.toLocaleDateString(undefined,{day:'numeric',month:'short'});
+ host.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Weight trend from ${dateLabel(first)} to ${dateLabel(last)}">${grid}${target}${line}${circles}<text x="${L}" y="${H-12}" fill="var(--muted)" font-size="11">${dateLabel(first)}</text><text x="${W-R}" y="${H-12}" text-anchor="end" fill="var(--muted)" font-size="11">${dateLabel(last)}</text></svg>`;
+}
+function renderWeight(){
+ const host=$('weightEntries');if(!host)return;
+ const sorted=[...weightLogs].sort((a,b)=>String(b.date).localeCompare(String(a.date))||(Number(b.loggedAt)||0)-(Number(a.loggedAt)||0));
+ $('weightCount').textContent=`${sorted.length} ${sorted.length===1?'entry':'entries'}`;
+ const valid=sorted.filter(x=>Number.isFinite(Number(x.weight))&&weightDateValue(x.date));
+ if(!valid.length){host.innerHTML='<div class="muted tiny">No weight entries yet.</div>';}
+ else host.innerHTML=valid.map(item=>{
+  const label=weightDateValue(item.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  return `<div class="daily-history-row"><div><div class="daily-history-date">${esc(label)}</div><div class="daily-history-macros">${fmt(Number(item.weight))} kg</div></div><button class="btn danger smallbtn" type="button" data-delete-weight="${esc(item.id)}">Delete</button></div>`;
+ }).join('');
+ host.querySelectorAll('[data-delete-weight]').forEach(button=>button.onclick=()=>{if(!confirm('Delete this weight entry?'))return;weightLogs=weightLogs.filter(x=>String(x.id)!==button.dataset.deleteWeight);localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));renderWeight();});
+ $('weightLatest').textContent=valid.length?fmt(Number(valid[0].weight))+' kg':'—';
+ const chronological=[...valid].sort((a,b)=>String(a.date).localeCompare(String(b.date))||(Number(a.loggedAt)||0)-(Number(b.loggedAt)||0));
+ if(chronological.length){const delta=Number(valid[0].weight)-Number(chronological[0].weight);$('weightChange').textContent=(delta>0?'+':'')+fmt(delta)+' kg';}else $('weightChange').textContent='—';
+ const todayDate=weightDateValue(today());
+ const recent=(days)=>{const cutoff=new Date(todayDate||new Date());cutoff.setDate(cutoff.getDate()-days);return valid.filter(x=>{const d=weightDateValue(x.date);return d&&d>=cutoff&&d<=todayDate;});};
+ const avg7=weightAverage(recent(7)),avg30=weightAverage(recent(30));
+ $('weightAverage7').textContent=avg7===null?'—':fmt(avg7)+' kg';$('weightAverage30').textContent=avg30===null?'—':fmt(avg30)+' kg';
+ $('weightTargetInput').value=weightTarget===null?'':weightTarget;
+ renderWeightChart([...valid].sort((a,b)=>String(a.date).localeCompare(String(b.date))||(Number(a.loggedAt)||0)-(Number(b.loggedAt)||0)));
+ document.querySelectorAll('[data-weight-range]').forEach(b=>b.classList.toggle('active',b.dataset.weightRange===weightChartRange));
+}
+document.querySelectorAll('[data-weight-range]').forEach(button=>button.addEventListener('click',()=>{weightChartRange=button.dataset.weightRange;renderWeight();}));
+$('saveWeightTarget').onclick=()=>{const raw=$('weightTargetInput').value.trim();if(!raw){$('weightTargetStatus').textContent='Enter a target weight, or use Clear target.';return;}const v=Number(raw);if(!Number.isFinite(v)||v<=0||v>500){$('weightTargetStatus').textContent='Enter a valid target weight in kilograms.';return;}weightTarget=v;localStorage.setItem('macroWeightTarget',JSON.stringify(weightTarget));$('weightTargetStatus').textContent=`Target saved: ${fmt(weightTarget)} kg.`;renderWeight();};
+$('clearWeightTarget').onclick=()=>{weightTarget=null;localStorage.setItem('macroWeightTarget','null');$('weightTargetStatus').textContent='Target cleared.';renderWeight();};
+$('weightForm').onsubmit=e=>{
+ e.preventDefault();const weight=Number($('weightInput').value);
+ if(!Number.isFinite(weight)||weight<=0||weight>500){$('weightStatus').textContent='Enter a valid weight in kilograms.';return;}
+ weightLogs.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),date:today(),loggedAt:Date.now(),weight});
+ localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));$('weightInput').value='';$('weightStatus').textContent=`Saved ${fmt(weight)} kg for ${new Date().toLocaleDateString()}.`;renderWeight();
+};
+
+// Barcode lookup and review flow. Nothing is saved until the user confirms.
+let scannerInstance=null, cameraStream=null, scanFrame=null, zxingLoaded=false;
+const setScannerStatus=(msg)=>{ $('scannerStatus').textContent=msg; };
+function closeBarcodeReview(){ $('barcodeReview').classList.add('hide'); }
+function showBarcodeReview(p,code){
+ const n=p.nutriments||{};
+ const kcal=n['energy-kcal_100g'] ?? (typeof n['energy_100g']==='number'?n['energy_100g']/4.184:null);
+ const protein=n.proteins_100g, carbs=n.carbohydrates_100g, fat=n.fat_100g;
+ if([kcal,protein,carbs,fat].some(v=>v===null||v===undefined||!Number.isFinite(Number(v)))){
+   setScannerStatus('Product found, but its per-100 g nutrition data is incomplete. You can enter the missing values manually in Add a custom food.');
+ }
+ $('scanName').value=p.product_name||p.product_name_en||p.generic_name||'';
+ $('scanBrand').value=p.brands||'';
+ $('scanCode').value=code;
+ $('scanKcal').value=kcal==null?'':Number(kcal).toFixed(1);
+ $('scanProtein').value=protein==null?'':Number(protein).toFixed(1);
+ $('scanCarbs').value=carbs==null?'':Number(carbs).toFixed(1);
+ $('scanFat').value=fat==null?'':Number(fat).toFixed(1);
+ $('scanBasis').value='Per 100 g, as sold'+(p.quantity?' · pack '+p.quantity:'');
+ $('scanCategory').value='Packaged foods';
+ $('barcodeReview').classList.remove('hide');
+}
+async function lookupBarcode(){
+ const code=$('barcodeInput').value.trim().replace(/\s+/g,'');
+ if(!/^\d{8,14}$/.test(code)){setScannerStatus('Enter a valid 8–14 digit barcode.');return;}
+ $('lookupBarcode').disabled=true;setScannerStatus('Looking up barcode…');closeBarcodeReview();
+ try{
+  const url=`https://world.openfoodfacts.org/api/v3/product/${encodeURIComponent(code)}.json?fields=code,product_name,product_name_en,generic_name,brands,quantity,serving_size,nutriments`;
+  const response=await fetch(url,{headers:{'Accept':'application/json'}});
+  if(!response.ok)throw new Error(`Lookup service returned ${response.status}`);
+  const data=await response.json();
+  if(!data.product||data.status===0)throw new Error('No product was found for that barcode.');
+  showBarcodeReview(data.product,code);
+  setScannerStatus('Product retrieved. Check the name and nutrition against the packaging before saving.');
+ }catch(err){setScannerStatus(err.message||'Could not retrieve this product. Check your connection or enter the food manually.');}
+ finally{$('lookupBarcode').disabled=false;}
+}
+$('lookupBarcode').onclick=lookupBarcode;
+$('barcodeInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();lookupBarcode();}});
+$('saveScannedFood').onclick=()=>{
+ const name=$('scanName').value.trim(),vals=['scanKcal','scanProtein','scanCarbs','scanFat'].map(id=>$(id).value);
+ if(!name||vals.some(v=>v===''||!Number.isFinite(Number(v))||Number(v)<0)){alert('Please check the product name and enter all four nutrition values.');return;}
+ const code=$('scanCode').value;
+ if(foods.some(f=>f.barcode===code)){if(!confirm('This barcode is already in your library. Save another copy?'))return;}
+ foods.push({id:newFoodId(),name:titleCase(($('scanBrand').value.trim()?$('scanBrand').value.trim()+' – ':'')+name),barcode:code,baseQty:100,unit:'g',kcal:num(vals[0]),protein:num(vals[1]),carbs:num(vals[2]),fat:num(vals[3]),category:$('scanCategory').value.trim()||'Packaged foods',basis:$('scanBasis').value.trim()||'Per 100 g, as sold'});
+ save();closeBarcodeReview();$('barcodeInput').value='';renderLibrary();setScannerStatus('Product saved to your food library.');
+};
+$('discardScannedFood').onclick=()=>{closeBarcodeReview();setScannerStatus('Product discarded. Nothing was added to your library.');};
+async function stopCameraScanner(){
+ if(scanFrame)cancelAnimationFrame(scanFrame);scanFrame=null;
+ if(scannerInstance){try{await scannerInstance.stop();await scannerInstance.clear();}catch{}scannerInstance=null;}
+ if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}
+ $('scannerOverlay').classList.add('hide');$('stopScanner').disabled=true;$('startScanner').disabled=false;
+}
+$('stopScanner').onclick=stopCameraScanner;
+$('startScanner').onclick=async()=>{
+ if(!navigator.mediaDevices?.getUserMedia){setScannerStatus('Camera access is unavailable in this browser. Enter the barcode manually.');return;}
+ $('startScanner').disabled=true;$('stopScanner').disabled=false;$('scannerOverlay').classList.remove('hide');
+ try{
+  // Native BarcodeDetector where available; use html5-qrcode as a browser fallback.
+  const nativeFormats=('BarcodeDetector'in window)?(await BarcodeDetector.getSupportedFormats()).filter(x=>['ean_13','ean_8','upc_a','upc_e','code_128'].includes(x)):[];
+  if(nativeFormats.length){
+   const detector=new BarcodeDetector({formats:nativeFormats});
+   cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+   const video=document.createElement('video');video.setAttribute('playsinline','');video.muted=true;video.srcObject=cameraStream;$('barcodeCamera').replaceChildren(video);await video.play();
+   setScannerStatus('Camera active. Hold the barcode inside the frame.');
+   const tick=async()=>{if(!cameraStream)return;try{const codes=await detector.detect(video);if(codes.length){$('barcodeInput').value=codes[0].rawValue;await stopCameraScanner();lookupBarcode();return;}}catch{}scanFrame=requestAnimationFrame(tick);};
+   tick();
+  }else{
+   if(!window.Html5Qrcode){
+    await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';script.onload=resolve;script.onerror=()=>reject(new Error('Could not load camera scanning support. Enter the barcode manually.'));document.head.appendChild(script);});
+   }
+   scannerInstance=new Html5Qrcode('barcodeCamera');
+   setScannerStatus('Starting camera…');
+   await scannerInstance.start({facingMode:'environment'},{fps:10,qrbox:{width:260,height:140},formatsToSupport:[Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E,Html5QrcodeSupportedFormats.CODE_128]},async(decoded)=>{$('barcodeInput').value=decoded;await stopCameraScanner();lookupBarcode();},()=>{});
+   setScannerStatus('Camera active. Hold the barcode inside the frame.');
+  }
+ }catch(err){await stopCameraScanner();setScannerStatus(err.message||'Could not start camera. Check camera permission or enter the barcode manually.');}
+};
+
+
+
+function renderMacroTargetProgress(totalsNow){
+ const host=$('macroTargetProgressList');if(!host)return;
+ const configs=[['kcal','Calories',totalsNow.kcal,'kcal'],['protein','Protein',totalsNow.protein,'g'],['carbs','Carbohydrates',totalsNow.carbs,'g'],['fat','Fat',totalsNow.fat,'g']];
+ host.innerHTML=configs.filter(([key])=>validTarget(macroTargets[key])).map(([key,label,current,unit])=>{
+  const target=Number(macroTargets[key]),pct=current/target*100,remaining=target-current;
+  const status=remaining>=0?`${fmt(remaining)} ${unit} remaining`:`${fmt(Math.abs(remaining))} ${unit} over`;
+  return `<div class="target-progress-item"><div class="row between tiny"><span>${label}</span><b>${key==='kcal'?Math.round(current).toLocaleString():fmt(current)} / ${key==='kcal'?Math.round(target).toLocaleString():fmt(target)} ${unit}</b></div><div class="progress"><i style="width:${Math.min(100,Math.max(0,pct))}%"></i></div><div class="tiny target-progress-status">${Math.round(pct)}% · ${status}</div></div>`;
+ }).join('')||'<div class="tiny muted">Set one or more targets below to see daily progress.</div>';
+}
+function syncMacroTargetInputs(){
+ for(const key of ['kcal','protein','carbs','fat']){const el=$('target'+key.charAt(0).toUpperCase()+key.slice(1));if(el)el.value=macroTargets[key]??'';}
+}
+$('saveMacroTargets').onclick=()=>{
+ const next={};
+ for(const key of ['kcal','protein','carbs','fat']){
+  const raw=$('target'+key.charAt(0).toUpperCase()+key.slice(1)).value.trim();
+  if(!raw){next[key]=null;continue;}
+  const value=Number(raw),max=key==='kcal'?20000:2000;
+  if(!Number.isFinite(value)||value<=0||value>max){$('macroTargetStatus').textContent=`Enter a valid ${key==='kcal'?'calorie':key} target, or leave it blank.`;return;}
+  next[key]=value;
+ }
+ if(!Object.values(next).some(validTarget)){$('macroTargetStatus').textContent='Set at least one target before saving.';return;}
+ macroTargets=next;localStorage.setItem('macroTargets',JSON.stringify(macroTargets));$('macroTargetStatus').textContent='Daily targets saved.';renderDiary();
+};
+$('resetMacroTargets').onclick=()=>{
+ macroTargets={kcal:2100,protein:200,carbs:null,fat:null};localStorage.setItem('macroTargets',JSON.stringify(macroTargets));syncMacroTargetInputs();$('macroTargetStatus').textContent='Default targets restored: 2,100 kcal and 200 g protein.';renderDiary();
+};
+syncMacroTargetInputs();
+
+renderDiary();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();

@@ -1,95 +1,385 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#000000"><meta name="description" content="A simple garden planting and growth tracker.">
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14171b">
+<meta name="description" content="Personal food library and daily macro tracker.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<title>Garden Ledger</title>
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>MK's Macro Ledger</title>
 <style>
-:root{--bg:#000000;--panel:#000000;--ink:#ffffff;--muted:#ffffff;--line:#278b45;--header:#000000;--accent:#278b45;--accent-ink:#ffffff;--surface2:#000000;--surface3:#000000;--input:#000000;--shadow:none}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Manrope",system-ui,sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
-header{background:var(--header);color:var(--ink);padding:20px 18px 17px;position:sticky;top:0;z-index:5;border-bottom:1px solid #1d291f}header .top{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:22px;margin:0;font-weight:800;letter-spacing:-.5px}.sub{color:var(--muted);font-size:12px;margin-top:3px}
-main{max-width:760px;margin:auto;padding:15px;display:grid;gap:14px}.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;position:sticky;top:83px;z-index:6;background:var(--header);padding:8px 0}.tab{border:1px solid var(--line);background:var(--surface2);color:var(--muted);border-radius:11px;padding:10px 8px;font-weight:700;white-space:nowrap;cursor:pointer}.tab.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}h2{font-size:17px;margin:0 0 12px;letter-spacing:-.2px}h3{font-size:14px;margin:0}.muted,.tiny{color:var(--muted)}.tiny{font-size:12px}
-input,select,textarea{width:100%;min-width:0;border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:var(--input);color:var(--ink);font:inherit}label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin:0 0 5px}.field{min-width:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.btn{border:0;border-radius:11px;padding:11px 14px;background:var(--accent);color:var(--accent-ink);font:700 14px "Manrope",sans-serif;cursor:pointer}.btn.secondary,.btn.ghost{background:var(--accent);color:#ffffff;border:1px solid var(--accent)}.btn.danger{background:var(--accent);color:#ffffff;border:1px solid var(--accent)}.btn:disabled{opacity:.4}.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar>*{flex:1}.section{display:grid;gap:11px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.stat{background:var(--surface2);border-radius:13px;padding:12px}.stat .v{font-size:25px;font-weight:800;letter-spacing:-.7px;font-variant-numeric:tabular-nums}.stat .l{font-size:11px;color:var(--muted)}.hide{display:none!important}.pill{font-size:11px;color:var(--muted);background:var(--surface2);padding:4px 8px;border-radius:99px;display:inline-block}.plant-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}.plant-row:last-child{border:0}.plant-name{font-weight:800}.plant-meta{font-size:12px;color:var(--muted)}.status{font-size:11px;font-weight:700;padding:4px 8px;border-radius:99px;background:#000000;color:#ffffff;border:1px solid var(--line);white-space:nowrap}.status.pending,.status.overdue{background:#000000;color:#ffffff;border:1px solid var(--line)}.progress{height:7px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-top:8px}.progress i{height:100%;display:block;background:var(--accent);border-radius:99px}.notice{padding:11px 12px;background:var(--surface2);border:1px solid var(--line);border-radius:11px;font-size:12px}.empty{padding:18px;text-align:center;color:var(--muted);font-size:13px}.event{padding:11px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:75px 1fr;gap:10px}.event:last-child{border:0}.event-date{font-size:12px;color:var(--accent);font-weight:800}.footer{text-align:center;font-size:11px;color:var(--muted);padding:5px 10px 18px}dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;max-width:min(92vw,480px)}dialog::backdrop{background:#000a}.toast{position:fixed;right:14px;bottom:14px;background:#000000;border:1px solid var(--accent);color:#ffffff;padding:10px 14px;border-radius:11px;z-index:20;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1}
-.recommend-card{padding:10px 0;border-bottom:1px solid var(--line)}.recommend-card:last-child{border:0}.detail-dialog{width:min(94vw,620px);max-width:620px;max-height:88vh;overflow:auto}.detail-dialog form{min-width:0!important}.timeline{border-left:2px solid var(--line);margin:8px 0 8px 7px;padding-left:17px;display:grid;gap:13px}.timeline-item{position:relative}.timeline-item:before{content:"";position:absolute;left:-23px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--panel)}.timeline-item.pending:before{background:var(--surface3);border-color:var(--muted)}.photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.photo-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.observation{padding:10px;background:var(--surface2);border-radius:10px}.detail-actions{display:flex;gap:8px;flex-wrap:wrap}.detail-actions>*{flex:1}.library-actions{display:grid;gap:6px;justify-items:stretch}.library-actions .btn{font-size:11px;padding:7px 9px}.guide-dialog{width:min(94vw,540px);max-width:540px;max-height:88vh;overflow:auto}.guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px}.guide-grid b{font-size:13px}.guide-section{padding:10px 0;border-bottom:1px solid var(--line)}.guide-section p{margin:5px 0 0;font-size:13px;color:#fff}
-@media(max-width:520px){main{padding:12px}.tabs{grid-template-columns:repeat(2,minmax(0,1fr));top:82px}.tab{white-space:normal;min-height:42px}.stats{gap:6px}.stat{padding:10px}.stat .v{font-size:21px}.grid{gap:8px}}
-dialog{background:#000000;border-color:var(--accent)}
-.card{background:#000000;border-color:var(--accent)}
-input,select,textarea{background:#000000;color:#ffffff;border-color:var(--accent)}
-.tab{background:#000000;color:#ffffff;border-color:var(--accent)}
-.tab.active{background:var(--accent);color:#ffffff;border-color:var(--accent)}
-.stat,.notice,.observation{background:#000000;border-color:var(--accent);color:#ffffff}
-.pill{background:#000000;color:#ffffff;border:1px solid var(--accent)}
-.progress{background:#000000;border:1px solid var(--accent)}
-.footer,.sub,.tiny,.muted,label{color:#ffffff}
+:root{--bg:#181b1f;--panel:#22272d;--ink:#e7e9ec;--muted:#a2aab4;--line:#39414a;--green:#d8dde3;--green2:#343b43;--red:#e1a0a0;--shadow:0 5px 20px #00000024}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{background:var(--header);color:var(--ink);padding:20px 18px 17px;position:sticky;top:0;z-index:5}header .top{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:22px;margin:0;font-weight:750;letter-spacing:-.5px;cursor:pointer}h1:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:3px}.sub{color:#d0d0d0;font-size:12px;margin-top:3px}
+main{max-width:760px;margin:auto;padding:15px;display:grid;gap:14px}.tabs{display:flex;gap:7px;overflow:auto;padding:8px 0;position:sticky;top:86px;z-index:6;background:var(--header);}.tab{border:1px solid var(--line);background:#252b32;color:var(--muted);border-radius:999px;padding:9px 14px;font-weight:650;white-space:nowrap}.tab.active{background:#d8dde3;border-color:#d8dde3;color:#171a1e}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}h2{font-size:17px;margin:0 0 12px;letter-spacing:-.2px}.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted)}
+input,select{width:100%;min-width:0;border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:#2a3037;color:var(--ink);font:inherit}label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin:0 0 5px}.field{min-width:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.btn{border:0;border-radius:11px;padding:11px 14px;background:var(--green);color:#171a1e;font:700 14px inherit;cursor:pointer}.btn.secondary{background:var(--green2);color:var(--ink)}.btn.ghost{background:#2b3138;color:var(--ink);border:1px solid var(--line)}.btn.danger{background:#392c30;color:#efb7bd}.btn:disabled{opacity:.4}.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.foodrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.foodrow:last-child{border:0}.qtyadd{display:flex;align-items:center;gap:5px}.qtyadd input{width:82px;padding:7px}.qtyadd select{width:auto;max-width:145px;padding:7px 24px 7px 8px;font-size:12px;flex:0 1 auto}.qtyadd span{font-size:12px;color:var(--muted)}.foodrow .info{flex:1;min-width:0}.food-actions{justify-content:flex-end;flex-wrap:wrap}.food-actions>*{flex:0 0 auto}dialog::backdrop{background:#0008}dialog input{margin-bottom:2px}.foodrow strong{display:block;font-size:14px}.pill{font-size:11px;color:var(--muted);background:#303740;padding:3px 7px;border-radius:99px;display:inline-block}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{background:#2b3138;border-radius:13px;padding:12px}.stat .v{font-size:24px;font-weight:800;letter-spacing:-.7px;font-variant-numeric:tabular-nums}.stat .l{font-size:12px;color:var(--muted)}.progress{height:8px;background:#3a424b;border-radius:99px;overflow:hidden}.progress>i{height:100%;display:block;background:#c6cdd5;border-radius:99px}.hide{display:none!important}.entry{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}.entry:last-child{border:0}.entry button{padding:6px 9px}.notice{padding:11px 12px;background:#2b3239;border:1px solid var(--line);color:var(--ink);border-radius:11px;font-size:12px}.ok{color:#c5dfce}.dangertext{color:#e1a0a0}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar>*{flex:1}.section{display:grid;gap:11px}.amountline{display:grid;grid-template-columns:1fr 100px;gap:9px;align-items:end}.result{background:#2b3138;border-radius:12px;padding:12px}.result strong{font-size:20px}.searchbar{position:sticky;top:0;background:var(--panel);padding:0 0 8px;z-index:2}.smallbtn{font-size:12px;padding:7px 10px}.footer{text-align:center;font-size:11px;color:var(--muted);padding:5px 10px 18px}
+@media(max-width:520px){.foodrow{align-items:flex-start;flex-wrap:wrap}.food-actions{width:100%;justify-content:flex-start}.food-actions .smallbtn{padding:7px 9px}}@media(max-width:380px){.grid4{grid-template-columns:repeat(2,1fr)}.stat .v{font-size:21px}}
+dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px}dialog::backdrop{background:#000a}input::placeholder{color:#89929d}select option{background:#2a3037;color:var(--ink)}
+.daily-add-food{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:44px;padding:10px 14px;border:1px solid var(--accent);border-radius:12px;background:var(--accent);color:var(--accent-ink);font:700 14px/1.2 "Manrope",system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px #0003}.daily-add-food span{font-size:19px;line-height:1}.daily-add-food:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+.library-tools{justify-content:space-between;align-items:center;flex-wrap:wrap;margin:10px 0}
+.library-select-all{padding:8px 2px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.library-select-all label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.food-library-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+.food-library-row .foodrow{border:0;margin:0;min-width:0}
+.food-select{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+#deleteSelectedFoods:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:430px){.food-library-row{grid-template-columns:24px minmax(0,1fr);gap:5px}.food-library-row .foodrow{gap:6px}.food-library-row .food-actions{gap:4px}}
+
+
+/* Mobile layout refinements: consistent food controls and a complete navigation grid */
+@media(max-width:600px){
+  .tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible;padding:8px 0;border:0;box-shadow:none;background:#050505}
+  .tab{width:100%;min-width:0;min-height:44px;padding:10px 8px;text-align:center;white-space:normal;line-height:1.2;border-radius:12px}
+  .foodrow{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:9px}
+  #quickResults .foodrow{grid-template-columns:minmax(0,1fr);gap:9px;padding:13px 0}
+  #quickResults .foodrow .info{width:100%;min-width:0}
+  #quickResults .foodrow .food-actions{display:block;width:100%;margin:0}
+  #quickResults .qtyadd{display:grid;grid-template-columns:minmax(0,1fr) 48px 76px;align-items:center;gap:8px;width:100%}
+  #quickResults .qtyadd input{width:100%;min-width:0;min-height:42px}
+  #quickResults .qtyadd span{text-align:left;white-space:nowrap}
+  #quickResults .qtyadd button{width:76px;min-height:42px;padding:8px 10px;justify-self:stretch}
+}
+@media(min-width:601px){.tabs{flex-wrap:wrap;overflow:visible}.tab{flex:1 1 auto;text-align:center}}
+/* Camera scanner: centered overlay with a compact viewport */
+.scanner-overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.78);}
+.scanner-panel{width:min(90vw,460px);max-height:85vh;overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 16px 48px #0009;display:grid;gap:12px;text-align:center}
+#barcodeCamera{width:min(80vw,400px)!important;height:min(50vh,320px);max-height:50vh;margin:0 auto!important;overflow:hidden;border-radius:12px;background:#080808;display:grid;place-items:center}
+#barcodeCamera video,#barcodeCamera canvas{width:100%!important;height:100%!important;max-height:50vh!important;object-fit:contain!important}
+.scanner-panel .toolbar{justify-content:center}
+.scanner-panel .toolbar button{flex:0 1 160px}
+@media(max-width:520px){.scanner-panel{width:92vw;padding:14px}#barcodeCamera{width:80vw!important;height:min(42vh,280px)}}
+
+
+
+/* Long-press drag sorting for touch and pointer devices */
+.drag-handle{display:flex;align-items:center;justify-content:center;width:30px;min-width:30px;height:34px;padding:0;border:1px solid var(--line);border-radius:9px;background:var(--surface3);color:var(--muted);font-size:21px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.drag-handle:active,.drag-handle.is-grabbing{cursor:grabbing;color:var(--ink);border-color:var(--accent)}
+.is-dragging{opacity:.48;outline:1px dashed var(--accent);outline-offset:2px}
+.entry{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.entry-drag-area{min-width:0;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.entry-drag-area.is-grabbing{cursor:grabbing}
+.library-item{grid-template-columns:30px 18px minmax(0,1fr);align-items:start}
+.library-drag-placeholder{width:30px;height:30px;display:block}
+.library-item>.food-select{margin:7px 0 0;width:18px;height:18px}
+@media(max-width:430px){.library-item{grid-template-columns:26px 18px minmax(0,1fr);gap:7px}.drag-handle{width:26px;min-width:26px;height:32px}}
+
+
+.weight-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.weight-stats .stat .v{font-size:22px}
+.weight-chart-heading{align-items:center;flex-wrap:wrap;margin-top:3px}.weight-ranges{display:flex;gap:5px}.weight-ranges .btn{padding:6px 9px;font-size:11px}.weight-ranges .btn.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.weight-chart{width:100%;min-height:190px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:8px}.weight-chart svg{display:block;width:100%;height:auto;overflow:visible}.weight-chart-empty{padding:30px 8px;text-align:center;color:var(--muted);font-size:12px}
+.weight-target-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:end}.weight-target-row .btn{min-height:42px;padding:8px 10px}.weight-target-row input{min-height:42px}
+@media(max-width:420px){.weight-target-row{grid-template-columns:minmax(0,1fr) auto}.weight-target-row .field{grid-column:1/-1}.weight-chart{padding:5px}.weight-ranges .btn{padding:6px 7px}}
+
+.target-progress-list{display:grid;gap:10px;padding:2px 0}
+.target-progress-item{display:grid;gap:5px}
+.target-progress-item .progress{height:7px}
+.target-progress-item .progress>i{background:var(--accent)}
+.target-progress-status{text-align:right;font-size:11px}
+.target-settings{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--surface2)}
+.target-settings summary{font-size:13px;font-weight:750;cursor:pointer;list-style:none}
+.target-settings summary::-webkit-details-marker{display:none}
+.target-settings summary:after{content:'＋';float:right;color:var(--muted)}
+.target-settings[open] summary:after{content:'−'}
+.target-input-grid{margin:10px 0}
+.target-input-grid input{min-height:42px}
+.weekly-reports{display:grid;gap:10px}.weekly-report{border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:12px;display:grid;gap:8px}.weekly-report-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.weekly-report-title{font-weight:750;font-size:13px}.weekly-report-days{font-size:11px;color:var(--muted)}.weekly-report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.weekly-report-stat{background:var(--surface3);border-radius:9px;padding:8px}.weekly-report-stat b{display:block;font-size:15px;font-variant-numeric:tabular-nums}.weekly-report-stat span{font-size:10px;color:var(--muted)}.weekly-report-foot{font-size:11px;color:var(--muted)}.backup-status{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:12px;color:var(--muted);margin:10px 0}.backup-status.needs-backup{border-color:#9b713e;color:var(--ink)}
+
+/* Library card refinement: compact, predictable card structure based on the approved first mock-up. */
+#foodList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}
+.library-item{display:flex;flex-direction:column;min-width:0;height:100%;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--surface2);gap:8px}
+.library-card-top{display:flex;align-items:center;justify-content:flex-start;gap:8px;min-height:22px}
+.library-card-top .food-select{width:18px;height:18px;margin:0;flex:0 0 18px}
+.library-card-top .drag-handle{width:25px;min-width:25px;height:26px;font-size:18px}
+.library-item-main{display:grid;grid-template-rows:auto auto auto;gap:9px;min-width:0;flex:1}
+.library-item-info{min-width:0}
+.library-item-info strong{display:block;font-size:15px;line-height:1.3;font-weight:750;overflow-wrap:anywhere}
+.library-item-meta{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.45;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.library-quantity-row .qtyadd{display:grid;grid-template-columns:minmax(48px,76px) minmax(0,1fr) 72px;gap:7px;align-items:center;width:100%}
+.library-quantity-row .qtyadd input{width:100%;min-width:0;min-height:40px;padding:7px 8px}
+.library-quantity-row .qtyadd select{width:100%;min-width:0;max-width:none;min-height:40px;padding:7px 22px 7px 8px;font-size:12px}
+.library-quantity-row .qtyadd span{font-size:12px;color:var(--muted);white-space:normal;overflow-wrap:anywhere}
+.library-quantity-row .qtyadd .library-add{min-height:40px;width:100%;padding:8px 10px;background:var(--accent)!important;border:1px solid var(--accent)!important;color:var(--accent-ink)!important}
+.library-manage-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.library-manage-row button{width:100%;min-height:38px}
+.library-manage-row [data-deletefood]{background:#c9362e!important;border:1px solid #e34b42!important;color:#fff!important}
+.library-item.is-dragging{opacity:.5}
+@media(max-width:600px){#foodList{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:380px){.library-item{padding:11px}.library-quantity-row .qtyadd{grid-template-columns:minmax(48px,68px) minmax(0,1fr) 68px;gap:6px}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{font-size:12px;padding-left:6px;padding-right:6px}}
 </style>
+
 <style>
-.plant-library-main{display:flex;align-items:center;gap:13px;min-width:0}
-.plant-art{width:84px;height:84px;flex:0 0 84px;border-radius:12px;background-image:url('./plant-guide-sprite.jpg');background-size:500% 300%;background-repeat:no-repeat;border:1px solid #286b43;background-color:#080a08}
-.guide-art{width:100%;height:190px;max-width:100%;background-size:500% 300%;background-color:#080a08;margin-bottom:14px}
-.stage-photos{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
-.stage-photos figure{margin:0;width:108px}
-.stage-photos img{width:108px;height:82px;object-fit:cover;border-radius:8px;border:1px solid #286b43;display:block}
-.stage-photos figcaption{font-size:10px;color:#aaa;margin-top:3px}
-.photo-stage-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}
-.photo-stage-row select{max-width:220px}
-@media(max-width:520px){.plant-art{width:66px;height:66px;flex-basis:66px}.guide-art{height:165px}}
+/* v59: button-only styling refinements requested by the user. */
+/* Daily Log: make Remove clearly destructive without changing its size or position. */
+#diaryEntries [data-remove]{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important}
+/* Library: Add matches the orange primary Add food action. */
+#foodList [data-addfood]{background:#ff7a24!important;border:1px solid #ff7a24!important;color:#17100b!important}
+/* Library: Delete uses the same treatment as Daily Log Remove. */
+#foodList [data-deletefood],#deleteSelectedFoods{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important}
 </style>
 </head>
 <body>
-<header><div class="top"><div><h1>Garden Ledger</h1><div class="sub">Your garden, written down.</div></div><span class="pill" id="seasonLabel">Season</span></div></header>
+<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to Daily log">MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div></div></header>
 <main>
-<nav class="tabs" aria-label="Main navigation">
-<button class="tab active" data-tab="garden">Garden</button><button class="tab" data-tab="plants">Plant library</button><button class="tab" data-tab="calendar">Calendar</button><button class="tab" data-tab="history">History</button><button class="tab" data-tab="settings">Settings</button>
-</nav>
-<section id="garden" class="section">
-<div class="card section">
-<div class="row between"><h2 style="margin:0">Garden overview</h2><span class="tiny" id="todayLabel"></span></div>
-<div class="stats"><div class="stat"><div class="v" id="plantCount">0</div><div class="l">Active plantings</div></div><div class="stat"><div class="v" id="sproutCount">0</div><div class="l">Sprouting soon</div></div><div class="stat"><div class="v" id="harvestCount">0</div><div class="l">Harvests soon</div></div></div>
-<div class="row between"><h2 style="margin:3px 0 0">Your plantings</h2><button class="btn small" id="addPlantTop">＋ Add planting</button></div>
-<div id="plantingList"></div>
+<div class="tabs">
+<button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Scanner</button><button class="tab" data-tab="weight">Weight</button>
 </div>
-<div class="card section"><h2>Coming up</h2><div id="upcomingList"></div></div>
+<section id="diary" class="section">
+<div class="card section">
+<div class="row between"><h2 style="margin:0">Daily total</h2><div class="row"><button class="btn ghost smallbtn" id="clearDay">Clear day</button><input id="logDate" type="date" style="width:auto;max-width:155px"></div></div>
+<div class="stats">
+<div class="stat"><div class="l">Calories</div><div class="v" id="totalKcal">0</div><div class="tiny">kcal</div></div>
+<div class="stat"><div class="l">Protein</div><div class="v" id="totalProtein">0 g</div><div class="tiny">Daily total</div></div>
+<div class="stat"><div class="l">Carbohydrates</div><div class="v" id="totalCarbs">0 g</div><div class="tiny">Daily total</div></div>
+<div class="stat"><div class="l">Fat</div><div class="v" id="totalFat">0 g</div><div class="tiny">Daily total</div></div>
+</div>
+
+<div class="target-progress-list" id="macroTargetProgressList"></div>
+<button class="daily-add-food" id="dailyAddFood" type="button"><span aria-hidden="true">＋</span> Add food</button>
+<div id="diaryEntries" class="section" style="margin-top:2px"><div class="muted tiny">No foods logged yet.</div></div>
+<div class="grid4 tiny"><div>Calories from macros<br><b id="macroCalories">0 kcal</b></div><div>Difference<br><b id="difference">0 kcal</b></div><div>Entries<br><b id="entryCount">0</b></div><div>Daily targets<br><b>Customisable</b></div></div>
+<div id="discrepancy" class="notice hide"></div>
+<details class="target-settings"><summary>Daily targets</summary><p class="tiny muted" style="margin:0">Set the daily goals you want to track. Leave a field blank to turn off that target.</p>
+<div class="grid target-input-grid">
+<div class="field"><label for="targetKcal">Calories (kcal)</label><input id="targetKcal" type="number" min="1" max="20000" step="1" inputmode="numeric"></div>
+<div class="field"><label for="targetProtein">Protein (g)</label><input id="targetProtein" type="number" min="0.1" max="2000" step="0.1" inputmode="decimal"></div>
+<div class="field"><label for="targetCarbs">Carbohydrates (g)</label><input id="targetCarbs" type="number" min="0.1" max="2000" step="0.1" inputmode="decimal"></div>
+<div class="field"><label for="targetFat">Fat (g)</label><input id="targetFat" type="number" min="0.1" max="2000" step="0.1" inputmode="decimal"></div>
+</div><div class="toolbar"><button class="btn" id="saveMacroTargets" type="button">Save targets</button><button class="btn ghost" id="resetMacroTargets" type="button">Restore defaults</button></div><div class="tiny" id="macroTargetStatus" aria-live="polite"></div>
+</details>
+</div>
+<div class="card section" id="dailyHistoryCard">
+<h2>History</h2>
+<p class="muted tiny" style="margin:0 0 10px">Daily macro totals from your previous logged days.</p>
+<div id="dailyHistoryList" class="daily-history-list"><div class="muted tiny">No previous days logged yet.</div></div>
+<div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="openHistory" type="button">Export</button></div>
+</div>
 </section>
-<section id="plants" class="section hide">
-<div class="card section"><div class="row between"><h2 style="margin:0">Plant library</h2><span class="pill" id="speciesCount"></span></div>
-<input id="plantSearch" placeholder="Search plants and growing conditions…">
-<div id="speciesList"></div></div>
-<div class="card section"><h2>Add a custom plant</h2>
-<div class="field"><label for="customPlantName">Plant name</label><input id="customPlantName" placeholder="e.g. Purple basil"></div>
-<div class="grid"><div class="field"><label for="customMin">Germination min (days)</label><input id="customMin" type="number" min="1" value="5"></div><div class="field"><label for="customMax">Germination max (days)</label><input id="customMax" type="number" min="1" value="10"></div></div>
-<div class="grid"><div class="field"><label for="customHarvestMin">Harvest min (days)</label><input id="customHarvestMin" type="number" min="1" value="60"></div><div class="field"><label for="customHarvestMax">Harvest max (days)</label><input id="customHarvestMax" type="number" min="1" value="90"></div></div>
-<button class="btn" id="saveCustomPlant">Save custom plant</button></div>
+<section id="scanner" class="section hide">
+<div class="card section">
+<h2>Scan a packaged food</h2>
+<p class="muted" style="margin:0">Scan a barcode or enter its number. We'll look up the product, then show you the details to check before saving it.</p>
+<div class="grid">
+<div class="field"><label>Barcode number</label><input id="barcodeInput" inputmode="numeric" autocomplete="off" placeholder="Scan or type barcode"></div>
+<div class="field" style="align-self:end"><button class="btn" id="lookupBarcode" type="button">Look up product</button></div>
+</div>
+<div class="toolbar"><button class="btn secondary" id="startScanner" type="button">Use camera scanner</button></div>
+<div id="scannerStatus" class="tiny" aria-live="polite"></div>
+<div id="scannerOverlay" class="scanner-overlay hide" role="dialog" aria-modal="true" aria-label="Barcode camera scanner"><div class="scanner-panel"><h3 style="margin:0">Scan barcode</h3><div id="barcodeCamera"></div><div class="tiny">Hold the barcode inside the camera frame.</div><div class="toolbar"><button class="btn ghost" id="stopScanner" type="button" disabled>Close camera</button></div></div></div>
+<div id="barcodeReview" class="hide section" style="border:1px solid var(--line);border-radius:12px;padding:12px">
+<h3 style="margin:0">Review product before saving</h3>
+<div class="field"><label>Product</label><input id="scanName"></div>
+<div class="field"><label>Brand</label><input id="scanBrand"></div>
+<div class="field"><label>Barcode</label><input id="scanCode" readonly></div>
+<div class="tiny">Nutrition per 100 g, as listed in the product database. Check against the packaging before saving.</div>
+<div class="grid4">
+<div class="field"><label>kcal</label><input id="scanKcal" type="number" min="0" step="any"></div>
+<div class="field"><label>Protein g</label><input id="scanProtein" type="number" min="0" step="any"></div>
+<div class="field"><label>Carbs g</label><input id="scanCarbs" type="number" min="0" step="any"></div>
+<div class="field"><label>Fat g</label><input id="scanFat" type="number" min="0" step="any"></div>
+</div>
+<div class="field"><label>Weight basis / notes</label><input id="scanBasis" placeholder="e.g. as sold, drained, dry"></div>
+<div class="field"><label>Category</label><input id="scanCategory" list="categoryOptions" value="Packaged foods"></div>
+<div class="toolbar"><button class="btn" id="saveScannedFood" type="button">Save to food library</button><button class="btn ghost" id="discardScannedFood" type="button">Discard</button></div>
+<div class="tiny">Source: Open Food Facts. Product data is community-contributed and may be incomplete or incorrect.</div>
+</div>
+</div>
 </section>
-<section id="calendar" class="section hide"><div class="card section"><h2>Growth calendar</h2><p class="tiny" style="margin:0">Predicted milestones calculated from each planting date and the plant's typical growing ranges.</p><div id="calendarList"></div></div></section>
-<section id="history" class="section hide"><div class="card section"><h2>Planting history</h2><div id="historyList"></div></div></section>
-<section id="settings" class="section hide">
-<div class="card section"><h2>Garden settings</h2>
-<div class="field"><label for="gardenName">Garden name</label><input id="gardenName" placeholder="My Garden"></div>
-<div class="field"><label for="locationPreset">Your location</label><select id="locationPreset"><option value="melbourne">Melbourne, Victoria, Australia</option><option value="sydney">Sydney, NSW, Australia</option><option value="brisbane">Brisbane, Queensland, Australia</option><option value="perth">Perth, WA, Australia</option><option value="adelaide">Adelaide, SA, Australia</option><option value="hobart">Hobart, Tasmania, Australia</option><option value="darwin">Darwin, NT, Australia</option><option value="canberra">Canberra, ACT, Australia</option><option value="auckland">Auckland, New Zealand</option><option value="london">London, UK</option><option value="newyork">New York, USA</option><option value="losangeles">Los Angeles, USA</option><option value="other-north">Other location – Northern Hemisphere</option><option value="other-south">Other location – Southern Hemisphere</option></select></div>
-<div class="field"><label for="locationDetail">Suburb / region (optional)</label><input id="locationDetail" placeholder="e.g. Fitzroy, Victoria"></div>
-<div class="notice" id="seasonInfo">Season is calculated automatically from your location and today's date.</div>
-<div class="field"><label for="environment">Growing environment</label><select id="environment"><option value="mixed">Combination of garden beds, pots and indoors</option><option value="outdoor">Outdoor garden / beds</option><option value="pots">Pots and containers</option><option value="indoor">Indoor growing</option><option value="greenhouse">Greenhouse</option></select></div>
-<div class="field"><label for="microclimate">Local conditions</label><select id="microclimate"><option value="default">Use regional defaults</option><option value="frost">Regular frost exposure</option><option value="sheltered">Sheltered, relatively warm garden</option><option value="hot">Hot, exposed garden</option></select></div>
-<div class="toolbar"><button class="btn" id="saveSettings">Save settings</button><button class="btn secondary" id="weatherButton">Check local weather</button></div>
-<div id="weatherResult" class="notice">Weather is optional. Connect to the internet to retrieve a current forecast for your selected location.</div></div>
-<div class="card section"><div class="row between"><h2 style="margin:0">What to plant now</h2><span class="pill" id="recommendSeason"></span></div><p class="tiny" style="margin:0">Seasonal suggestions based on your selected region and the current date. Local conditions can shift planting windows.</p><div id="recommendations"></div></div>
-<div class="card section"><h2>Data & backup</h2><p class="tiny" style="margin:0">Your garden records are stored on this device. Export a backup regularly, especially before changing browsers or devices.</p><div class="toolbar"><button class="btn" id="exportData">Export backup</button><button class="btn secondary" id="importButton">Import backup</button><input id="importFile" type="file" accept="application/json" class="hide"></div><div id="backupStatus" class="tiny" aria-live="polite"></div></div>
-<div class="card section"><h2>About Garden Ledger</h2><p class="tiny" style="margin:0">A simple planting diary with estimated germination and harvest windows. Predictions are guides, not guarantees. Actual results depend on variety, temperature, moisture, planting depth and growing conditions.</p><button class="btn danger" id="clearAll">Delete all garden data</button></div>
+<section id="library" class="section hide">
+<div class="card section">
+<div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
+<input id="librarySearch" placeholder="Search foods...">
+<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px"><select id="categoryFilter"><option value="All">All categories</option></select><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="recent">Recently used</option><option value="custom">Custom order (drag to arrange)</option></select></div>
+<p class="tiny muted" style="margin:-4px 0 2px">Choose Custom order to arrange foods by holding the handle and dragging.</p>
+<div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button><button class="btn danger smallbtn" id="deleteSelectedFoods" type="button" disabled>Delete selected (0)</button></div>
+<div class="row between library-select-all"><span class="tiny muted" id="selectedFoodCount">0 selected</span></div>
+<div id="foodList"></div>
+</div>
+
+
+
+<div class="card section">
+<h2>Add a custom food</h2>
+<div class="field"><label>Food name</label><input id="customName" placeholder="e.g. Greek yoghurt, 170 g"></div>
+<div class="grid">
+<div class="field"><label>Base serving quantity</label><input id="customQty" type="number" min="0.01" step="any" value="1"></div>
+<div class="field"><label>Unit</label><input id="customUnit" value="serve" placeholder="g, mL, serve"></div>
+</div>
+<div class="grid4">
+<div class="field"><label>kcal</label><input id="customKcal" type="number" min="0" step="any"></div>
+<div class="field"><label>Protein g</label><input id="customProtein" type="number" min="0" step="any"></div>
+<div class="field"><label>Carbs g</label><input id="customCarbs" type="number" min="0" step="any"></div>
+<div class="field"><label>Fat g</label><input id="customFat" type="number" min="0" step="any"></div>
+</div>
+<div class="field"><label>Weight basis (optional)</label><input id="customBasis" placeholder="e.g. raw, cooked, dry, drained"></div><div class="field"><label>Category</label><input id="customCategory" list="categoryOptions" value="Custom" placeholder="e.g. Dairy & protein"><datalist id="categoryOptions"></datalist></div><button class="btn" id="saveCustom">Save custom food</button>
+</div>
 </section>
-<div class="footer">Garden Ledger · Planting and growth tracker</div>
-</main><div class="toast" id="toast" role="status" aria-live="polite"></div>
-<dialog id="plantDialog"><form method="dialog" id="plantForm" class="section" style="padding:4px;min-width:min(78vw,390px)">
-<div class="row between"><h2 style="margin:0">Add a planting</h2><button class="btn ghost" value="cancel" aria-label="Close">✕</button></div>
-<div class="field"><label for="plantSpecies">Plant</label><select id="plantSpecies" required></select></div>
-<div class="field"><label for="variety">Variety (optional)</label><input id="variety" placeholder="e.g. Roma, Cherry, Genovese"><div class="tiny">Different varieties can have different growing times. Use the seed packet or plant label for the most accurate estimate.</div></div>
-<div class="grid"><div class="field"><label for="plantedDate">Date planted</label><input id="plantedDate" type="date" required></div><div class="field"><label for="quantity">Quantity</label><input id="quantity" type="number" min="1" value="1"></div></div>
-<div class="grid"><div class="field"><label for="plantMethod">Growing method</label><select id="plantMethod"><option>Direct sow</option><option>Seed tray</option><option>Seedling transplant</option><option>Pot</option><option>Other</option></select></div><div class="field"><label for="plantLocation">Location</label><input id="plantLocation" placeholder="Bed 1, balcony…"></div></div>
-<div class="field"><label for="plantNotes">Notes (optional)</label><textarea id="plantNotes" rows="2" placeholder="Soil, conditions, anything to remember…"></textarea></div>
-<div class="toolbar"><button class="btn" id="savePlant" value="default">Save planting</button></div></form></dialog>
-<dialog id="guideDialog" class="guide-dialog"><div class="section" style="padding:4px"><div class="row between"><h2 id="guideTitle" style="margin:0">Growing guide</h2><button class="btn ghost" onclick="document.getElementById('guideDialog').close()">Close</button></div><div id="guideBody" class="section"></div><button class="btn" id="guidePlantButton">Add this plant</button></div></dialog>
-<dialog id="detailDialog" class="detail-dialog"><div class="section" style="padding:4px"><div class="row between"><div><h2 id="detailTitle" style="margin:0">Plant record</h2><div class="tiny" id="detailSubtitle"></div></div><button class="btn ghost" id="closeDetail">✕</button></div><div id="detailBody" class="section"></div><div class="card section"><h2>Record a milestone</h2><div class="grid"><div class="field"><label for="milestoneType">Milestone</label><select id="milestoneType"><option value="Sprouted">Sprouted</option><option value="Flowered">First flowers</option><option value="Harvested">First harvest</option><option value="Transplanted">Transplanted</option><option value="Other">Other observation</option></select></div><div class="field"><label for="milestoneDate">Date</label><input id="milestoneDate" type="date"></div></div><div class="field"><label for="milestoneNote">Note (optional)</label><input id="milestoneNote" placeholder="What happened?"></div><button class="btn" id="saveMilestone">Save milestone</button></div><div class="card section"><h2>Photo journal</h2><p class="tiny" style="margin:0">Take a photo with your camera or choose one from your device. Select the growth stage so the image appears alongside that point in the timeline. Photos are resized and stored on this device.</p><div class="photo-stage-row"><label for="photoStage" class="tiny">Growth stage</label><select id="photoStage"><option value="Planted">Planted</option><option value="Sprouted">Sprouting</option><option value="Transplanted">Transplanted</option><option value="Flowered">Flowering</option><option value="Harvested">Harvesting</option><option value="Other">Other</option></select></div><input id="photoInput" type="file" accept="image/*" capture="environment"><div id="photoGrid" class="photo-grid"></div></div><div class="card section"><h2>Add an observation</h2><textarea id="observationText" rows="3" placeholder="Growth, weather, watering, pests, changes…"></textarea><button class="btn" id="saveObservation">Save observation</button><div id="observationList" class="section"></div></div></div></dialog>
-<script src="app.js"></script><script>document.getElementById("guidePlantButton").addEventListener("click",()=>{const n=document.getElementById("guideTitle").textContent;const p=[...document.querySelectorAll("#plantSpecies option")].find(o=>o.textContent.startsWith(n+" ("));if(p){document.getElementById("guideDialog").close();document.getElementById("addPlantTop").click();document.getElementById("plantSpecies").value=p.value;}});</script></body></html>
+
+<section id="weight" class="section hide">
+<div class="card section">
+<h2>Weight</h2>
+<p class="muted tiny" style="margin:0">Record your body weight. Each entry is automatically dated.</p>
+<form id="weightForm" class="grid" style="grid-template-columns:minmax(0,1fr) auto;align-items:end">
+<div class="field"><label for="weightInput">Body weight (kg)</label><input id="weightInput" type="number" min="0.1" max="500" step="0.1" placeholder="e.g. 82.5" required inputmode="decimal"></div>
+<button class="btn" type="submit">Log weight</button>
+</form>
+<div id="weightStatus" class="tiny muted" aria-live="polite"></div>
+</div>
+<div class="card section">
+<h2 style="margin:0">Progress overview</h2>
+<div class="stats weight-stats">
+<div class="stat"><div class="v" id="weightLatest">—</div><div class="l">Latest weight</div></div>
+<div class="stat"><div class="v" id="weightChange">—</div><div class="l">Change since first entry</div></div>
+<div class="stat"><div class="v" id="weightAverage7">—</div><div class="l">7-day average</div></div>
+<div class="stat"><div class="v" id="weightAverage30">—</div><div class="l">30-day average</div></div>
+</div>
+<div class="row between weight-chart-heading"><strong>Weight trend</strong><div class="weight-ranges" role="group" aria-label="Chart date range"><button type="button" class="btn ghost smallbtn active" data-weight-range="30">30 days</button><button type="button" class="btn ghost smallbtn" data-weight-range="90">90 days</button><button type="button" class="btn ghost smallbtn" data-weight-range="all">All</button></div></div>
+<div id="weightChart" class="weight-chart" role="img" aria-label="Body weight progress chart"><div class="muted tiny">Log your first weigh-in to see your progress chart.</div></div>
+<div class="weight-target-row">
+<div class="field"><label for="weightTargetInput">Target weight (optional, kg)</label><input id="weightTargetInput" type="number" min="0.1" max="500" step="0.1" placeholder="Set a target"></div>
+<button type="button" class="btn secondary" id="saveWeightTarget">Save target</button>
+<button type="button" class="btn ghost" id="clearWeightTarget">Clear</button>
+</div>
+<div class="tiny muted" id="weightTargetStatus" aria-live="polite"></div>
+</div>
+<div class="card section">
+<div class="row between"><h2 style="margin:0">Weigh-in history</h2><span class="pill" id="weightCount">0 entries</span></div>
+<div id="weightEntries" class="daily-history-list"><div class="muted tiny">No weight entries yet.</div></div>
+</div>
+</section>
+<section id="history" class="section hide">
+<div class="card section">
+<h2>Weekly report</h2>
+<p class="tiny muted" style="margin-top:-4px">Weeks run Monday to Sunday. Daily averages are calculated across days with food entries; unlogged days are not treated as zero.</p>
+<div id="weeklyReports" class="weekly-reports"><div class="muted tiny">Your weekly summaries will appear here once you have logged food.</div></div>
+</div>
+<div class="card section">
+<h2>History & backup</h2>
+<div class="field"><label>Choose a day to view</label><input id="historyDate" type="date"></div>
+<div id="historySummary" class="result">No saved log for this date.</div>
+<div class="toolbar"><button class="btn secondary" id="loadHistory">Load day into diary</button><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div>
+<div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div>
+<div class="field"><label>Restore a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div>
+<p class="tiny muted">Restoring replaces the current Library, diary and settings. The app will offer to download a safety backup first.</p>
+</div>
+</section>
+<div class="footer">Macro Ledger · Personal estimates, not a clinical nutrition database.</div>
+</main>
+<dialog id="foodEditor" style="border:1px solid #ddd;border-radius:16px;padding:18px;width:min(92vw,520px);max-height:90vh;overflow:auto">
+<form id="foodEditorForm" class="section">
+<div class="row between"><h2 id="editorTitle" style="margin:0">Edit food</h2><button type="button" class="btn ghost smallbtn" id="closeEditor">Close</button></div>
+<div class="field"><label>Food name</label><input id="editName" required></div>
+<div class="grid"><div class="field"><label>Base serving quantity</label><input id="editQty" type="number" min="0.01" step="any" required></div><div class="field"><label>Unit</label><input id="editUnit" required></div></div>
+<div class="field"><label>Weight basis (optional)</label><input id="editBasis" placeholder="e.g. raw, cooked, dry, drained"></div><div class="card" style="padding:12px"><strong>Serving option (optional)</strong><p class="tiny muted" style="margin:4px 0 10px">For foods measured in grams, set a serving size to enable gram or serve when adding to your Daily Log. Example: WPC, Scoop, 30 g.</p><div class="grid"><div class="field"><label>Serving name</label><input id="editServeName" placeholder="e.g. Scoop"></div><div class="field"><label>Serving weight (g)</label><input id="editServeGrams" type="number" min="0" step="0.1" placeholder="e.g. 30"></div></div></div><div class="field"><label>Category</label><input id="editCategory" list="categoryOptions" required></div>
+<div class="grid4"><div class="field"><label>kcal</label><input id="editKcal" type="number" min="0" step="any" required></div><div class="field"><label>Protein g</label><input id="editProtein" type="number" min="0" step="any" required></div><div class="field"><label>Carbs g</label><input id="editCarbs" type="number" min="0" step="any" required></div><div class="field"><label>Fat g</label><input id="editFat" type="number" min="0" step="any" required></div></div>
+<div class="toolbar"><button class="btn" type="submit">Save changes</button><button class="btn ghost" type="button" id="cancelEditor">Cancel</button></div>
+</form></dialog>
+<style>
+ :root{--header:#080808;--accent:#f5f5f5;--accent-ink:#111;--surface2:#222;--surface3:#303030;--input:#1d1d1d;--progress:#f5f5f5}
+html[data-theme="monochrome"]{--bg:#080808;--panel:#151515;--ink:#f4f4f4;--muted:#a7a7a7;--line:#363636;--green:#f0f0f0;--green2:#292929;--header:#050505;--accent:#f5f5f5;--accent-ink:#111;--surface2:#202020;--surface3:#303030;--input:#1b1b1b;--progress:#f2f2f2}
+html[data-theme="yellow"]{--bg:#080808;--panel:#151515;--ink:#f4f2e9;--muted:#aaa69a;--line:#38352b;--green:#f2cf45;--green2:#292820;--header:#050505;--accent:#f2cf45;--accent-ink:#171307;--surface2:#202020;--surface3:#302d22;--input:#1b1b1b;--progress:#f2cf45}
+html[data-theme="orange"]{--bg:#080808;--panel:#151515;--ink:#f4f0ec;--muted:#aaa29b;--line:#403127;--green:#ff7a24;--green2:#2c211a;--header:#050505;--accent:#ff7a24;--accent-ink:#1b0d04;--surface2:#202020;--surface3:#33271f;--input:#1b1b1b;--progress:#ff7a24}
+/* Consistent food-library action buttons across all colour modes */
+html[data-theme="orange"] .food-actions [data-addfood]{background:#ff7a24!important;border:1px solid #ff7a24!important;color:#17100b!important}
+html[data-theme="orange"] .food-actions [data-editfood]{background:#292725!important;border:1px solid #49443f!important;color:#f2efeb!important}
+.food-actions [data-deletefood]{background:#292526!important;border:1px solid #453638!important;color:#d98f88!important}
+body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color:var(--muted)}.tab.active,.btn:not(.secondary):not(.ghost):not(.danger){background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}.btn.secondary,.btn.ghost{background:var(--green2);color:var(--ink);border-color:var(--line)}input,select{background:var(--input);color:var(--ink);border-color:var(--line)}.stat,.result,.notice,.pill{background:var(--surface2);color:var(--ink)}.progress{background:var(--surface3)}.progress>i{background:var(--progress)}.sub{color:var(--muted)}.colour-dialog{width:min(92vw,430px);padding:18px;background:var(--panel);color:var(--ink);border:1px solid var(--line)}.colour-options{display:grid;gap:8px;margin-top:15px}.theme-choice{display:grid;grid-template-columns:58px 1fr;grid-template-rows:auto auto;column-gap:12px;text-align:left;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);color:var(--ink);font:inherit;cursor:pointer}.theme-choice[aria-pressed="true"]{outline:2px solid var(--accent);border-color:var(--accent)}.theme-choice strong{font-size:14px}.theme-choice small{color:var(--muted);font-size:12px}.swatches{grid-row:1/3;display:flex;gap:3px}.swatches i{width:15px;height:30px;border-radius:4px;background:#080808;border:1px solid #777}.theme-choice[data-theme-choice="monochrome"] i:nth-child(2){background:#555}.theme-choice[data-theme-choice="monochrome"] i:nth-child(3){background:#f5f5f5}.theme-choice[data-theme-choice="yellow"] i:nth-child(2){background:#222}.theme-choice[data-theme-choice="yellow"] i:nth-child(3){background:#f2cf45}.theme-choice[data-theme-choice="orange"] i:nth-child(2){background:#222}.theme-choice[data-theme-choice="orange"] i:nth-child(3){background:#ff7a24}
+
+.colour-swatch-button{width:40px;height:40px;min-width:40px;padding:0;border-radius:50%;border:2px solid #777;background:var(--accent);box-shadow:0 0 0 3px #ffffff12;cursor:pointer;flex:0 0 40px}
+.colour-swatch-button:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+
+.library-tools{justify-content:space-between;align-items:center;flex-wrap:wrap;margin:10px 0}
+.library-select-all{padding:8px 2px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.library-select-all label{display:flex;align-items:center;gap:8px;cursor:pointer}
+.food-library-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+.food-library-row .foodrow{border:0;margin:0;min-width:0}
+.food-select{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+#deleteSelectedFoods:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:430px){.food-library-row{grid-template-columns:24px minmax(0,1fr);gap:5px}.food-library-row .foodrow{gap:6px}.food-library-row .food-actions{gap:4px}}
+
+
+/* Food library: card-based layout with a clear information/action hierarchy */
+#foodList{display:grid;gap:10px;margin-top:10px}
+.library-item{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}
+.library-item>.food-select{margin:3px 0 0;width:18px;height:18px}
+.library-item-main{min-width:0;display:grid;gap:10px}
+.library-item-info{min-width:0}
+.library-item-info strong{display:block;font-size:15px;line-height:1.35;font-weight:750;overflow-wrap:anywhere}
+.library-item-meta{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.library-quantity-row{display:block}.library-quantity-row .qtyadd{display:grid;grid-template-columns:minmax(54px,1fr) minmax(88px,1.25fr) 72px;gap:7px;align-items:center}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{width:100%;min-width:0;min-height:40px;padding:8px 9px}.library-quantity-row .qtyadd span{font-size:12px;color:var(--muted)}.library-quantity-row .qtyadd button{min-height:40px;width:100%}
+.library-quantity{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center;min-width:0}
+.library-quantity input{width:100%;min-width:0;min-height:40px;padding:8px 10px}
+.library-quantity span{font-size:12px;color:var(--muted);white-space:nowrap}
+.library-add{min-height:40px;width:100%;background:var(--accent)!important;border:1px solid var(--accent)!important;color:var(--accent-ink)!important}
+.library-manage-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.library-manage-row button{min-height:38px;width:100%}
+.library-manage-row [data-deletefood]{background:#292526!important;border:1px solid #453638!important;color:#d98f88!important}
+#foodList .foodrow{display:none}
+@media(min-width:601px){#foodList{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.library-item{height:100%}}
+@media(max-width:380px){.library-item{padding:11px;gap:8px}.library-item-meta{font-size:11px}.library-quantity-row .qtyadd{grid-template-columns:minmax(48px,.8fr) minmax(76px,1.2fr) 64px;gap:5px}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{padding:7px 6px;font-size:12px}}
+.daily-history-list{display:grid;gap:8px}
+.daily-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface2)}
+.daily-history-date{font-weight:700;font-size:13px}
+.daily-history-macros{font-size:12px;color:var(--muted);line-height:1.6;font-variant-numeric:tabular-nums}
+.daily-history-view{padding:7px 10px;white-space:nowrap}
+
+.target-progress-list{display:grid;gap:10px;padding:2px 0}
+.target-progress-item{display:grid;gap:5px}
+.target-progress-item .progress{height:7px}
+.target-progress-item .progress>i{background:var(--accent)}
+.target-progress-status{text-align:right;font-size:11px}
+.target-settings{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--surface2)}
+.target-settings summary{font-size:13px;font-weight:750;cursor:pointer;list-style:none}
+.target-settings summary::-webkit-details-marker{display:none}
+.target-settings summary:after{content:'＋';float:right;color:var(--muted)}
+.target-settings[open] summary:after{content:'−'}
+.target-input-grid{margin:10px 0}
+.target-input-grid input{min-height:42px}
+.weekly-reports{display:grid;gap:10px}.weekly-report{border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:12px;display:grid;gap:8px}.weekly-report-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.weekly-report-title{font-weight:750;font-size:13px}.weekly-report-days{font-size:11px;color:var(--muted)}.weekly-report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.weekly-report-stat{background:var(--surface3);border-radius:9px;padding:8px}.weekly-report-stat b{display:block;font-size:15px;font-variant-numeric:tabular-nums}.weekly-report-stat span{font-size:10px;color:var(--muted)}.weekly-report-foot{font-size:11px;color:var(--muted)}.backup-status{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:12px;color:var(--muted);margin:10px 0}.backup-status.needs-backup{border-color:#9b713e;color:var(--ink)}
+
+
+/* Stage 1 mobile touch refinements: comfortably tappable controls without changing the visual system. */
+@media(max-width:600px){
+  .tab,.btn,.daily-add-food,.library-add,.library-manage-row button{min-height:42px}
+  input,select{min-height:42px}
+  .drag-handle{min-width:32px;width:32px;height:40px}
+  .library-item{min-width:0}
+  .scanner-panel{max-height:calc(100dvh - 28px);padding-bottom:max(14px,env(safe-area-inset-bottom))}
+}
+@media(max-width:360px){
+  .tabs{gap:6px}
+  .tab{padding:8px 9px;font-size:13px}
+  .library-item-meta{font-size:10.5px}
+}
+
+/* Stage 1: unobtrusive, non-blocking Library add confirmation */
+.app-toast{
+  position:fixed;right:16px;bottom:16px;z-index:120;
+  max-width:min(220px,calc(100vw - 32px));
+  padding:10px 14px;border:1px solid #a85d24;border-radius:11px;
+  background:#24201c;color:#f4a261;
+  box-shadow:0 8px 24px #0007;font:600 13px/1.35 "Manrope",system-ui,sans-serif;
+  opacity:0;visibility:hidden;transform:translateY(5px);
+  transition:opacity .16s ease,transform .16s ease,visibility .16s;
+  pointer-events:none;
+}
+.app-toast.is-visible{opacity:1;visibility:visible;transform:translateY(0)}
+@media(max-width:600px){
+  .app-toast{right:12px;bottom:12px;max-width:calc(100vw - 24px);padding:9px 12px}
+}
+@media(prefers-reduced-motion:reduce){.app-toast{transition:none}}
+</style>
+<div id="appToast" class="app-toast" role="status" aria-live="polite" aria-hidden="true"></div>
+<script src="foods.js"></script><script src="app.js"></script>
+<script>
+// Keep the app on its orange theme; the colour selector has been removed.
+document.documentElement.dataset.theme='orange';
+localStorage.setItem('macroLedgerTheme','orange');
+document.querySelector('meta[name="theme-color"]').content='#080808';
+</script>
+</body></html>
