@@ -29,7 +29,7 @@ After opening it once while online, the app files are cached and the core tracke
 
 - Food library populated with the recurring foods and estimates from your logs.
 - Search and category filtering.
-- Serving converter that scales all four values from the base serving.
+- Per-food gram/serve selection and serving-size configuration in the Library.
 - Daily diary with repeated entries and running totals.
 - Independent 4/4/9 macro-calorie cross-check; supplied calories are never overwritten.
 - Custom food creation.
@@ -50,3 +50,10 @@ Local-only storage (v42)
 
 COLES FOOD LIBRARY ADDITION (v44)
 This release adds the approved Coles chicken, pork and beef mince entries, Coles chicken breast fillets, raw vegetable entries, Coles frozen blueberries, and Coles dry rice entries. Existing browser food-library entries and diary logs are preserved. For an existing installation, the new entries are appended once; existing entries are not overwritten. Fresh vegetables and Coles Simply White Long Grain Rice use generic composition estimates as identified in each food's basis note.
+
+
+DUAL GRAM / SERVE ENTRY (v49)
+- Foods measured in grams can optionally be given a custom serving name and serving weight in the Edit food dialog (for example, WPC / Scoop / 30 g).
+- The Library Add control then offers grams or the configured serving. Nutrition is calculated from the food's existing per-100 g values.
+- Foods without a configured serving continue to use their existing measurement. Non-gram countable items retain their natural units unless their nutrition is recorded by weight.
+- Serving settings are stored with the food library and do not overwrite diary history.

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#14171b">
-<meta name="description" content="Personal food library, serving converter and daily macro tracker.">
+<meta name="description" content="Personal food library and daily macro tracker.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,7 +61,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to Daily log">MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div></div></header>
 <main>
 <div class="tabs">
-<button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="converter">Converter</button><button class="tab" data-tab="scanner">Barcode scanner</button>
+<button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Barcode scanner</button>
 </div>
 <section id="diary" class="section">
 <div class="card section">
@@ -77,12 +77,12 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div id="diaryEntries" class="section" style="margin-top:2px"><div class="muted tiny">No foods logged yet.</div></div>
 <div class="grid4 tiny"><div>Calories from macros<br><b id="macroCalories">0 kcal</b></div><div>Difference<br><b id="difference">0 kcal</b></div><div>Entries<br><b id="entryCount">0</b></div><div>Target calories<br><b>2,000–2,200</b></div></div>
 <div id="discrepancy" class="notice hide"></div>
-<div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="openHistory" type="button">History &amp; backup</button></div>
 </div>
 <div class="card section" id="dailyHistoryCard">
 <h2>History</h2>
 <p class="muted tiny" style="margin:0 0 10px">Daily macro totals from your previous logged days.</p>
 <div id="dailyHistoryList" class="daily-history-list"><div class="muted tiny">No previous days logged yet.</div></div>
+<div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="openHistory" type="button">Export</button></div>
 </div>
 </section>
 <section id="scanner" class="section hide">
@@ -143,20 +143,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="field"><label>Weight basis (optional)</label><input id="customBasis" placeholder="e.g. raw, cooked, dry, drained"></div><div class="field"><label>Category</label><input id="customCategory" list="categoryOptions" value="Custom" placeholder="e.g. Dairy & protein"><datalist id="categoryOptions"></datalist></div><button class="btn" id="saveCustom">Save custom food</button>
 </div>
 </section>
-<section id="converter" class="section hide">
-<div class="card section">
-<h2>Serving converter</h2>
-<div class="field"><label>Choose a saved food</label><select id="convertFood"></select></div>
-<div class="amountline">
-<div class="field"><label>Quantity</label><input id="convertQty" type="number" min="0" step="any" value="1"></div>
-<div class="field"><label>Unit</label><input id="convertUnit" disabled></div>
-</div>
-<div class="tiny" id="baseInfo"></div>
-<div class="result" id="convertResult">Choose a food to calculate its macros.</div>
-<button class="btn" id="addConverted">Add converted serving to diary</button>
-</div>
-<div class="card"><h2>How the converter works</h2><p class="muted" style="margin:0">Each library item has a base serving. Change the quantity to scale its calories, protein, carbohydrates and fat proportionally. For example, 150 g of a food with a 100 g base serving multiplies every value by 1.5.</p></div>
-</section>
+
 <section id="history" class="section hide">
 <div class="card section">
 <h2>History & backup</h2>
@@ -173,7 +160,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="row between"><h2 id="editorTitle" style="margin:0">Edit food</h2><button type="button" class="btn ghost smallbtn" id="closeEditor">Close</button></div>
 <div class="field"><label>Food name</label><input id="editName" required></div>
 <div class="grid"><div class="field"><label>Base serving quantity</label><input id="editQty" type="number" min="0.01" step="any" required></div><div class="field"><label>Unit</label><input id="editUnit" required></div></div>
-<div class="field"><label>Weight basis (optional)</label><input id="editBasis" placeholder="e.g. raw, cooked, dry, drained"></div><div class="field"><label>Category</label><input id="editCategory" list="categoryOptions" required></div>
+<div class="field"><label>Weight basis (optional)</label><input id="editBasis" placeholder="e.g. raw, cooked, dry, drained"></div><div class="card" style="padding:12px"><strong>Serving option (optional)</strong><p class="tiny muted" style="margin:4px 0 10px">For foods measured in grams, set a serving size to enable gram or serve when adding to your Daily Log. Example: WPC, Scoop, 30 g.</p><div class="grid"><div class="field"><label>Serving name</label><input id="editServeName" placeholder="e.g. Scoop"></div><div class="field"><label>Serving weight (g)</label><input id="editServeGrams" type="number" min="0" step="0.1" placeholder="e.g. 30"></div></div></div><div class="field"><label>Category</label><input id="editCategory" list="categoryOptions" required></div>
 <div class="grid4"><div class="field"><label>kcal</label><input id="editKcal" type="number" min="0" step="any" required></div><div class="field"><label>Protein g</label><input id="editProtein" type="number" min="0" step="any" required></div><div class="field"><label>Carbs g</label><input id="editCarbs" type="number" min="0" step="any" required></div><div class="field"><label>Fat g</label><input id="editFat" type="number" min="0" step="any" required></div></div>
 <div class="toolbar"><button class="btn" type="submit">Save changes</button><button class="btn ghost" type="button" id="cancelEditor">Cancel</button></div>
 </form></dialog>
@@ -209,7 +196,7 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 .library-item-info{min-width:0}
 .library-item-info strong{display:block;font-size:15px;line-height:1.35;font-weight:750;overflow-wrap:anywhere}
 .library-item-meta{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.library-quantity-row{display:grid;grid-template-columns:minmax(0,1fr) 72px;gap:8px;align-items:center}
+.library-quantity-row{display:block}.library-quantity-row .qtyadd{display:grid;grid-template-columns:minmax(54px,1fr) minmax(88px,1.25fr) 72px;gap:7px;align-items:center}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{width:100%;min-width:0;min-height:40px;padding:8px 9px}.library-quantity-row .qtyadd span{font-size:12px;color:var(--muted)}.library-quantity-row .qtyadd button{min-height:40px;width:100%}
 .library-quantity{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center;min-width:0}
 .library-quantity input{width:100%;min-width:0;min-height:40px;padding:8px 10px}
 .library-quantity span{font-size:12px;color:var(--muted);white-space:nowrap}
@@ -219,7 +206,7 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 .library-manage-row [data-deletefood]{background:#292526!important;border:1px solid #453638!important;color:#d98f88!important}
 #foodList .foodrow{display:none}
 @media(min-width:601px){#foodList{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.library-item{height:100%}}
-@media(max-width:380px){.library-item{padding:11px;gap:8px}.library-item-meta{font-size:11px}.library-quantity-row{grid-template-columns:minmax(0,1fr) 66px}}
+@media(max-width:380px){.library-item{padding:11px;gap:8px}.library-item-meta{font-size:11px}.library-quantity-row .qtyadd{grid-template-columns:minmax(48px,.8fr) minmax(76px,1.2fr) 64px;gap:5px}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{padding:7px 6px;font-size:12px}}
 .daily-history-list{display:grid;gap:8px}
 .daily-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface2)}
 .daily-history-date{font-weight:700;font-size:13px}
