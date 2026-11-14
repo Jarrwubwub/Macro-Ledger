@@ -34,7 +34,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 
 /* Mobile layout refinements: consistent food controls and a complete navigation grid */
 @media(max-width:600px){
-  .tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible;padding:0;border:0;box-shadow:none;background:transparent}
+  .tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible;padding:8px 0;border:0;box-shadow:none;background:#050505}
   .tab{width:100%;min-width:0;min-height:44px;padding:10px 8px;text-align:center;white-space:normal;line-height:1.2;border-radius:12px}
   .foodrow{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:9px}
   #quickResults .foodrow{grid-template-columns:minmax(0,1fr);gap:9px;padding:13px 0}
@@ -136,6 +136,12 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="stat"><div class="l">Carbohydrates</div><div class="v" id="totalCarbs">0 g</div><div class="tiny">Daily total</div></div>
 <div class="stat"><div class="l">Fat</div><div class="v" id="totalFat">0 g</div><div class="tiny">Daily total</div></div>
 </div>
+
+<div class="target-progress-list" id="macroTargetProgressList"></div>
+<button class="daily-add-food" id="dailyAddFood" type="button"><span aria-hidden="true">＋</span> Add food</button>
+<div id="diaryEntries" class="section" style="margin-top:2px"><div class="muted tiny">No foods logged yet.</div></div>
+<div class="grid4 tiny"><div>Calories from macros<br><b id="macroCalories">0 kcal</b></div><div>Difference<br><b id="difference">0 kcal</b></div><div>Entries<br><b id="entryCount">0</b></div><div>Daily targets<br><b>Customisable</b></div></div>
+<div id="discrepancy" class="notice hide"></div>
 <details class="target-settings"><summary>Daily targets</summary><p class="tiny muted" style="margin:0">Set the daily goals you want to track. Leave a field blank to turn off that target.</p>
 <div class="grid target-input-grid">
 <div class="field"><label for="targetKcal">Calories (kcal)</label><input id="targetKcal" type="number" min="1" max="20000" step="1" inputmode="numeric"></div>
@@ -144,11 +150,6 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="field"><label for="targetFat">Fat (g)</label><input id="targetFat" type="number" min="0.1" max="2000" step="0.1" inputmode="decimal"></div>
 </div><div class="toolbar"><button class="btn" id="saveMacroTargets" type="button">Save targets</button><button class="btn ghost" id="resetMacroTargets" type="button">Restore defaults</button></div><div class="tiny" id="macroTargetStatus" aria-live="polite"></div>
 </details>
-<div class="target-progress-list" id="macroTargetProgressList"></div>
-<button class="daily-add-food" id="dailyAddFood" type="button"><span aria-hidden="true">＋</span> Add food</button>
-<div id="diaryEntries" class="section" style="margin-top:2px"><div class="muted tiny">No foods logged yet.</div></div>
-<div class="grid4 tiny"><div>Calories from macros<br><b id="macroCalories">0 kcal</b></div><div>Difference<br><b id="difference">0 kcal</b></div><div>Entries<br><b id="entryCount">0</b></div><div>Daily targets<br><b>Customisable</b></div></div>
-<div id="discrepancy" class="notice hide"></div>
 </div>
 <div class="card section" id="dailyHistoryCard">
 <h2>History</h2>
