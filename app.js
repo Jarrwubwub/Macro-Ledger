@@ -7,6 +7,7 @@ function migrateFoods(list){
     const f={...original};
     const originalName=f.name||'Food';
     let name=originalName.replace(/\s*[–-]\s*\d+(?:\.\d+)?\s*(?:g|mL)\s*$/i,'').trim();
+    name=name.replace(/^raw\s+/i,'').replace(/\s*[–-]\s*raw$/i,'').trim();
     if(/^Eggs?\s*(?:×|x)\s*\d+$/i.test(name))name='Egg';
     if(name==='Egg'){f.unit='egg';f.baseQty=Number(original.baseQty)||1;}
     if(name==='Half avocado'){name='Avocado';f.unit='avocado';f.baseQty=1;f.kcal*=2;f.protein*=2;f.carbs*=2;f.fat*=2;}
