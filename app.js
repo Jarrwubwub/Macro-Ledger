@@ -275,6 +275,9 @@ $('startScanner').onclick=async()=>{
 
 // Google Drive private app-data backup. Tokens are memory-only and must be renewed by user action.
 const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.appdata';
+const DRIVE_LINK_KEY='macroDriveLinked';
+const driveWasLinked=()=>localStorage.getItem(DRIVE_LINK_KEY)==='1';
+const updateDriveLinkUI=()=>{const linked=driveWasLinked();$('driveConnect').textContent=linked?'Reconnect Google Drive':'Connect Google Drive';if(!driveConnected)$('driveSync').disabled=true;};
 const driveStatus=(message)=>{const el=$('driveStatus');if(el)el.textContent=message};
 const localSnapshot=()=>({version:1,app:'MK Macro Ledger',savedAt:new Date().toISOString(),foods,logs,categories});
 const snapshotText=()=>JSON.stringify(localSnapshot());
@@ -322,9 +325,9 @@ function requestDriveToken(){return new Promise((resolve,reject)=>{
  client.requestAccessToken({prompt:''});
  });}
 async function connectDrive(){
- $('driveConnect').disabled=true;driveStatus('Connecting to Google…');
+ $('driveConnect').disabled=true;driveStatus('Reconnecting to Google…');
  try{
-  await requestDriveToken();const file=await findDriveBackup();
+  await requestDriveToken();localStorage.setItem(DRIVE_LINK_KEY,'1');const file=await findDriveBackup();
   if(!file){driveFileId=null;driveLastRemoteModified=null;driveConnected=true;$('driveSync').disabled=false;await driveBackupNow();driveStatus('Connected. Your current device data has been backed up to Google Drive.');return;}
   const remote=await readDriveBackup(file);const local=localSnapshot();
   const remoteDate=new Date(file.modifiedTime).toLocaleString();
@@ -332,10 +335,12 @@ async function connectDrive(){
   if(restore){foods=remote.foods;logs=remote.logs;categories=Array.isArray(remote.categories)?remote.categories:[];localStorage.setItem('macroFoods',JSON.stringify(foods));localStorage.setItem('macroLogs',JSON.stringify(logs));localStorage.setItem('macroCategories',JSON.stringify(categories));renderDiary();renderLibrary();renderConverterSelect();}
   driveFileId=file.id;driveLastRemoteModified=file.modifiedTime;driveConnected=true;$('driveSync').disabled=false;
   if(!restore){await writeDriveBackup(false);driveStatus("Connected. This device data has replaced the Drive backup.");}else driveStatus('Connected. Drive backup restored to this device.');
- }catch(error){driveConnected=false;driveToken=null;driveStatus('Could not connect: '+error.message+' Your local data has not been changed.');}
- finally{$('driveConnect').disabled=false;}
+ }catch(error){driveConnected=false;driveToken=null;driveStatus('Could not connect: '+error.message+' Your local data has not been changed. '+(driveWasLinked()?'Your Google account was previously linked; try reconnecting.':''));}
+ finally{$('driveConnect').disabled=false;updateDriveLinkUI();}
 }
 $('driveConnect').onclick=connectDrive;$('driveSync').onclick=driveBackupNow;
+updateDriveLinkUI();
+if(driveWasLinked())driveStatus('Google Drive was previously linked on this device. Reconnect to renew access and check your backup.');
 window.addEventListener('focus',()=>{if(driveConnected&&driveDirty)scheduleDriveBackup()});
 
 renderDiary();renderQuick();
