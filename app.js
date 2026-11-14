@@ -43,9 +43,10 @@ function addEntry(food,qty=food.baseQty,unit=food.unit){
  const entry={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),loggedAt:Date.now(),name:food.name,qty,unit,kcal:food.kcal*factor,protein:food.protein*factor,carbs:food.carbs*factor,fat:food.fat*factor};
  logs[currentDate]=[...entries(),entry];save();renderDiary();
 }
-function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','converter','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='converter')renderConverterSelect();if(tab==='history')renderHistory()}
+function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','converter','scanner','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='converter')renderConverterSelect();if(tab==='history')renderHistory()}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 $('goLibrary').onclick=()=>setTab('library');
+$('openHistory').onclick=()=>{ $('historyDate').value=currentDate; setTab('history'); }; 
 $('dailyAddFood').onclick=()=>{$('addFoodCard').scrollIntoView({behavior:'smooth',block:'start'});};
 $('logDate').value=currentDate;$('historyDate').value=currentDate;
 $('logDate').onchange=e=>{currentDate=e.target.value||today();renderDiary()};
@@ -145,11 +146,26 @@ function renderConverterSelect(){
 }
 function updateConverter(){
  const f=foods.find(x=>x.id===$('convertFood').value);if(!f)return;
- converted=f.id;$('convertQty').value=$('convertQty').value||f.baseQty;$('convertUnit').value=f.unit;$('baseInfo').textContent=`Base serving: ${fmt(f.baseQty)} ${f.unit} = ${fmt(f.kcal)} kcal · ${fmt(f.protein)} g protein · ${fmt(f.carbs)} g carbs · ${fmt(f.fat)} g fat`;
- const qty=num($('convertQty').value),factor=qty/f.baseQty;
+ converted=f.id;
+ // Do not repopulate the field while the user is clearing or editing it.
+ const rawQty=$('convertQty').value;
+ $('convertUnit').value=f.unit;
+ $('baseInfo').textContent=`Base serving: ${fmt(f.baseQty)} ${f.unit} = ${fmt(f.kcal)} kcal · ${fmt(f.protein)} g protein · ${fmt(f.carbs)} g carbs · ${fmt(f.fat)} g fat`;
+ if(rawQty.trim()===''){
+  $('convertResult').textContent='Enter a quantity to calculate the macros.';
+  $('addConverted').disabled=true;
+  return;
+ }
+ const qty=num(rawQty);
+ if(!Number.isFinite(qty)||qty<=0){
+  $('convertResult').textContent='Enter a quantity greater than zero.';
+  $('addConverted').disabled=true;
+  return;
+ }
+ const factor=qty/f.baseQty;
  const v={kcal:f.kcal*factor,protein:f.protein*factor,carbs:f.carbs*factor,fat:f.fat*factor};
  $('convertResult').innerHTML=`<strong>${Math.round(v.kcal)} kcal</strong><div class="tiny">Protein ${fmt(v.protein)} g · Carbs ${fmt(v.carbs)} g · Fat ${fmt(v.fat)} g</div>`;
- $('addConverted').disabled=qty<=0;
+ $('addConverted').disabled=false;
 }
 $('convertFood').onchange=()=>{$('convertQty').value=foods.find(f=>f.id===$('convertFood').value)?.baseQty||1;updateConverter()};
 $('convertQty').oninput=updateConverter;

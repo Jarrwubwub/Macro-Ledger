@@ -61,11 +61,11 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <header><div class="top"><div><h1>MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div><button class="colour-swatch-button" id="colourButton" type="button" aria-label="Change colour mode" title="Change colour mode"></button></div></header>
 <main>
 <div class="tabs">
-<button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Food library</button><button class="tab" data-tab="converter">Converter</button><button class="tab" data-tab="history">History & export</button>
+<button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="converter">Converter</button><button class="tab" data-tab="scanner">Barcode scanner</button>
 </div>
 <section id="diary" class="section">
 <div class="card section">
-<div class="row between"><h2 style="margin:0">Daily totals</h2><div class="row"><button class="btn ghost smallbtn" id="clearDay">Clear day</button><input id="logDate" type="date" style="width:auto;max-width:155px"></div></div>
+<div class="row between"><h2 style="margin:0">Daily total</h2><div class="row"><button class="btn ghost smallbtn" id="clearDay">Clear day</button><input id="logDate" type="date" style="width:auto;max-width:155px"></div></div>
 <div class="stats">
 <div class="stat"><div class="l">Calories</div><div class="v" id="totalKcal">0</div><div class="tiny">kcal</div></div>
 <div class="stat"><div class="l">Protein</div><div class="v" id="totalProtein">0 g</div><div class="tiny">Target 180–200 g</div></div>
@@ -77,6 +77,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div id="diaryEntries" class="section" style="margin-top:2px"><div class="muted tiny">No foods logged yet.</div></div>
 <div class="grid4 tiny"><div>Calories from macros<br><b id="macroCalories">0 kcal</b></div><div>Difference<br><b id="difference">0 kcal</b></div><div>Entries<br><b id="entryCount">0</b></div><div>Target calories<br><b>2,000–2,200</b></div></div>
 <div id="discrepancy" class="notice hide"></div>
+<div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="openHistory" type="button">History</button></div>
 </div>
 <div class="card" id="addFoodCard">
 <div class="row between"><h2 style="margin:0">Add food</h2><button class="btn secondary smallbtn" id="goLibrary">Browse library</button></div>
@@ -85,6 +86,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 
 </div>
 </div>
+<section id="scanner" class="section hide">
 <div class="card section">
 <h2>Scan a packaged food</h2>
 <p class="muted" style="margin:0">Scan a barcode or enter its number. We'll look up the product, then show you the details to check before saving it.</p>
