@@ -35,7 +35,8 @@ let currentDate=today(), converted=null;
 const num=(v)=>Number(v)||0, fmt=(v)=>Number(v.toFixed(1)).toFixed(1);
 function titleCase(value){const acronyms=new Set(['WPC','TVP','BBQ','BCAA','DHA','EPA']);return String(value).trim().split(/\s+/).map(word=>word.split(/([-/])/).map(part=>{if(acronyms.has(part.toUpperCase()))return part.toUpperCase();if(/^[A-Z0-9]{2,3}$/.test(part))return part.toUpperCase();return part.charAt(0).toLocaleUpperCase()+part.slice(1).toLocaleLowerCase()}).join('')).join(' ')}
 const totals=items=>items.reduce((a,x)=>({kcal:a.kcal+x.kcal,protein:a.protein+x.protein,carbs:a.carbs+x.carbs,fat:a.fat+x.fat}),{kcal:0,protein:0,carbs:0,fat:0});
-const save=()=>{localStorage.setItem('macroFoods',JSON.stringify(foods));localStorage.setItem('macroLogs',JSON.stringify(logs));localStorage.setItem('macroCategories',JSON.stringify(categories))};
+let driveConnected=false,driveToken=null,driveFileId=null,driveLastRemoteModified=null,driveSyncTimer=null,driveBusy=false,driveDirty=false;
+const save=()=>{localStorage.setItem('macroFoods',JSON.stringify(foods));localStorage.setItem('macroLogs',JSON.stringify(logs));localStorage.setItem('macroCategories',JSON.stringify(categories));if(driveConnected)scheduleDriveBackup()};
 save();
 const entries=()=>logs[currentDate]||[];
 function addEntry(food,qty=food.baseQty,unit=food.unit){
@@ -271,6 +272,71 @@ $('startScanner').onclick=async()=>{
   }
  }catch(err){await stopCameraScanner();setScannerStatus(err.message||'Could not start camera. Check camera permission or enter the barcode manually.');}
 };
+
+// Google Drive private app-data backup. Tokens are memory-only and must be renewed by user action.
+const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.appdata';
+const driveStatus=(message)=>{const el=$('driveStatus');if(el)el.textContent=message};
+const localSnapshot=()=>({version:1,app:'MK Macro Ledger',savedAt:new Date().toISOString(),foods,logs,categories});
+const snapshotText=()=>JSON.stringify(localSnapshot());
+async function driveRequest(url,options={}){
+ const response=await fetch(url,{...options,headers:{...(options.headers||{}),Authorization:`Bearer ${driveToken}`}});
+ if(!response.ok){const body=await response.text();throw new Error(`Google Drive returned ${response.status}: ${body.slice(0,180)}`)}
+ return response.status===204?null:response.json();
+}
+async function findDriveBackup(){
+ const q=encodeURIComponent("name='mk-macro-ledger-backup.json' and 'appDataFolder' in parents and trashed=false");
+ const data=await driveRequest(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name,modifiedTime,size)&pageSize=10`);
+ return data.files?.sort((a,b)=>new Date(b.modifiedTime)-new Date(a.modifiedTime))[0]||null;
+}
+async function readDriveBackup(file){
+ const response=await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(file.id)}?alt=media`,{headers:{Authorization:`Bearer ${driveToken}`}});
+ if(!response.ok)throw new Error(`Could not download backup (${response.status}).`);
+ const data=await response.json();
+ if(!Array.isArray(data.foods)||!data.logs||typeof data.logs!=='object')throw new Error('The Drive backup does not contain valid Macro Ledger data.');
+ return data;
+}
+async function writeDriveBackup(create=false){
+ const metadata={name:'mk-macro-ledger-backup.json',...(create?{parents:['appDataFolder']}: {})};
+ const boundary='macro_ledger_'+Math.random().toString(36).slice(2);
+ const body=`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${snapshotText()}\r\n--${boundary}--`;
+ const url=create?'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime':'https://www.googleapis.com/upload/drive/v3/files/'+encodeURIComponent(driveFileId)+'?uploadType=multipart&fields=id,name,modifiedTime';
+ const result=await driveRequest(url,{method:create?'POST':'PATCH',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body});
+ driveFileId=result.id;driveLastRemoteModified=result.modifiedTime;driveDirty=false;
+}
+async function driveBackupNow(){
+ if(!driveConnected||!driveToken||driveBusy)return;driveBusy=true;$('driveSync').disabled=true;driveStatus('Checking the cloud backup…');
+ try{
+  if(driveFileId){
+   const remote=await driveRequest(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(driveFileId)}?fields=id,modifiedTime`);
+   if(driveLastRemoteModified&&remote.modifiedTime!==driveLastRemoteModified){driveStatus('A newer or different cloud backup was detected. No data was overwritten. Reconnect and choose which copy to keep.');driveConnected=false;$('driveSync').disabled=true;return;}
+   await writeDriveBackup(false);
+  }else{const file=await findDriveBackup();if(file){driveFileId=file.id;driveLastRemoteModified=file.modifiedTime;driveStatus('A cloud backup exists but is not linked to this device. Reconnect to choose whether to restore it or replace it.');driveConnected=false;$('driveSync').disabled=true;return;}await writeDriveBackup(true);}
+  driveStatus('Backup saved to Google Drive · '+new Date().toLocaleString());
+ }catch(error){driveStatus('Backup failed: '+error.message+' Your local data is still safe.');}
+ finally{driveBusy=false;if(driveConnected)$('driveSync').disabled=false;}
+}
+function scheduleDriveBackup(){driveDirty=true;clearTimeout(driveSyncTimer);driveSyncTimer=setTimeout(()=>driveBackupNow(),1800)}
+function requestDriveToken(){return new Promise((resolve,reject)=>{
+ if(!window.google?.accounts?.oauth2){reject(new Error('Google sign-in has not loaded yet. Wait a moment and try again.'));return;}
+ const client=google.accounts.oauth2.initTokenClient({client_id:window.MACRO_LEDGER_GOOGLE_CLIENT_ID,scope:DRIVE_SCOPE,callback:response=>{if(response.error){reject(new Error(response.error));return;}driveToken=response.access_token;resolve(driveToken)},error_callback:error=>reject(new Error(error.message||'Google sign-in was cancelled.'))});
+ client.requestAccessToken({prompt:''});
+ });}
+async function connectDrive(){
+ $('driveConnect').disabled=true;driveStatus('Connecting to Google…');
+ try{
+  await requestDriveToken();const file=await findDriveBackup();
+  if(!file){driveFileId=null;driveLastRemoteModified=null;driveConnected=true;$('driveSync').disabled=false;await driveBackupNow();driveStatus('Connected. Your current device data has been backed up to Google Drive.');return;}
+  const remote=await readDriveBackup(file);const local=localSnapshot();
+  const remoteDate=new Date(file.modifiedTime).toLocaleString();
+  const restore=confirm(`A Macro Ledger backup already exists in Google Drive (last modified ${remoteDate}).\n\nChoose OK to RESTORE the Drive backup onto this device.\nChoose Cancel to KEEP this device's current data and replace the Drive backup with it.\n\nNo data will be changed until you choose.`);
+  if(restore){foods=remote.foods;logs=remote.logs;categories=Array.isArray(remote.categories)?remote.categories:[];localStorage.setItem('macroFoods',JSON.stringify(foods));localStorage.setItem('macroLogs',JSON.stringify(logs));localStorage.setItem('macroCategories',JSON.stringify(categories));renderDiary();renderLibrary();renderConverterSelect();}
+  driveFileId=file.id;driveLastRemoteModified=file.modifiedTime;driveConnected=true;$('driveSync').disabled=false;
+  if(!restore){await writeDriveBackup(false);driveStatus("Connected. This device data has replaced the Drive backup.");}else driveStatus('Connected. Drive backup restored to this device.');
+ }catch(error){driveConnected=false;driveToken=null;driveStatus('Could not connect: '+error.message+' Your local data has not been changed.');}
+ finally{$('driveConnect').disabled=false;}
+}
+$('driveConnect').onclick=connectDrive;$('driveSync').onclick=driveBackupNow;
+window.addEventListener('focus',()=>{if(driveConnected&&driveDirty)scheduleDriveBackup()});
 
 renderDiary();renderQuick();
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});

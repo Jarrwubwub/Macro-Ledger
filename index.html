@@ -165,7 +165,13 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="field"><label>Choose a day to view</label><input id="historyDate" type="date"></div>
 <div id="historySummary" class="result">No saved log for this date.</div>
 <div class="toolbar"><button class="btn secondary" id="loadHistory">Load day into diary</button><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn ghost" id="exportJSON">Backup JSON</button></div>
-<div class="notice">Your food library and diary are stored on this device in your browser. Export a JSON backup regularly if you want to move your data to another phone or browser.</div>
+<div class="card section" id="driveBackupPanel" style="padding:13px;margin-top:4px">
+<h3 style="margin:0;font-size:15px">Google Drive backup</h3>
+<p class="tiny" style="margin:0">Connect the same Google account on each device to transfer your food library, diary and categories. Backups are stored privately in the app's hidden Drive app-data area.</p>
+<div class="toolbar"><button class="btn" id="driveConnect" type="button">Connect Google Drive</button><button class="btn ghost" id="driveSync" type="button" disabled>Back up now</button></div>
+<div id="driveStatus" class="notice" role="status" aria-live="polite">Not connected. Your existing data remains saved on this device.</div>
+<div class="tiny">Automatic backups run while the app is open after you make changes. Open the app on another device and connect the same Google account to retrieve the backup. Keep JSON exports as an extra safeguard.</div>
+</div>
 <div class="field"><label>Restore a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div>
 </div>
 </section>
@@ -231,6 +237,8 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 @media(min-width:601px){#foodList{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.library-item{height:100%}}
 @media(max-width:380px){.library-item{padding:11px;gap:8px}.library-item-meta{font-size:11px}.library-quantity-row{grid-template-columns:minmax(0,1fr) 66px}}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>window.MACRO_LEDGER_GOOGLE_CLIENT_ID="541369998829-eat13jppdubpamfu2di9u5e74ft1cehe.apps.googleusercontent.com";</script>
 <script src="foods.js"></script><script src="app.js"></script>
 <script>
 (()=>{const root=document.documentElement,dialog=document.getElementById('colourDialog'),button=document.getElementById('colourButton');const valid=['monochrome','yellow','orange'];function setTheme(theme){if(theme==='amber')theme='yellow';if(!valid.includes(theme))theme='monochrome';root.dataset.theme=theme;localStorage.setItem('macroLedgerTheme',theme);button.style.backgroundColor=getComputedStyle(root).getPropertyValue('--accent').trim();button.setAttribute('aria-label','Change colour mode. Current mode: '+theme);button.title='Current colour: '+theme+'. Click to change';document.querySelectorAll('[data-theme-choice]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.themeChoice===theme)));document.querySelector('meta[name="theme-color"]').content=getComputedStyle(root).getPropertyValue('--header').trim()||'#14171b'}setTheme(localStorage.getItem('macroLedgerTheme')||'orange');button.addEventListener('click',()=>dialog.showModal());document.getElementById('closeColour').addEventListener('click',()=>dialog.close());document.querySelectorAll('[data-theme-choice]').forEach(el=>el.addEventListener('click',()=>{setTheme(el.dataset.themeChoice);dialog.close()}));dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()})})();

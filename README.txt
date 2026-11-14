@@ -39,3 +39,12 @@ The food values are personal estimates based on the values used in your logs, no
 
 
 Latest update (v15): dark, eye-friendly colour theme; diary entries now appear directly beneath protein target progress; Add food shows the five most frequently logged foods (ties are broken by most recent use); Browse library remains available for all other foods.
+
+Google Drive backup (v40)
+- In History & backup, select Connect Google Drive and sign in with the Google account added as an OAuth test user.
+- On the first device, if no Drive backup exists, the app uploads that device's current food library, diary and categories.
+- On another device, connect the same account. If a backup already exists, choose Restore to download it, or Cancel to keep the device's current data and replace the cloud backup.
+- Once connected in an open app session, changes are backed up automatically after a short pause. You can also select Back up now.
+- Reconnect after reloading the app or opening it on another device. Google access tokens are kept only in memory.
+- If the app detects that the cloud file changed since this device last synced, it stops rather than silently overwriting the newer cloud copy. Reconnect and explicitly choose which copy to keep.
+- This is a backup/restore workflow, not simultaneous live editing or background sync while the app is closed. Keep using JSON export as an additional backup.
