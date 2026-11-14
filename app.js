@@ -1,5 +1,5 @@
 (()=>{
-const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA');
+const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
 function migrateFoods(list){
@@ -89,16 +89,21 @@ function renderDiary(){
 }
 
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const reorderControllers=new WeakMap();
 function enableLongPressReorder(container,rowSelector,handleSelector,onCommit){
- let timer=null,active=false,pointerId=null,row=null,moved=false,startX=0,startY=0;
+ // Each render replaces the previous listeners instead of accumulating document handlers.
+ reorderControllers.get(container)?.abort();
+ const controller=new AbortController(),signal=controller.signal;
+ reorderControllers.set(container,controller);
+ let timer=null,active=false,pointerId=null,row=null,activeHandle=null,moved=false,startX=0,startY=0;
  const clear=()=>{if(timer)clearTimeout(timer);timer=null;};
  container.querySelectorAll(handleSelector).forEach(handle=>{
   handle.addEventListener('pointerdown',e=>{
    if(e.button!==undefined&&e.button!==0)return;
-   clear();active=false;moved=false;pointerId=e.pointerId;row=handle.closest(rowSelector);startX=e.clientX;startY=e.clientY;
+   clear();active=false;moved=false;pointerId=e.pointerId;row=handle.closest(rowSelector);activeHandle=handle;startX=e.clientX;startY=e.clientY;
    timer=setTimeout(()=>{active=true;row?.classList.add('is-dragging');handle.classList.add('is-grabbing');},260);
    e.preventDefault();
-  });
+  },{signal});
  });
  const move=e=>{
   if(pointerId!==e.pointerId)return;
@@ -114,12 +119,12 @@ function enableLongPressReorder(container,rowSelector,handleSelector,onCommit){
  const finish=e=>{
   if(pointerId!==e.pointerId)return;
   clear();
-  if(active){row?.classList.remove('is-dragging');container.querySelectorAll('.is-grabbing').forEach(x=>x.classList.remove('is-grabbing'));if(moved)onCommit();}
-  active=false;pointerId=null;row=null;moved=false;
+  if(active){row?.classList.remove('is-dragging');activeHandle?.classList.remove('is-grabbing');if(moved)onCommit();}
+  active=false;pointerId=null;row=null;activeHandle=null;moved=false;
  };
- document.addEventListener('pointermove',move,{passive:false});
- document.addEventListener('pointerup',finish);
- document.addEventListener('pointercancel',finish);
+ document.addEventListener('pointermove',move,{passive:false,signal});
+ document.addEventListener('pointerup',finish,{signal});
+ document.addEventListener('pointercancel',finish,{signal});
 }
 function quantityInput(f,index){const gram=isGramUnit(f.unit);const whole=!gram;const qty=whole?Math.max(0,Math.round(Number(f.baseQty)||0)):(Number(f.baseQty)||0);return `<input aria-label="Amount of ${esc(f.name)}" type="number" min="0" step="${whole?'1':'0.1'}" inputmode="${whole?'numeric':'decimal'}" value="${qty}" data-foodqty="${index}" data-whole="${whole?'1':'0'}">`}
 function addControls(f,index){const hasServe=isGramUnit(f.unit)&&Number(f.serveGrams)>0;return `<div class="qtyadd">${quantityInput(f,index)}${hasServe?`<select aria-label="Measurement unit for ${esc(f.name)}" data-foodunit="${index}"><option value="g">Grams (g)</option><option value="serve">${esc(f.serveName||'Serve')} (${fmt(f.serveGrams)} g)</option></select>`:`<span>${esc(f.unit)}</span>`}<button class="btn library-add smallbtn" data-addfood="${index}">Add</button></div>`}
@@ -127,7 +132,7 @@ function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodr
 function bindFoodActions(container){
  container.querySelectorAll('[data-foodqty][data-whole="1"]').forEach(input=>input.addEventListener('change',()=>{input.value=String(Math.max(0,Math.round(Number(input.value)||0)))}));
  container.querySelectorAll('[data-foodunit]').forEach(select=>select.addEventListener('change',()=>{const i=Number(select.dataset.foodunit),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`);if(!f||!input)return;input.value=select.value==='serve'?'1':String(f.baseQty);input.step=select.value==='serve'?'0.1':(isGramUnit(f.unit)?'0.1':'1');input.inputMode=select.value==='serve'?'decimal':(isGramUnit(f.unit)?'decimal':'numeric')}));
- container.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.addfood),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`),unitSelect=container.querySelector(`[data-foodunit="${i}"]`),qty=input?num(input.value):f?.baseQty,unit=unitSelect?.value||f?.unit;if(f&&qty>0){addEntry(f,qty,unit);if(container.id==='quickResults')renderQuick();setTab('diary')}});
+ container.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.addfood),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`),unitSelect=container.querySelector(`[data-foodunit="${i}"]`),qty=input?num(input.value):f?.baseQty,unit=unitSelect?.value||f?.unit;if(f&&qty>0){addEntry(f,qty,unit);if(container.id==='foodList'){showToast('Item added')}else{if(container.id==='quickResults')renderQuick();setTab('diary')}}});
  container.querySelectorAll('[data-editfood]').forEach(b=>b.onclick=()=>openFoodEditor(Number(b.dataset.editfood)));
  container.querySelectorAll('[data-deletefood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.deletefood);if(!foods[i])return;foods.splice(i,1);save();renderLibrary();});
 }
@@ -138,7 +143,9 @@ function renderLibrary(){
  const q=$('librarySearch').value.toLowerCase(),cat=$('categoryFilter').value,sort=$('librarySort').value||'alphabetical';
  const usage=foodUsage();
  const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q));
- list.sort((a,b)=>{if(sort==='recent'){const au=usage.get(a.name.toLocaleLowerCase())||{last:0},bu=usage.get(b.name.toLocaleLowerCase())||{last:0};return bu.last-au.last||a.name.localeCompare(b.name,undefined,{sensitivity:'base'});}return a.name.localeCompare(b.name,undefined,{sensitivity:'base'});});
+ if(sort==='recent')list.sort((a,b)=>{const au=usage.get(a.name.toLocaleLowerCase())||{last:0},bu=usage.get(b.name.toLocaleLowerCase())||{last:0};return bu.last-au.last||a.name.localeCompare(b.name,undefined,{sensitivity:'base'});});
+ else if(sort==='alphabetical')list.sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
+ // Custom order deliberately preserves the underlying Library array order.
  $('foodCount').textContent=foods.length+' foods';
  $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item" data-food-id="${esc(f.id)}"><div class="library-card-top">${sort==='custom'?`<button class="drag-handle library-drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(f.name)}" title="Hold, then drag to reorder">⠿</button>`:''}<input class="food-select" type="checkbox" aria-label="Select ${esc(f.name)} for deletion" data-selectfood="${i}"></div><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||'<div class="tiny muted">No matching foods.</div>';
  bindFoodActions($('foodList'));
@@ -390,10 +397,9 @@ $('startScanner').onclick=async()=>{
  $('startScanner').disabled=true;$('stopScanner').disabled=false;$('scannerOverlay').classList.remove('hide');
  try{
   // Native BarcodeDetector where available; use html5-qrcode as a browser fallback.
-  if('BarcodeDetector'in window){
-   const supported=await BarcodeDetector.getSupportedFormats();
-   const formats=['ean_13','ean_8','upc_a','upc_e','code_128'].filter(x=>supported.includes(x));
-   const detector=new BarcodeDetector({formats});
+  const nativeFormats=('BarcodeDetector'in window)?(await BarcodeDetector.getSupportedFormats()).filter(x=>['ean_13','ean_8','upc_a','upc_e','code_128'].includes(x)):[];
+  if(nativeFormats.length){
+   const detector=new BarcodeDetector({formats:nativeFormats});
    cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
    const video=document.createElement('video');video.setAttribute('playsinline','');video.muted=true;video.srcObject=cameraStream;$('barcodeCamera').replaceChildren(video);await video.play();
    setScannerStatus('Camera active. Hold the barcode inside the frame.');

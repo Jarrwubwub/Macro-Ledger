@@ -338,7 +338,40 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 .target-input-grid{margin:10px 0}
 .target-input-grid input{min-height:42px}
 .weekly-reports{display:grid;gap:10px}.weekly-report{border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:12px;display:grid;gap:8px}.weekly-report-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.weekly-report-title{font-weight:750;font-size:13px}.weekly-report-days{font-size:11px;color:var(--muted)}.weekly-report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.weekly-report-stat{background:var(--surface3);border-radius:9px;padding:8px}.weekly-report-stat b{display:block;font-size:15px;font-variant-numeric:tabular-nums}.weekly-report-stat span{font-size:10px;color:var(--muted)}.weekly-report-foot{font-size:11px;color:var(--muted)}.backup-status{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:12px;color:var(--muted);margin:10px 0}.backup-status.needs-backup{border-color:#9b713e;color:var(--ink)}
+
+
+/* Stage 1 mobile touch refinements: comfortably tappable controls without changing the visual system. */
+@media(max-width:600px){
+  .tab,.btn,.daily-add-food,.library-add,.library-manage-row button{min-height:42px}
+  input,select{min-height:42px}
+  .drag-handle{min-width:32px;width:32px;height:40px}
+  .library-item{min-width:0}
+  .scanner-panel{max-height:calc(100dvh - 28px);padding-bottom:max(14px,env(safe-area-inset-bottom))}
+}
+@media(max-width:360px){
+  .tabs{gap:6px}
+  .tab{padding:8px 9px;font-size:13px}
+  .library-item-meta{font-size:10.5px}
+}
+
+/* Stage 1: unobtrusive, non-blocking Library add confirmation */
+.app-toast{
+  position:fixed;right:16px;bottom:16px;z-index:120;
+  max-width:min(220px,calc(100vw - 32px));
+  padding:10px 14px;border:1px solid #a85d24;border-radius:11px;
+  background:#24201c;color:#f4a261;
+  box-shadow:0 8px 24px #0007;font:600 13px/1.35 "Manrope",system-ui,sans-serif;
+  opacity:0;visibility:hidden;transform:translateY(5px);
+  transition:opacity .16s ease,transform .16s ease,visibility .16s;
+  pointer-events:none;
+}
+.app-toast.is-visible{opacity:1;visibility:visible;transform:translateY(0)}
+@media(max-width:600px){
+  .app-toast{right:12px;bottom:12px;max-width:calc(100vw - 24px);padding:9px 12px}
+}
+@media(prefers-reduced-motion:reduce){.app-toast{transition:none}}
 </style>
+<div id="appToast" class="app-toast" role="status" aria-live="polite" aria-hidden="true"></div>
 <script src="foods.js"></script><script src="app.js"></script>
 <script>
 // Keep the app on its orange theme; the colour selector has been removed.
