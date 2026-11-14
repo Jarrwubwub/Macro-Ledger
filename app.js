@@ -41,6 +41,8 @@ foods=foods.map(f=>{
 });
 let categories=load('macroCategories',[]);
 let logs=load('macroLogs',{});
+let weightLogs=load('macroWeightLogs',[]);
+if(!Array.isArray(weightLogs))weightLogs=[];
 let currentDate=today();
 const num=(v)=>Number(v)||0, fmt=(v)=>Number(v.toFixed(1)).toFixed(1);
 function titleCase(value){const acronyms=new Set(['WPC','TVP','BBQ','BCAA','DHA','EPA']);return String(value).trim().split(/\s+/).map(word=>word.split(/([-/])/).map(part=>{if(acronyms.has(part.toUpperCase()))return part.toUpperCase();if(/^[A-Z0-9]{2,3}$/.test(part))return part.toUpperCase();return part.charAt(0).toLocaleUpperCase()+part.slice(1).toLocaleLowerCase()}).join('')).join(' ')}
@@ -54,7 +56,7 @@ function addEntry(food,qty=food.baseQty,unit=food.unit){
  const entry={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),loggedAt:Date.now(),name:food.name,qty,unit,kcal:food.kcal*factor,protein:food.protein*factor,carbs:food.carbs*factor,fat:food.fat*factor};
  logs[currentDate]=[...entries(),entry];save();renderDiary();
 }
-function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','scanner','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='history')renderHistory()}
+function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','scanner','weight','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='history')renderHistory();if(tab==='weight')renderWeight()}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 const appTitle=$('appTitle');appTitle.addEventListener('click',()=>setTab('diary'));appTitle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTab('diary')}});
 $('openHistory').onclick=()=>{ $('historyDate').value=currentDate; setTab('history'); }; 
@@ -67,13 +69,46 @@ function renderDiary(){
  $('proteinProgress').style.width=Math.min(100,t.protein/200*100)+'%';$('proteinProgressLabel').textContent=fmt(t.protein)+' / 200 g';
  $('macroCalories').textContent=Math.round(macro)+' kcal';$('difference').textContent=(diff>0?'+':'')+Math.round(diff)+' kcal';$('entryCount').textContent=entries().length;
  const notice=$('discrepancy');notice.classList.toggle('hide',entries().length===0||Math.abs(diff)<25);notice.textContent=`Your supplied food calories differ from calories calculated from macros by ${Math.round(diff)} kcal. Supplied calorie values are preserved.`;
- $('diaryEntries').innerHTML=entries().length?entries().map(x=>`<div class="entry"><div><b>${esc(x.name)}</b><div class="tiny">${fmt(x.qty)} ${esc(x.unit)} · ${fmt(x.kcal)} kcal · P ${fmt(x.protein)} g · C ${fmt(x.carbs)} g · F ${fmt(x.fat)} g</div></div><button class="btn danger smallbtn" data-remove="${x.id}">Remove</button></div>`).join(''):'<div class="muted tiny">No foods logged yet.</div>';
+ $('diaryEntries').innerHTML=entries().length?entries().map(x=>`<div class="entry" data-entry-id="${esc(x.id)}"><button class="drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(x.name)}" title="Hold, then drag to reorder">⠿</button><div><b>${esc(x.name)}</b><div class="tiny">${fmt(x.qty)} ${esc(x.unit)} · ${fmt(x.kcal)} kcal · P ${fmt(x.protein)} g · C ${fmt(x.carbs)} g · F ${fmt(x.fat)} g</div></div><button class="btn danger smallbtn" data-remove="${esc(x.id)}">Remove</button></div>`).join(''):'<div class="muted tiny">No foods logged yet.</div>';
  $('diaryEntries').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{logs[currentDate]=entries().filter(x=>x.id!==b.dataset.remove);save();renderDiary()});
+ enableLongPressReorder($('diaryEntries'),'.entry','.drag-handle',()=>{const byId=new Map(entries().map(x=>[String(x.id),x]));logs[currentDate]=[...$('diaryEntries').querySelectorAll('[data-entry-id]')].map(row=>byId.get(row.dataset.entryId)).filter(Boolean);save();});
  $('clearDay').disabled=!entries().length;
  renderDailyHistory();
 }
 
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function enableLongPressReorder(container,rowSelector,handleSelector,onCommit){
+ let timer=null,active=false,pointerId=null,row=null,moved=false,startX=0,startY=0;
+ const clear=()=>{if(timer)clearTimeout(timer);timer=null;};
+ container.querySelectorAll(handleSelector).forEach(handle=>{
+  handle.addEventListener('pointerdown',e=>{
+   if(e.button!==undefined&&e.button!==0)return;
+   clear();active=false;moved=false;pointerId=e.pointerId;row=handle.closest(rowSelector);startX=e.clientX;startY=e.clientY;
+   timer=setTimeout(()=>{active=true;row?.classList.add('is-dragging');handle.classList.add('is-grabbing');},260);
+   e.preventDefault();
+  });
+ });
+ const move=e=>{
+  if(pointerId!==e.pointerId)return;
+  if(!active){if(Math.abs(e.clientX-startX)>12||Math.abs(e.clientY-startY)>18)clear();return;}
+  e.preventDefault();
+  const under=document.elementFromPoint(e.clientX,e.clientY),target=under?.closest(rowSelector);
+  if(!target||target===row||!container.contains(target))return;
+  const rect=target.getBoundingClientRect();
+  if(e.clientY<rect.top+rect.height/2)container.insertBefore(row,target);
+  else container.insertBefore(row,target.nextSibling);
+  moved=true;
+ };
+ const finish=e=>{
+  if(pointerId!==e.pointerId)return;
+  clear();
+  if(active){row?.classList.remove('is-dragging');container.querySelectorAll('.is-grabbing').forEach(x=>x.classList.remove('is-grabbing'));if(moved)onCommit();}
+  active=false;pointerId=null;row=null;moved=false;
+ };
+ document.addEventListener('pointermove',move,{passive:false});
+ document.addEventListener('pointerup',finish);
+ document.addEventListener('pointercancel',finish);
+}
 function quantityInput(f,index){const whole=f.unit.toLowerCase()!=='g';const qty=whole?Math.max(0,Math.round(Number(f.baseQty)||0)):(Number(f.baseQty)||0);return `<input aria-label="Amount of ${esc(f.name)}" type="number" min="0" step="${whole?'1':'0.1'}" inputmode="${whole?'numeric':'decimal'}" value="${qty}" data-foodqty="${index}" data-whole="${whole?'1':'0'}">`}
 function addControls(f,index){const hasServe=f.unit==='g'&&Number(f.serveGrams)>0;return `<div class="qtyadd">${quantityInput(f,index)}${hasServe?`<select aria-label="Measurement unit for ${esc(f.name)}" data-foodunit="${index}"><option value="g">g</option><option value="serve">${esc(f.serveName||'Serve')} (${fmt(f.serveGrams)} g)</option></select>`:`<span>${esc(f.unit)}</span>`}<button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div>`}
 function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions">${button?`<div class="qtyadd">${quantityInput(f,index)}<span>${esc(f.unit)}</span><button class="btn secondary smallbtn" data-addfood="${index}">Add</button></div>`:''}<button class="btn ghost smallbtn" data-editfood="${index}">Edit</button><button class="btn danger smallbtn" data-deletefood="${index}">Delete</button></div></div>`}
@@ -93,8 +128,9 @@ function renderLibrary(){
  const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q));
  list.sort((a,b)=>{if(sort==='recent'){const au=usage.get(a.name.toLocaleLowerCase())||{last:0},bu=usage.get(b.name.toLocaleLowerCase())||{last:0};return bu.last-au.last||a.name.localeCompare(b.name,undefined,{sensitivity:'base'});}return a.name.localeCompare(b.name,undefined,{sensitivity:'base'});});
  $('foodCount').textContent=foods.length+' foods';
- $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item"><input class="food-select" type="checkbox" aria-label="Select ${esc(f.name)} for deletion" data-selectfood="${i}"><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||'<div class="tiny muted">No matching foods.</div>';
+ $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item" data-food-id="${esc(f.id)}">${sort==='custom'?`<button class="drag-handle library-drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(f.name)}" title="Hold, then drag to reorder">⠿</button>`:'<span class="library-drag-placeholder" aria-hidden="true"></span>'}<input class="food-select" type="checkbox" aria-label="Select ${esc(f.name)} for deletion" data-selectfood="${i}"><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||'<div class="tiny muted">No matching foods.</div>';
  bindFoodActions($('foodList'));
+ if(sort==='custom')enableLongPressReorder($('foodList'),'.library-item','.library-drag-handle',()=>{const visible=[...$('foodList').querySelectorAll('[data-food-id]')].map(x=>x.dataset.foodId),visibleSet=new Set(visible),ordered=foods.filter(f=>visibleSet.has(String(f.id))),byId=new Map(ordered.map(f=>[String(f.id),f])),ranked=visible.map(id=>byId.get(id)).filter(Boolean);let cursor=0;foods=foods.map(f=>visibleSet.has(String(f.id))?ranked[cursor++]:f);save();renderLibrary();});
  const updateSelection=()=>{const boxes=[...$('foodList').querySelectorAll('[data-selectfood]')],selected=boxes.filter(x=>x.checked).length,all=$('selectAllFoods');$('selectedFoodCount').textContent=selected+' selected';$('deleteSelectedFoods').disabled=selected===0;$('deleteSelectedFoods').textContent=`Delete selected (${selected})`;all.checked=boxes.length>0&&selected===boxes.length;all.indeterminate=selected>0&&selected<boxes.length;};
  $('foodList').querySelectorAll('[data-selectfood]').forEach(box=>box.addEventListener('change',updateSelection));
  $('selectAllFoods').checked=false;$('selectAllFoods').indeterminate=false;$('selectAllFoods').onchange=()=>{$('foodList').querySelectorAll('[data-selectfood]').forEach(box=>box.checked=$('selectAllFoods').checked);updateSelection()};
@@ -188,12 +224,31 @@ function renderHistory(){
 }
 $('historyDate').onchange=renderHistory;$('loadHistory').onclick=()=>{currentDate=$('historyDate').value||today();$('logDate').value=currentDate;setTab('diary');renderDiary()};
 function download(name,content,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-$('exportJSON').onclick=()=>download('macro-ledger-backup.json',JSON.stringify({foods,logs},null,2),'application/json');
+$('exportJSON').onclick=()=>download('macro-ledger-backup.json',JSON.stringify({foods,logs,weightLogs},null,2),'application/json');
 $('exportCSV').onclick=()=>{const rows=[['Date','Food','Quantity','Unit','Calories','Protein g','Carbs g','Fat g']];Object.entries(logs).forEach(([date,items])=>items.forEach(x=>rows.push([date,x.name,x.qty,x.unit,x.kcal,x.protein,x.carbs,x.fat])));const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');download('macro-ledger-history.csv',csv,'text/csv')};
 function historyExportText(){const dates=Object.keys(logs).filter(date=>Array.isArray(logs[date])&&logs[date].length).sort();if(!dates.length)return "MK's Macro Ledger\n\nNo diary entries saved.";return ["MK's Macro Ledger — Food Diary Export",'',...dates.flatMap(date=>{const items=logs[date],t=totals(items);return [date,`${items.length} entries | ${Math.round(t.kcal)} kcal | Protein ${fmt(t.protein)} g | Carbs ${fmt(t.carbs)} g | Fat ${fmt(t.fat)} g`,'',...items.map(x=>`${x.name} — ${fmt(x.qty)} ${x.unit} | ${fmt(x.kcal)} kcal | P ${fmt(x.protein)} g | C ${fmt(x.carbs)} g | F ${fmt(x.fat)} g`),'','----------------------------------------','']})].join('\n')}
 $('exportTXT').onclick=()=>download('macro-ledger-history.txt',historyExportText(),'text/plain;charset=utf-8');
 $('exportPDF').onclick=()=>{const content=historyExportText(),printWindow=window.open('','_blank');if(!printWindow){alert('Please allow pop-ups for this site to create the PDF.');return;}const safe=esc(content);printWindow.document.open();printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Macro Ledger — Food Diary</title><style>body{font:12pt/1.5 Arial,sans-serif;color:#111;margin:24mm;white-space:pre-wrap}h1{font-size:18pt}@page{size:auto;margin:18mm}</style></head><body><h1>MK's Macro Ledger</h1><pre>${safe}</pre><script>window.onload=()=>{window.focus();window.print()}</script></body></html>`);printWindow.document.close();};
-$('importJSON').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.foods)||typeof data.logs!=='object')throw Error();foods=data.foods;logs=data.logs;save();renderDiary();renderLibrary();alert('Backup restored.')}catch{alert('That file does not look like a Macro Ledger backup.')}e.target.value=''};
+$('importJSON').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.foods)||typeof data.logs!=='object')throw Error();foods=data.foods;logs=data.logs;if(Array.isArray(data.weightLogs))weightLogs=data.weightLogs;localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));save();renderDiary();renderLibrary();renderWeight();alert('Backup restored.')}catch{alert('That file does not look like a Macro Ledger backup.')}e.target.value=''};
+
+// Weight diary: stored independently from food logs.
+function renderWeight(){
+ const host=$('weightEntries');if(!host)return;
+ const sorted=[...weightLogs].sort((a,b)=>String(b.date).localeCompare(String(a.date))||(Number(b.loggedAt)||0)-(Number(a.loggedAt)||0));
+ $('weightCount').textContent=`${sorted.length} ${sorted.length===1?'entry':'entries'}`;
+ if(!sorted.length){host.innerHTML='<div class="muted tiny">No weight entries yet.</div>';return;}
+ host.innerHTML=sorted.map(item=>{
+  const label=new Date(String(item.date)+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  return `<div class="daily-history-row"><div><div class="daily-history-date">${esc(label)}</div><div class="daily-history-macros">${fmt(Number(item.weight)||0)} kg</div></div><button class="btn danger smallbtn" type="button" data-delete-weight="${esc(item.id)}">Delete</button></div>`;
+ }).join('');
+ host.querySelectorAll('[data-delete-weight]').forEach(button=>button.onclick=()=>{if(!confirm('Delete this weight entry?'))return;weightLogs=weightLogs.filter(x=>String(x.id)!==button.dataset.deleteWeight);localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));renderWeight();});
+}
+$('weightForm').onsubmit=e=>{
+ e.preventDefault();const weight=Number($('weightInput').value);
+ if(!Number.isFinite(weight)||weight<=0||weight>500){$('weightStatus').textContent='Enter a valid weight in kilograms.';return;}
+ weightLogs.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),date:today(),loggedAt:Date.now(),weight});
+ localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));$('weightInput').value='';$('weightStatus').textContent=`Saved ${fmt(weight)} kg for ${new Date().toLocaleDateString()}.`;renderWeight();
+};
 
 // Barcode lookup and review flow. Nothing is saved until the user confirms.
 let scannerInstance=null, cameraStream=null, scanFrame=null, zxingLoaded=false;

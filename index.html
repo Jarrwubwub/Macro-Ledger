@@ -55,13 +55,25 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .scanner-panel .toolbar button{flex:0 1 160px}
 @media(max-width:520px){.scanner-panel{width:92vw;padding:14px}#barcodeCamera{width:80vw!important;height:min(42vh,280px)}}
 
+
+
+/* Long-press drag sorting for touch and pointer devices */
+.drag-handle{display:flex;align-items:center;justify-content:center;width:30px;min-width:30px;height:34px;padding:0;border:1px solid var(--line);border-radius:9px;background:var(--surface3);color:var(--muted);font-size:21px;line-height:1;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.drag-handle:active,.drag-handle.is-grabbing{cursor:grabbing;color:var(--ink);border-color:var(--accent)}
+.is-dragging{opacity:.48;outline:1px dashed var(--accent);outline-offset:2px}
+.entry{grid-template-columns:30px minmax(0,1fr) auto;align-items:center}
+.library-item{grid-template-columns:30px 18px minmax(0,1fr);align-items:start}
+.library-drag-placeholder{width:30px;height:30px;display:block}
+.library-item>.food-select{margin:7px 0 0;width:18px;height:18px}
+@media(max-width:430px){.library-item{grid-template-columns:26px 18px minmax(0,1fr);gap:7px}.drag-handle{width:26px;min-width:26px;height:32px}}
+
 </style>
 </head>
 <body>
 <header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to Daily log">MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div></div></header>
 <main>
 <div class="tabs">
-<button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Barcode scanner</button>
+<button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Barcode scanner</button><button class="tab" data-tab="weight">Weight</button>
 </div>
 <section id="diary" class="section">
 <div class="card section">
@@ -119,7 +131,8 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="card section">
 <div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
 <input id="librarySearch" placeholder="Search foods...">
-<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px"><select id="categoryFilter"><option value="All">All categories</option></select><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="recent">Recently used</option></select></div>
+<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px"><select id="categoryFilter"><option value="All">All categories</option></select><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="recent">Recently used</option><option value="custom">Custom order (drag to arrange)</option></select></div>
+<p class="tiny muted" style="margin:-4px 0 2px">Choose Custom order to arrange foods by holding the handle and dragging.</p>
 <div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button><button class="btn danger smallbtn" id="deleteSelectedFoods" type="button" disabled>Delete selected (0)</button></div>
 <div class="row between library-select-all"><label class="tiny"><input id="selectAllFoods" type="checkbox"> Select all visible foods</label><span class="tiny muted" id="selectedFoodCount">0 selected</span></div>
 <div id="foodList"></div>
@@ -144,6 +157,21 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </div>
 </section>
 
+<section id="weight" class="section hide">
+<div class="card section">
+<h2>Weight</h2>
+<p class="muted tiny" style="margin:0">Record your body weight. Each entry is automatically dated.</p>
+<form id="weightForm" class="grid" style="grid-template-columns:minmax(0,1fr) auto;align-items:end">
+<div class="field"><label for="weightInput">Body weight (kg)</label><input id="weightInput" type="number" min="0.1" max="500" step="0.1" placeholder="e.g. 82.5" required inputmode="decimal"></div>
+<button class="btn" type="submit">Log weight</button>
+</form>
+<div id="weightStatus" class="tiny muted" aria-live="polite"></div>
+</div>
+<div class="card section">
+<div class="row between"><h2 style="margin:0">Weigh-in history</h2><span class="pill" id="weightCount">0 entries</span></div>
+<div id="weightEntries" class="daily-history-list"><div class="muted tiny">No weight entries yet.</div></div>
+</div>
+</section>
 <section id="history" class="section hide">
 <div class="card section">
 <h2>History & backup</h2>
