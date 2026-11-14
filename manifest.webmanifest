@@ -1,11 +1,11 @@
 {
-  "name": "MK's Macro Ledger",
-  "short_name": "MK's Macro Ledger",
+  "name": "Garden Ledger",
+  "short_name": "Garden Ledger",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f5f5f5",
-  "theme_color": "#000000",
-  "description": "Offline food library, serving converter and daily macro diary.",
+  "background_color": "#080d09",
+  "theme_color": "#080d09",
+  "description": "Offline planting and growth tracker.",
   "icons": [
     {
       "src": "icon-192.png",
