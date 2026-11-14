@@ -46,6 +46,14 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
   #quickResults .qtyadd button{width:76px;min-height:42px;padding:8px 10px;justify-self:stretch}
 }
 @media(min-width:601px){.tabs{flex-wrap:wrap;overflow:visible}.tab{flex:1 1 auto;text-align:center}}
+/* Camera scanner: centered overlay with a compact viewport */
+.scanner-overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px;background:rgba(0,0,0,.78);}
+.scanner-panel{width:min(90vw,460px);max-height:85vh;overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 16px 48px #0009;display:grid;gap:12px;text-align:center}
+#barcodeCamera{width:min(80vw,400px)!important;height:min(50vh,320px);max-height:50vh;margin:0 auto!important;overflow:hidden;border-radius:12px;background:#080808;display:grid;place-items:center}
+#barcodeCamera video,#barcodeCamera canvas{width:100%!important;height:100%!important;max-height:50vh!important;object-fit:contain!important}
+.scanner-panel .toolbar{justify-content:center}
+.scanner-panel .toolbar button{flex:0 1 160px}
+@media(max-width:520px){.scanner-panel{width:92vw;padding:14px}#barcodeCamera{width:80vw!important;height:min(42vh,280px)}}
 
 </style>
 </head>
@@ -84,9 +92,9 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="field"><label>Barcode number</label><input id="barcodeInput" inputmode="numeric" autocomplete="off" placeholder="Scan or type barcode"></div>
 <div class="field" style="align-self:end"><button class="btn" id="lookupBarcode" type="button">Look up product</button></div>
 </div>
-<div class="toolbar"><button class="btn secondary" id="startScanner" type="button">Use camera scanner</button><button class="btn ghost" id="stopScanner" type="button" disabled>Stop camera</button></div>
+<div class="toolbar"><button class="btn secondary" id="startScanner" type="button">Use camera scanner</button></div>
 <div id="scannerStatus" class="tiny" aria-live="polite"></div>
-<div id="barcodeCamera" class="hide" style="width:100%;max-width:420px;margin:auto"></div>
+<div id="scannerOverlay" class="scanner-overlay hide" role="dialog" aria-modal="true" aria-label="Barcode camera scanner"><div class="scanner-panel"><h3 style="margin:0">Scan barcode</h3><div id="barcodeCamera"></div><div class="tiny">Hold the barcode inside the camera frame.</div><div class="toolbar"><button class="btn ghost" id="stopScanner" type="button" disabled>Close camera</button></div></div></div>
 <div id="barcodeReview" class="hide section" style="border:1px solid var(--line);border-radius:12px;padding:12px">
 <h3 style="margin:0">Review product before saving</h3>
 <div class="field"><label>Product</label><input id="scanName"></div>

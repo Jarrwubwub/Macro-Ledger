@@ -227,12 +227,12 @@ async function stopCameraScanner(){
  if(scanFrame)cancelAnimationFrame(scanFrame);scanFrame=null;
  if(scannerInstance){try{await scannerInstance.stop();await scannerInstance.clear();}catch{}scannerInstance=null;}
  if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}
- $('barcodeCamera').classList.add('hide');$('stopScanner').disabled=true;$('startScanner').disabled=false;
+ $('scannerOverlay').classList.add('hide');$('stopScanner').disabled=true;$('startScanner').disabled=false;
 }
 $('stopScanner').onclick=stopCameraScanner;
 $('startScanner').onclick=async()=>{
  if(!navigator.mediaDevices?.getUserMedia){setScannerStatus('Camera access is unavailable in this browser. Enter the barcode manually.');return;}
- $('startScanner').disabled=true;$('stopScanner').disabled=false;$('barcodeCamera').classList.remove('hide');
+ $('startScanner').disabled=true;$('stopScanner').disabled=false;$('scannerOverlay').classList.remove('hide');
  try{
   // Native BarcodeDetector where available; use html5-qrcode as a browser fallback.
   if('BarcodeDetector'in window){
