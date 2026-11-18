@@ -287,18 +287,14 @@ body > header { padding-top: 38px !important; }
 <style>
 
 /* v100: bring Daily Log food entries up by approximately 7 mm. */
-#diary #diaryEntries {
-  margin-top: max(0px, calc(var(--diary-entry-clearance, 18px) - 45px)) !important;
-}
+#diary #diary #diaryEntries { margin-top: 19px !important; }
 
 </style>
 <style>
 
 /* v102: keep the first Daily Log entry a consistent 5mm below Add food
    on both mobile and desktop; do not use the old viewport-sized spacer. */
-#diary #diaryEntries {
-  margin-top: 19px !important;
-}
+#diary #diary #diaryEntries { margin-top: 19px !important; }
 
 </style>
 </head>
@@ -702,9 +698,7 @@ body > main::-webkit-scrollbar { width: 7px; }
 body > main::-webkit-scrollbar-thumb { background: #626a73; border-radius: 8px; }
 /* The first diary entry starts below the initial viewport. The spacer is
    calculated from the actual Add food button position and viewport height. */
-#diary #diaryEntries {
-  margin-top: var(--diary-entry-clearance, 18px) !important;
-}
+#diary #diary #diaryEntries { margin-top: 19px !important; }
 @media (max-width: 600px) {
   body > main { top: var(--ledger-header-height, 170px) !important; }
 }
@@ -780,4 +774,12 @@ body > header .tabs {
 <script>
 (()=>{const allowed=['orange','blue','yellow','red','monochrome'];const saved=localStorage.getItem('macroLedgerTheme');const theme=allowed.includes(saved)?saved:'orange';document.documentElement.dataset.theme=theme;const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content='#080808';})();
 </script>
+
+<style id="diary-entry-spacing-v103">
+/* Single source of truth: 19px gap below Add food on mobile and desktop. */
+body #diary #diaryEntries {
+  margin-top: 19px !important;
+}
+</style>
+
 </body></html>
