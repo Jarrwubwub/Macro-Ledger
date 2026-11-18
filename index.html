@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#14171b">
-<meta name="description" content="Personal food library and daily macro tracker.">
+<meta name="description" content="Personal nutrition and exercise tracking.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>MK's Macro Ledger</title>
+<title>MK's Personal Ledger</title>
 <style>
 :root{--bg:#181b1f;--panel:#22272d;--ink:#e7e9ec;--muted:#a2aab4;--line:#39414a;--green:#d8dde3;--green2:#343b43;--red:#e1a0a0;--shadow:0 5px 20px #00000024}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
 header{background:var(--header);color:var(--ink);padding:20px 18px 17px;position:sticky;top:0;z-index:5}header .top{display:flex;align-items:center;justify-content:space-between;gap:12px}h1{font-size:22px;margin:0;font-weight:750;letter-spacing:-.5px;cursor:pointer}h1:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:3px}.sub{color:#d0d0d0;font-size:12px;margin-top:3px}
-main{max-width:760px;margin:auto;padding:15px;display:grid;gap:14px}.tabs{display:flex;gap:7px;overflow:auto;padding:8px 0;position:sticky;top:86px;z-index:6;background:var(--header);}.tab{border:1px solid var(--line);background:#252b32;color:var(--muted);border-radius:999px;padding:9px 14px;font-weight:650;white-space:nowrap}.tab.active{background:#d8dde3;border-color:#d8dde3;color:#171a1e}
+main{max-width:760px;margin:auto;padding:15px;display:grid;gap:14px}.tabs{display:flex;gap:7px;overflow:auto;padding:8px 0;position:sticky;top:132px;z-index:6;background:var(--header);}.tab{border:1px solid var(--line);background:#252b32;color:var(--muted);border-radius:999px;padding:9px 14px;font-weight:650;white-space:nowrap}.tab.active{background:#d8dde3;border-color:#d8dde3;color:#171a1e}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow)}h2{font-size:17px;margin:0 0 12px;letter-spacing:-.2px}.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted)}
 input,select{width:100%;min-width:0;border:1px solid var(--line);border-radius:11px;padding:11px 12px;background:#2a3037;color:var(--ink);font:inherit}label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin:0 0 5px}.field{min-width:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.btn{border:0;border-radius:11px;padding:11px 14px;background:var(--green);color:#171a1e;font:700 14px inherit;cursor:pointer}.btn.secondary{background:var(--green2);color:var(--ink)}.btn.ghost{background:#2b3138;color:var(--ink);border:1px solid var(--line)}.btn.danger{background:#392c30;color:#efb7bd}.btn:disabled{opacity:.4}.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.foodrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.foodrow:last-child{border:0}.qtyadd{display:flex;align-items:center;gap:5px}.qtyadd input{width:82px;padding:7px}.qtyadd select{width:auto;max-width:145px;padding:7px 24px 7px 8px;font-size:12px;flex:0 1 auto}.qtyadd span{font-size:12px;color:var(--muted)}.foodrow .info{flex:1;min-width:0}.food-actions{justify-content:flex-end;flex-wrap:wrap}.food-actions>*{flex:0 0 auto}dialog::backdrop{background:#0008}dialog input{margin-bottom:2px}.foodrow strong{display:block;font-size:14px}.pill{font-size:11px;color:var(--muted);background:#303740;padding:3px 7px;border-radius:99px;display:inline-block}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.stat{background:#2b3138;border-radius:13px;padding:12px}.stat .v{font-size:24px;font-weight:800;letter-spacing:-.7px;font-variant-numeric:tabular-nums}.stat .l{font-size:12px;color:var(--muted)}.progress{height:8px;background:#3a424b;border-radius:99px;overflow:hidden}.progress>i{height:100%;display:block;background:#c6cdd5;border-radius:99px}.hide{display:none!important}.entry{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}.entry:last-child{border:0}.entry button{padding:6px 9px}.notice{padding:11px 12px;background:#2b3239;border:1px solid var(--line);color:var(--ink);border-radius:11px;font-size:12px}.ok{color:#c5dfce}.dangertext{color:#e1a0a0}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar>*{flex:1}.section{display:grid;gap:11px}.amountline{display:grid;grid-template-columns:1fr 100px;gap:9px;align-items:end}.result{background:#2b3138;border-radius:12px;padding:12px}.result strong{font-size:20px}.searchbar{position:sticky;top:0;background:var(--panel);padding:0 0 8px;z-index:2}.smallbtn{font-size:12px;padding:7px 10px}.footer{text-align:center;font-size:11px;color:var(--muted);padding:5px 10px 18px}
 @media(max-width:520px){.foodrow{align-items:flex-start;flex-wrap:wrap}.food-actions{width:100%;justify-content:flex-start}.food-actions .smallbtn{padding:7px 9px}}@media(max-width:380px){.grid4{grid-template-columns:repeat(2,1fr)}.stat .v{font-size:21px}}
@@ -177,6 +177,13 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
   .weight-history-details .weight-history-row .library-delete-action{min-height:32px;padding:5px 8px!important;font-size:11px;line-height:1.1;}
 }
 
+
+/* v86: shared ledger switch; existing Nutrition tab and screen styling retained. */
+.ledger-switch{display:flex;gap:6px;margin-top:10px;max-width:270px}
+.ledger-switch-button{flex:1;min-height:34px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface2);color:var(--muted);font:700 12px/1.2 "Manrope",system-ui,sans-serif;cursor:pointer}
+.ledger-switch-button.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#exerciseHome .stat strong{display:block;font-size:12px;margin-top:5px}
+@media(max-width:600px){.ledger-switch{max-width:none}.ledger-switch-button{min-height:36px}}
 </style>
 
 <style>
@@ -238,7 +245,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </style>
 </head>
 <body>
-<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to Daily log">MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div><button id="openSettings" class="settings-gear" type="button" aria-label="Open Settings" title="Settings">⚙</button></div></header>
+<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to current ledger">MK's Macro Ledger</h1><div class="sub" id="appSubtitle">The food you eat, written down.</div><div class="ledger-switch" role="group" aria-label="Switch ledger"><button type="button" class="ledger-switch-button active" data-ledger="nutrition" aria-pressed="true">Nutrition</button><button type="button" class="ledger-switch-button" data-ledger="exercise" aria-pressed="false">Exercise</button></div></div><button id="openSettings" class="settings-gear" type="button" aria-label="Open Settings" title="Settings">⚙</button></div></header>
 <main>
 <div class="tabs">
 <button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Scanner</button><button class="tab" data-tab="weight">Weight</button>
@@ -378,6 +385,9 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </details>
 </div>
 </section>
+<section id="exerciseHome" class="section hide" aria-label="Exercise Ledger">
+<div class="card section"><div class="row between"><h2 style="margin:0">Exercise Ledger</h2><span class="pill">Stage 1</span></div><p class="muted">Your training and physical activity, recorded and measured.</p><div class="notice">The Exercise Ledger workspace is being prepared. Your Nutrition ledger remains available using the switch above or a two-finger horizontal swipe.</div><h2>Coming next</h2><div class="grid"><div class="stat"><div class="l">Daily log</div><strong>Workout and activity tracking</strong></div><div class="stat"><div class="l">Exercise library</div><strong>Saved exercises and templates</strong></div><div class="stat"><div class="l">Progress</div><strong>Performance and personal records</strong></div><div class="stat"><div class="l">History</div><strong>Training calendar and records</strong></div></div></div>
+</section>
 <section id="settings" class="section hide">
 <div class="card section"><div class="row between"><h2 style="margin:0">Settings</h2><button class="btn ghost smallbtn" id="closeSettings" type="button">Done</button></div>
 <details class="target-settings settings-section" id="appearanceSettings"><summary>Appearance</summary><p class="tiny muted">Choose the colour palette used throughout the app.</p><div class="theme-options">
@@ -387,9 +397,9 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <button type="button" class="theme-choice" data-theme-choice="red" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Red</strong><small>Black, charcoal and red</small></button>
 <button type="button" class="theme-choice" data-theme-choice="monochrome" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Monochrome</strong><small>Black, charcoal, white and grey</small></button>
 </div></details>
-<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v81</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
+<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v86</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
 <details class="target-settings settings-section" id="dataSettings"><summary>Data &amp; backups</summary><p class="tiny muted">Export or merge your data. Imports are non-destructive and retain existing records.</p><div class="toolbar"><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div><div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div><div class="field"><label>Import and merge a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div></details>
-<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Macro Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v81</span></p></details>
+<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Macro Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v86</span></p></details>
 </div></section>
 <section id="history" class="section hide">
 <div class="card section">
