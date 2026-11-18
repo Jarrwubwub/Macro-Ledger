@@ -287,14 +287,14 @@ body > header { padding-top: 38px !important; }
 <style>
 
 /* v100: bring Daily Log food entries up by approximately 7 mm. */
-#diary #diary #diaryEntries { margin-top: 19px !important; }
+
 
 </style>
 <style>
 
 /* v102: keep the first Daily Log entry a consistent 5mm below Add food
    on both mobile and desktop; do not use the old viewport-sized spacer. */
-#diary #diary #diaryEntries { margin-top: 19px !important; }
+
 
 </style>
 </head>
@@ -315,7 +315,7 @@ body > header { padding-top: 38px !important; }
 
 <div class="target-progress-list" id="macroTargetProgressList"></div>
 <button class="daily-add-food" id="dailyAddFood" type="button"><span aria-hidden="true">＋</span> Add food</button>
-<div id="diaryEntries" class="section" style="margin-top:10px"><div class="muted tiny">No foods logged yet.</div></div>
+<div id="diaryEntries" class="section"><div class="muted tiny">No foods logged yet.</div></div>
 <div class="grid4 tiny"><div>Calories from macros<br><b id="macroCalories">0 kcal</b></div><div>Difference<br><b id="difference">0 kcal</b></div><div>Entries<br><b id="entryCount">0</b></div><div>Daily targets<br><b>Customisable</b></div></div>
 <div id="discrepancy" class="notice hide"></div>
 <details class="target-settings"><summary>Daily targets</summary><p class="tiny muted" style="margin:0">Set the daily goals you want to track. Leave a field blank to turn off that target.</p>
@@ -698,7 +698,7 @@ body > main::-webkit-scrollbar { width: 7px; }
 body > main::-webkit-scrollbar-thumb { background: #626a73; border-radius: 8px; }
 /* The first diary entry starts below the initial viewport. The spacer is
    calculated from the actual Add food button position and viewport height. */
-#diary #diary #diaryEntries { margin-top: 19px !important; }
+
 @media (max-width: 600px) {
   body > main { top: var(--ledger-header-height, 170px) !important; }
 }
@@ -729,6 +729,7 @@ body > header .tabs {
   const main = document.querySelector('body > main');
   const addFood = document.getElementById('dailyAddFood');
   const diaryEntries = document.getElementById('diaryEntries');
+  if (diaryEntries) diaryEntries.style.setProperty('margin-top', '19px', 'important');
   const diaryCard = document.querySelector('#diary > .card');
   if (!header || !main) return;
 
@@ -737,28 +738,15 @@ body > header .tabs {
     document.documentElement.style.setProperty('--ledger-header-height', `${height}px`);
   };
 
-  const setDailyEntryClearance = () => {
-    if (!addFood || !diaryEntries || !main || main.scrollTop > 1) return;
-    const mainRect = main.getBoundingClientRect();
-    const addRect = addFood.getBoundingClientRect();
-    const remaining = main.clientHeight - (addRect.bottom - mainRect.top);
-    const clearance = Math.max(18, Math.ceil(remaining + 20));
-    document.documentElement.style.setProperty('--diary-entry-clearance', `${clearance}px`);
-  };
-
   const refreshLayout = () => {
     setHeaderSpace();
-    requestAnimationFrame(setDailyEntryClearance);
+    if (diaryEntries) diaryEntries.style.setProperty('margin-top', '19px', 'important');
   };
 
   refreshLayout();
   if ('ResizeObserver' in window) {
     const headerObserver = new ResizeObserver(refreshLayout);
     headerObserver.observe(header);
-    if (diaryCard) {
-      const diaryObserver = new ResizeObserver(() => requestAnimationFrame(setDailyEntryClearance));
-      diaryObserver.observe(diaryCard);
-    }
   }
   window.addEventListener('resize', refreshLayout, { passive: true });
   window.addEventListener('orientationchange', () => requestAnimationFrame(refreshLayout), { passive: true });
@@ -777,9 +765,8 @@ body > header .tabs {
 
 <style id="diary-entry-spacing-v103">
 /* Single source of truth: 19px gap below Add food on mobile and desktop. */
-body #diary #diaryEntries {
-  margin-top: 19px !important;
-}
+body 
 </style>
 
+<style id="diary-entry-spacing-v104">#diary #diaryEntries{margin-top:19px!important}</style>
 </body></html>
