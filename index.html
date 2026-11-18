@@ -187,6 +187,13 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .settings-gear{width:42px;height:42px;flex:0 0 42px;font-size:27px}
 #exerciseHome .stat strong{display:block;font-size:12px;margin-top:5px}
 @media(max-width:420px){.header-actions{gap:1px}.ledger-icon-button{width:38px;height:42px;flex-basis:38px}.settings-gear{width:38px;flex-basis:38px}}
+
+/* v95: prevent fixed-height main grid from stretching section rows vertically. */
+body > main {
+  align-content: start !important;
+  grid-auto-rows: max-content !important;
+}
+
 </style>
 
 <style>
