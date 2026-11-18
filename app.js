@@ -121,7 +121,7 @@ document.addEventListener('touchend',e=>{
 },{passive:true});
 document.addEventListener('touchcancel',()=>{ledgerGesture=null},{passive:true});
 $('openHistory').onclick=()=>{ $('historyDate').value=currentDate; setTab('history'); }; 
-$('dailyAddFood').onclick=()=>{setTab('library');window.scrollTo({top:0,behavior:'smooth'});};
+$('dailyAddFood').onclick=()=>{setTab('library');$('main').scrollTo({top:0,behavior:'smooth'});};
 $('logDate').value=currentDate;$('historyDate').value=currentDate;
 $('logDate').onchange=e=>{currentDate=e.target.value||today();renderDiary()};
 function renderDiary(){
@@ -334,7 +334,7 @@ function renderDailyHistory(){
   currentDate=button.dataset.historyDay;
   $('logDate').value=currentDate;
   renderDiary();
-  window.scrollTo({top:0,behavior:'smooth'});
+  $('main').scrollTo({top:0,behavior:'smooth'});
  });
 }
 function dateAtNoon(date){return new Date(String(date)+'T12:00:00');}

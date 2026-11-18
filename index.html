@@ -602,111 +602,55 @@ header .top>div:first-child{min-width:0} header .top h1{line-height:1.2} header 
 
 
 
-/* v92: fixed header and navigation; deliberate spacing and viewport-aware first-screen layout. */
-html { scroll-padding-top: var(--ledger-header-height, 170px); }
+
+/* v93: header is outside the scrolling surface; only main content can scroll. */
+html, body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0 !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
 body {
-  padding-top: var(--ledger-header-height, 170px) !important;
-  overflow-x: hidden;
+  padding-top: 0 !important;
+  overflow-x: hidden !important;
 }
 body > header {
   position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: auto !important;
+  inset: 0 0 auto 0 !important;
   width: 100% !important;
   z-index: 10000 !important;
   transform: none !important;
   -webkit-transform: none !important;
   will-change: auto !important;
   background: var(--header, #181b1f) !important;
-  padding: 10px 18px 17px !important;
-  box-shadow: 0 5px 18px #0008 !important;
 }
-body > header .top {
-  max-width: 760px;
-  margin: 0 auto;
-  display: flex;
-  align-items: flex-end !important;
-  justify-content: space-between;
-  gap: 18px !important;
+body > main {
+  position: fixed !important;
+  top: var(--ledger-header-height, 170px) !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  max-width: 760px !important;
+  margin: 0 auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-gutter: stable;
 }
-body > header .top > div:first-child { min-width: 0; }
-body > header .top .sub { margin-top: 3px; line-height: 1.35; }
-body > header .header-actions {
-  display: flex !important;
-  align-items: flex-end !important;
-  justify-content: space-between !important;
-  gap: 10px !important;
-  flex: 0 0 auto;
-  align-self: flex-end !important;
-}
-body > header .ledger-icon-button,
-body > header .settings-gear {
-  width: 46px !important;
-  height: 44px !important;
-  min-width: 46px !important;
-  flex: 0 0 46px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  display: grid !important;
-  place-items: center !important;
-  color: var(--accent) !important;
-  line-height: 1 !important;
-}
-body > header .ledger-icon-button svg {
-  width: 34px !important;
-  height: 34px !important;
-  display: block;
-  fill: currentColor;
-  stroke: currentColor;
-  stroke-width: .8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-body > header .settings-gear { font-size: 32px !important; }
-body > header .tabs {
-  position: static !important;
-  top: auto !important;
-  max-width: 760px;
-  margin: 22px auto 0 !important;
-  padding: 7px 0 0 !important;
-  background: transparent !important;
-  z-index: auto !important;
-}
-/* Give the daily summary enough vertical breathing room to keep the first logged
-   food row below the initial fold; the Add food action remains the last visible control. */
-#diary > .card:first-child {
-  padding-bottom: 18px;
-}
+body > main::-webkit-scrollbar { width: 7px; }
+body > main::-webkit-scrollbar-thumb { background: #626a73; border-radius: 8px; }
+/* The first diary entry starts below the initial viewport. The spacer is
+   calculated from the actual Add food button position and viewport height. */
 #diary #diaryEntries {
-  margin-top: 18px !important;
+  margin-top: var(--diary-entry-clearance, 18px) !important;
 }
 @media (max-width: 600px) {
-  body > header { padding: 9px 12px 16px !important; }
-  body > header .top { gap: 9px !important; }
-  body > header .header-actions { gap: 7px !important; }
-  body > header .ledger-icon-button,
-  body > header .settings-gear {
-    width: 42px !important;
-    min-width: 42px !important;
-    flex-basis: 42px !important;
-    height: 43px !important;
-  }
-  body > header .ledger-icon-button svg { width: 32px !important; height: 32px !important; }
-  body > header .settings-gear { font-size: 31px !important; }
-  body > header .tabs { margin-top: 20px !important; padding-top: 6px !important; }
-}
-@media (max-width: 360px) {
-  body > header .top { gap: 5px !important; }
-  body > header .header-actions { gap: 4px !important; }
-  body > header .ledger-icon-button,
-  body > header .settings-gear {
-    width: 38px !important;
-    min-width: 38px !important;
-    flex-basis: 38px !important;
-  }
-  body > header .ledger-icon-button svg { width: 30px !important; height: 30px !important; }
+  body > main { top: var(--ledger-header-height, 170px) !important; }
 }
 
 </style>
@@ -715,20 +659,47 @@ body > header .tabs {
 <script>
 (() => {
   const header = document.querySelector('body > header');
-  if (!header) return;
+  const main = document.querySelector('body > main');
+  const addFood = document.getElementById('dailyAddFood');
+  const diaryEntries = document.getElementById('diaryEntries');
+  const diaryCard = document.querySelector('#diary > .card');
+  if (!header || !main) return;
+
   const setHeaderSpace = () => {
     const height = Math.ceil(header.getBoundingClientRect().height);
     document.documentElement.style.setProperty('--ledger-header-height', `${height}px`);
   };
-  setHeaderSpace();
+
+  const setDailyEntryClearance = () => {
+    if (!addFood || !diaryEntries || !main || main.scrollTop > 1) return;
+    const mainRect = main.getBoundingClientRect();
+    const addRect = addFood.getBoundingClientRect();
+    const remaining = main.clientHeight - (addRect.bottom - mainRect.top);
+    const clearance = Math.max(18, Math.ceil(remaining + 20));
+    document.documentElement.style.setProperty('--diary-entry-clearance', `${clearance}px`);
+  };
+
+  const refreshLayout = () => {
+    setHeaderSpace();
+    requestAnimationFrame(setDailyEntryClearance);
+  };
+
+  refreshLayout();
   if ('ResizeObserver' in window) {
-    const observer = new ResizeObserver(setHeaderSpace);
-    observer.observe(header);
+    const headerObserver = new ResizeObserver(refreshLayout);
+    headerObserver.observe(header);
+    if (diaryCard) {
+      const diaryObserver = new ResizeObserver(() => requestAnimationFrame(setDailyEntryClearance));
+      diaryObserver.observe(diaryCard);
+    }
   }
-  window.addEventListener('resize', setHeaderSpace, { passive: true });
-  window.addEventListener('orientationchange', () => requestAnimationFrame(setHeaderSpace), { passive: true });
-  window.addEventListener('pageshow', setHeaderSpace);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setHeaderSpace);
+  window.addEventListener('resize', refreshLayout, { passive: true });
+  window.addEventListener('orientationchange', () => requestAnimationFrame(refreshLayout), { passive: true });
+  window.addEventListener('pageshow', refreshLayout);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshLayout);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshLayout();
+  });
 })();
 </script>
 
