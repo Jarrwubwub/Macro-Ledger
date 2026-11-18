@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=76;
+const APP_VERSION=79;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -194,7 +194,8 @@ function mealTotals(meal){return totals((meal.ingredients||[]).map(resolveMealIn
 function renderMeals(){
  const host=$('mealList');if(!host)return;
  if(!meals.length){host.innerHTML='<div class="tiny muted">No saved meals yet. Create a meal from foods in your Library.</div>';return;}
- host.innerHTML=meals.map(meal=>{const t=mealTotals(meal),names=(meal.ingredients||[]).map(i=>`${esc(i.foodName)} ${fmt(i.qty)} ${esc(i.displayUnit||i.unit)}`).join(' · ');return `<article class="saved-meal" data-meal-id="${esc(meal.id)}"><div class="saved-meal-head"><div><strong>${esc(meal.name)}</strong><div class="tiny muted">${names}</div><div class="tiny meal-macros">${Math.round(t.kcal)} kcal · P ${fmt(t.protein)} g · C ${fmt(t.carbs)} g · F ${fmt(t.fat)} g</div></div></div><div class="saved-meal-actions"><button class="btn library-add smallbtn" type="button" data-addmeal="${esc(meal.id)}">Add meal</button><button class="btn ghost smallbtn" type="button" data-editmeal="${esc(meal.id)}">Edit</button><button class="btn ghost smallbtn" type="button" data-duplicatemeal="${esc(meal.id)}">Duplicate</button><button class="btn danger smallbtn" type="button" data-deletemeal="${esc(meal.id)}">Delete</button></div></article>`}).join('');
+ host.innerHTML=meals.map(meal=>{const t=mealTotals(meal),names=(meal.ingredients||[]).map(i=>`${esc(i.foodName)} ${fmt(i.qty)} ${esc(i.displayUnit||i.unit)}`).join(' · ');return `<article class="saved-meal" data-meal-id="${esc(meal.id)}" tabindex="0" aria-expanded="false"><div class="saved-meal-head"><div class="saved-meal-summary"><strong>${esc(meal.name)}</strong><span class="tiny meal-macros">${Math.round(t.kcal)} kcal · P ${fmt(t.protein)} g · C ${fmt(t.carbs)} g · F ${fmt(t.fat)} g</span></div><div class="meal-ingredients">${names}</div></div><div class="saved-meal-actions"><button class="btn library-add smallbtn" type="button" data-addmeal="${esc(meal.id)}">Add meal</button><button class="btn ghost smallbtn" type="button" data-editmeal="${esc(meal.id)}">Edit</button><button class="btn ghost smallbtn" type="button" data-duplicatemeal="${esc(meal.id)}">Duplicate</button><button class="btn danger smallbtn" type="button" data-deletemeal="${esc(meal.id)}">Delete</button></div></article>`}).join('');
+ host.querySelectorAll('.saved-meal').forEach(card=>{const toggle=()=>{const expanded=card.classList.toggle('is-expanded');card.setAttribute('aria-expanded',String(expanded));};card.addEventListener('click',e=>{if(e.target.closest('button'))return;toggle()});card.addEventListener('keydown',e=>{if(e.target!==card)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}})});
  host.querySelectorAll('[data-addmeal]').forEach(b=>b.onclick=()=>addMealToDiary(b.dataset.addmeal));
  host.querySelectorAll('[data-editmeal]').forEach(b=>b.onclick=()=>openMealEditor(b.dataset.editmeal));
  host.querySelectorAll('[data-duplicatemeal]').forEach(b=>b.onclick=()=>{const source=meals.find(m=>String(m.id)===b.dataset.duplicatemeal);if(!source)return;meals.push({...JSON.parse(JSON.stringify(source)),id:mealId(),name:`${source.name} (copy)`});saveMeals();renderMeals();showToast('Meal duplicated')});
@@ -383,7 +384,7 @@ function mergeBackupData(data){
  }
  if(weightTarget===null&&data.weightTarget!==undefined&&data.weightTarget!==null&&Number(data.weightTarget)>0)weightTarget=Number(data.weightTarget);
  if(data.macroTargets&&typeof data.macroTargets==='object')for(const key of ['kcal','protein','carbs','fat'])if(!validTarget(macroTargets[key])&&validTarget(data.macroTargets[key]))macroTargets[key]=Number(data.macroTargets[key]);
- if(!localStorage.getItem('macroLedgerTheme')&&['orange','blue','monochrome'].includes(data.localPreferences?.theme)){applyTheme(data.localPreferences.theme);}
+ if(!localStorage.getItem('macroLedgerTheme')&&['orange','blue','yellow','red','monochrome'].includes(data.localPreferences?.theme)){applyTheme(data.localPreferences.theme);}
  if(!localStorage.getItem('macroLibraryPreferences')&&data.localPreferences&&typeof data.localPreferences==='object'){libraryPreferences={sort:['alphabetical','favourites','recent','custom'].includes(data.localPreferences.librarySort)?data.localPreferences.librarySort:'alphabetical',category:String(data.localPreferences.libraryCategory||'All'),search:String(data.localPreferences.librarySearch||'')};$('librarySort').value=libraryPreferences.sort;$('librarySearch').value=libraryPreferences.search;saveLibraryPreferences();}
  saveMeals();localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));localStorage.setItem('macroWeightTarget',JSON.stringify(weightTarget));localStorage.setItem('macroTargets',JSON.stringify(macroTargets));save();
  return report;
@@ -561,7 +562,7 @@ $('resetMacroTargets').onclick=()=>{
 syncMacroTargetInputs();
 
 renderDiary();
-function applyTheme(theme){if(!['orange','blue','monochrome'].includes(theme))theme='orange';document.documentElement.dataset.theme=theme;localStorage.setItem('macroLedgerTheme',theme);const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content='#080808';document.querySelectorAll('[data-theme-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.themeChoice===theme)));const about=$('aboutVersion');if(about)about.textContent='v'+APP_VERSION;}
+function applyTheme(theme){if(!['orange','blue','yellow','red','monochrome'].includes(theme))theme='orange';document.documentElement.dataset.theme=theme;localStorage.setItem('macroLedgerTheme',theme);const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content='#080808';document.querySelectorAll('[data-theme-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.themeChoice===theme)));const about=$('aboutVersion');if(about)about.textContent='v'+APP_VERSION;}
 document.querySelectorAll('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>applyTheme(button.dataset.themeChoice)));
 applyTheme(localStorage.getItem('macroLedgerTheme')||'orange');
 function setupAppUpdater(){
