@@ -58,6 +58,7 @@ if(!macroTargets||typeof macroTargets!=='object')macroTargets={kcal:2100,protein
 macroTargets={kcal:validTarget(macroTargets.kcal)?Number(macroTargets.kcal):2100,protein:validTarget(macroTargets.protein)?Number(macroTargets.protein):200,carbs:validTarget(macroTargets.carbs)?Number(macroTargets.carbs):null,fat:validTarget(macroTargets.fat)?Number(macroTargets.fat):null};
 localStorage.setItem('macroTargets',JSON.stringify(macroTargets));
 let weightChartRange='30';
+let weightHistoryVisible=7;
 let currentDate=today();
 let libraryPreferences=load('macroLibraryPreferences',{sort:'alphabetical',category:'All',search:''});
 if(!libraryPreferences||typeof libraryPreferences!=='object')libraryPreferences={sort:'alphabetical',category:'All',search:''};
@@ -101,7 +102,8 @@ function renderDiary(){
  renderMacroTargetProgress(t);
  $('macroCalories').textContent=Math.round(macro)+' kcal';$('difference').textContent=(diff>0?'+':'')+Math.round(diff)+' kcal';$('entryCount').textContent=entries().length;
  const notice=$('discrepancy');notice.classList.toggle('hide',entries().length===0||Math.abs(diff)<25);notice.textContent=`Your supplied food calories differ from calories calculated from macros by ${Math.round(diff)} kcal. Supplied calorie values are preserved.`;
- $('diaryEntries').innerHTML=entries().length?entries().map(x=>{const isMeal=x.entryType==='meal'&&Array.isArray(x.ingredients);const detail=isMeal?x.ingredients.map(i=>`${esc(i.foodName||i.name)} ${fmt(i.qty)} ${esc(i.displayUnit||i.unit)}`).join(' · '):`${fmt(x.qty)} ${esc(x.displayUnit||x.unit)}`;return `<div class="entry ${isMeal?'meal-diary-entry':''}" data-entry-id="${esc(x.id)}"><div class="entry-drag-area" role="button" tabindex="0" aria-label="Hold and drag to reorder ${isMeal?'meal':'food'} ${esc(x.name)}" title="Hold and drag to reorder"><b>${esc(x.name)}</b><div class="tiny">${isMeal?`Meal · ${detail}`:detail} · ${fmt(x.kcal)} kcal · P ${fmt(x.protein)} g · C ${fmt(x.carbs)} g · F ${fmt(x.fat)} g</div></div><button class="btn danger smallbtn" data-remove="${esc(x.id)}">Remove</button></div>`}).join(''):'<div class="muted tiny">No foods logged yet.</div>';
+ $('diaryEntries').innerHTML=entries().length?entries().map(x=>{const isMeal=x.entryType==='meal'&&Array.isArray(x.ingredients);const detail=isMeal?x.ingredients.map(i=>`${esc(i.foodName||i.name)} ${fmt(i.qty)} ${esc(i.displayUnit||i.unit)}`).join(' · '):`${fmt(x.qty)} ${esc(x.displayUnit||x.unit)}`;const macros=`${fmt(x.kcal)} kcal · P ${fmt(x.protein)} g · C ${fmt(x.carbs)} g · F ${fmt(x.fat)} g`;return `<div class="entry ${isMeal?'meal-diary-entry':''}" data-entry-id="${esc(x.id)}">${isMeal?`<div class="entry-drag-area" role="button" tabindex="0" aria-expanded="false" aria-label="Expand ingredients for ${esc(x.name)}; hold and drag to reorder" title="Tap to show ingredients; hold and drag to reorder"><div class="meal-entry-summary"><b>${esc(x.name)}</b><span class="meal-entry-macros">${macros}</span></div><div class="meal-entry-ingredients">${detail}</div></div>`:`<div class="entry-drag-area" role="button" tabindex="0" aria-label="Hold and drag to reorder food ${esc(x.name)}" title="Hold and drag to reorder"><b>${esc(x.name)}</b><div class="tiny">${detail} · ${macros}</div></div>`}<button class="btn danger smallbtn" data-remove="${esc(x.id)}">Remove</button></div>`}).join(''):'<div class="muted tiny">No foods logged yet.</div>';
+ $('diaryEntries').querySelectorAll('.meal-diary-entry .entry-drag-area').forEach(area=>{const toggle=()=>{const row=area.closest('.meal-diary-entry');row.classList.toggle('is-expanded');area.setAttribute('aria-expanded',row.classList.contains('is-expanded')?'true':'false')};area.addEventListener('click',toggle);area.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}})});
  $('diaryEntries').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{logs[currentDate]=entries().filter(x=>x.id!==b.dataset.remove);save();renderDiary()});
  enableLongPressReorder($('diaryEntries'),'.entry','.entry-drag-area',()=>{const byId=new Map(entries().map(x=>[String(x.id),x]));logs[currentDate]=[...$('diaryEntries').querySelectorAll('[data-entry-id]')].map(row=>byId.get(row.dataset.entryId)).filter(Boolean);save();},(row,x,y)=>showEntryContextMenu(row.dataset.entryId,x,y));
  $('diaryEntries').querySelectorAll('.entry-drag-area').forEach(area=>area.addEventListener('contextmenu',e=>{e.preventDefault();const row=area.closest('[data-entry-id]');if(row)showEntryContextMenu(row.dataset.entryId,e.clientX,e.clientY)}));
@@ -123,7 +125,6 @@ function enableLongPressReorder(container,rowSelector,handleSelector,onCommit,on
    if(e.button!==undefined&&e.button!==0)return;
    clear();active=false;moved=false;pointerId=e.pointerId;row=handle.closest(rowSelector);activeHandle=handle;startX=e.clientX;startY=e.clientY;startedAt=Date.now();
    timer=setTimeout(()=>{active=true;row?.classList.add('is-dragging');handle.classList.add('is-grabbing');},260);
-   e.preventDefault();
   },{signal});
  });
  const move=e=>{
@@ -420,11 +421,12 @@ function renderWeight(){
  $('weightCount').textContent=`${sorted.length} ${sorted.length===1?'entry':'entries'}`;
  const valid=sorted.filter(x=>Number.isFinite(Number(x.weight))&&weightDateValue(x.date));
  if(!valid.length){host.innerHTML='<div class="muted tiny">No weight entries yet.</div>';}
- else host.innerHTML=valid.map(item=>{
+ else host.innerHTML=valid.slice(0,weightHistoryVisible).map(item=>{
   const label=weightDateValue(item.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
   return `<div class="daily-history-row"><div><div class="daily-history-date">${esc(label)}</div><div class="daily-history-macros">${fmt(Number(item.weight))} kg</div></div><button class="btn danger smallbtn" type="button" data-delete-weight="${esc(item.id)}">Delete</button></div>`;
  }).join('');
- host.querySelectorAll('[data-delete-weight]').forEach(button=>button.onclick=()=>{if(!confirm('Delete this weight entry?'))return;weightLogs=weightLogs.filter(x=>String(x.id)!==button.dataset.deleteWeight);saveMeals();localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));renderWeight();});
+ const more=$('weightHistoryMore');more.hidden=valid.length<=weightHistoryVisible;more.textContent=`View more (${Math.min(7,Math.max(0,valid.length-weightHistoryVisible))} more)`;
+ host.querySelectorAll('[data-delete-weight]').forEach(button=>button.onclick=()=>{if(!confirm('Delete this weight entry?'))return;weightLogs=weightLogs.filter(x=>String(x.id)!==button.dataset.deleteWeight);localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));renderWeight();});
  $('weightLatest').textContent=valid.length?fmt(Number(valid[0].weight))+' kg':'—';
  const chronological=[...valid].sort((a,b)=>String(a.date).localeCompare(String(b.date))||(Number(a.loggedAt)||0)-(Number(b.loggedAt)||0));
  if(chronological.length){const delta=Number(valid[0].weight)-Number(chronological[0].weight);$('weightChange').textContent=(delta>0?'+':'')+fmt(delta)+' kg';}else $('weightChange').textContent='—';
@@ -436,6 +438,7 @@ function renderWeight(){
  renderWeightChart([...valid].sort((a,b)=>String(a.date).localeCompare(String(b.date))||(Number(a.loggedAt)||0)-(Number(b.loggedAt)||0)));
  document.querySelectorAll('[data-weight-range]').forEach(b=>b.classList.toggle('active',b.dataset.weightRange===weightChartRange));
 }
+$('weightHistoryMore').onclick=()=>{weightHistoryVisible+=7;renderWeight();};
 document.querySelectorAll('[data-weight-range]').forEach(button=>button.addEventListener('click',()=>{weightChartRange=button.dataset.weightRange;renderWeight();}));
 $('saveWeightTarget').onclick=()=>{const raw=$('weightTargetInput').value.trim();if(!raw){$('weightTargetStatus').textContent='Enter a target weight, or use Clear target.';return;}const v=Number(raw);if(!Number.isFinite(v)||v<=0||v>500){$('weightTargetStatus').textContent='Enter a valid target weight in kilograms.';return;}weightTarget=v;localStorage.setItem('macroWeightTarget',JSON.stringify(weightTarget));$('weightTargetStatus').textContent=`Target saved: ${fmt(weightTarget)} kg.`;renderWeight();};
 $('clearWeightTarget').onclick=()=>{weightTarget=null;localStorage.setItem('macroWeightTarget','null');$('weightTargetStatus').textContent='Target cleared.';renderWeight();};
