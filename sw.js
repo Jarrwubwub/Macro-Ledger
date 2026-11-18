@@ -1,4 +1,4 @@
-const CACHE='macro-ledger-v100';
+const CACHE='macro-ledger-v101';
 const FILES=['./','./index.html','./app.js','./foods.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('macro-ledger-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
