@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=86;
+const APP_VERSION=87;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -91,13 +91,35 @@ $('duplicateEntryAction').onclick=()=>{const menu=$('entryContextMenu'),id=menu?
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#entryContextMenu'))closeEntryContextMenu()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEntryContextMenu()});
 let currentTab='diary',ledgerMode='nutrition',tabBeforeSettings='diary';
 function setTab(tab){currentTab=tab;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','scanner','weight','history'].forEach(id=>$(id).classList.toggle('hide',ledgerMode!=='nutrition'||id!==tab));$('exerciseHome').classList.toggle('hide',ledgerMode!=='exercise'||tab==='settings');$('settings').classList.toggle('hide',tab!=='settings');if(tab==='library')renderLibrary();if(tab==='history')renderHistory();if(tab==='weight')renderWeight()}
-function setLedgerMode(mode){if(!['nutrition','exercise'].includes(mode)||mode===ledgerMode)return;if(currentTab==='settings')tabBeforeSettings=tabBeforeSettings||'diary';ledgerMode=mode;document.querySelectorAll('[data-ledger]').forEach(b=>{const active=b.dataset.ledger===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});$('appTitle').textContent=mode==='nutrition'?"MK's Macro Ledger":"MK's Exercise Ledger";$('appSubtitle').textContent=mode==='nutrition'?'The food you eat, written down.':'Your training, recorded and measured.';if(currentTab!=='settings')setTab(mode==='nutrition'?(currentTab==='exerciseHome'?'diary':currentTab):'exerciseHome');else setTab('settings')}
+function setLedgerMode(mode){if(!['nutrition','exercise'].includes(mode)||mode===ledgerMode)return;if(currentTab==='settings')tabBeforeSettings=tabBeforeSettings||'diary';ledgerMode=mode;document.querySelectorAll('[data-ledger]').forEach(b=>{const active=b.dataset.ledger===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});$('appTitle').textContent=mode==='nutrition'?"MK's Macro Ledger":"MK's Exercise Ledger";$('appSubtitle').textContent=mode==='nutrition'?'The food you eat, written down.':'The weight you lift, written down.';if(currentTab!=='settings')setTab(mode==='nutrition'?(currentTab==='exerciseHome'?'diary':currentTab):'exerciseHome');else setTab('settings')}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 document.querySelectorAll('[data-ledger]').forEach(b=>b.addEventListener('click',()=>setLedgerMode(b.dataset.ledger)));
 const appTitle=$('appTitle');appTitle.addEventListener('click',()=>setTab(ledgerMode==='nutrition'?'diary':'exerciseHome'));$('openSettings').onclick=()=>{if(currentTab!=='settings')tabBeforeSettings=currentTab;setTab('settings')};$('closeSettings').onclick=()=>setTab(tabBeforeSettings||'diary');appTitle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTab(ledgerMode==='nutrition'?'diary':'exerciseHome')}});
-// Two-finger horizontal swipe switches ledgers without consuming ordinary one-finger scrolling.
-let ledgerTouchStart=null;document.addEventListener('touchstart',e=>{if(e.touches.length===2){ledgerTouchStart={x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2};}else ledgerTouchStart=null;},{passive:true});
-document.addEventListener('touchend',e=>{if(!ledgerTouchStart||e.changedTouches.length<2)return;const x=(e.changedTouches[0].clientX+e.changedTouches[1].clientX)/2,y=(e.changedTouches[0].clientY+e.changedTouches[1].clientY)/2;const dx=x-ledgerTouchStart.x,dy=y-ledgerTouchStart.y;ledgerTouchStart=null;if(Math.abs(dx)>75&&Math.abs(dx)>Math.abs(dy)*1.35&&!e.target.closest('input,textarea,select,button,[contenteditable="true"],canvas,svg'))setLedgerMode(dx<0?'exercise':'nutrition');},{passive:true});
+// v87: robust two-finger horizontal switching. Track the gesture centroid across
+// touchmove/touchend; touchend.changedTouches commonly contains only one finger.
+let ledgerGesture=null;
+const ledgerGestureExcluded=target=>!!target.closest('input,textarea,select,button,[contenteditable="true"],canvas,svg,a,summary');
+document.addEventListener('touchstart',e=>{
+ if(e.touches.length===2&&!ledgerGestureExcluded(e.target)){
+  const a=e.touches[0],b=e.touches[1];
+  ledgerGesture={startX:(a.clientX+b.clientX)/2,startY:(a.clientY+b.clientY)/2,lastX:(a.clientX+b.clientX)/2,lastY:(a.clientY+b.clientY)/2,claimed:false};
+ }else if(e.touches.length>2||!ledgerGesture) ledgerGesture=null;
+},{passive:true});
+document.addEventListener('touchmove',e=>{
+ if(!ledgerGesture||e.touches.length!==2)return;
+ const a=e.touches[0],b=e.touches[1],x=(a.clientX+b.clientX)/2,y=(a.clientY+b.clientY)/2;
+ ledgerGesture.lastX=x;ledgerGesture.lastY=y;
+ const dx=x-ledgerGesture.startX,dy=y-ledgerGesture.startY;
+ if(Math.abs(dx)>28&&Math.abs(dx)>Math.abs(dy)*1.25){ledgerGesture.claimed=true;e.preventDefault();}
+},{passive:false});
+document.addEventListener('touchend',e=>{
+ if(!ledgerGesture)return;
+ // Include the lifted finger and the remaining finger when the browser reports them separately.
+ const pts=[];if(e.touches.length>0||e.changedTouches.length>1){for(const t of e.changedTouches)pts.push(t);for(const t of e.touches)pts.push(t);}
+ if(pts.length){const x=pts.reduce((n,t)=>n+t.clientX,0)/pts.length,y=pts.reduce((n,t)=>n+t.clientY,0)/pts.length;ledgerGesture.lastX=x;ledgerGesture.lastY=y;}
+ if(e.touches.length===0){const g=ledgerGesture;ledgerGesture=null;const dx=g.lastX-g.startX,dy=g.lastY-g.startY;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.3)setLedgerMode(dx<0?'exercise':'nutrition');}
+},{passive:true});
+document.addEventListener('touchcancel',()=>{ledgerGesture=null},{passive:true});
 $('openHistory').onclick=()=>{ $('historyDate').value=currentDate; setTab('history'); }; 
 $('dailyAddFood').onclick=()=>{setTab('library');window.scrollTo({top:0,behavior:'smooth'});};
 $('logDate').value=currentDate;$('historyDate').value=currentDate;
