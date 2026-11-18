@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=74;
+const APP_VERSION=75;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -88,9 +88,9 @@ function showEntryContextMenu(entryId,x,y){
 function closeEntryContextMenu(){const menu=$('entryContextMenu');if(menu)menu.classList.add('hide')}
 $('duplicateEntryAction').onclick=()=>{const menu=$('entryContextMenu'),id=menu?.dataset.entryId,source=entries().find(item=>String(item.id)===String(id));if(!source)return;const copy={...source,ingredients:Array.isArray(source.ingredients)?source.ingredients.map(i=>({...i})):undefined,id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),loggedAt:Date.now()};const day=entries(),index=day.findIndex(item=>String(item.id)===String(id));day.splice(index+1,0,copy);logs[currentDate]=day;save();closeEntryContextMenu();renderDiary();showToast('Entry duplicated')};
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#entryContextMenu'))closeEntryContextMenu()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEntryContextMenu()});
-function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','scanner','weight','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='history')renderHistory();if(tab==='weight')renderWeight()}
+function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','scanner','weight','history','settings'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='history')renderHistory();if(tab==='weight')renderWeight()}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
-const appTitle=$('appTitle');appTitle.addEventListener('click',()=>setTab('diary'));appTitle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTab('diary')}});
+const appTitle=$('appTitle');appTitle.addEventListener('click',()=>setTab('diary'));$('openSettings').onclick=()=>setTab('settings');$('closeSettings').onclick=()=>setTab('diary');appTitle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTab('diary')}});
 $('openHistory').onclick=()=>{ $('historyDate').value=currentDate; setTab('history'); }; 
 $('dailyAddFood').onclick=()=>{setTab('library');window.scrollTo({top:0,behavior:'smooth'});};
 $('logDate').value=currentDate;$('historyDate').value=currentDate;
@@ -346,7 +346,7 @@ function renderHistory(){
 }
 $('historyDate').onchange=renderHistory;$('loadHistory').onclick=()=>{currentDate=$('historyDate').value||today();$('logDate').value=currentDate;setTab('diary');renderDiary()};
 function download(name,content,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-function makeBackup(){return {app:'MK\'s Macro Ledger',appVersion:APP_VERSION,backupFormat:3,exportedAt:new Date().toISOString(),foods,logs,categories,meals,weightLogs,weightTarget,macroTargets,localPreferences:{librarySort:$('librarySort')?.value||libraryPreferences.sort,libraryCategory:$('categoryFilter')?.value||libraryPreferences.category,librarySearch:$('librarySearch')?.value??libraryPreferences.search,colesLibrarySeeded:!!localStorage.getItem(COLES_SEED_KEY)}};}
+function makeBackup(){return {app:'MK\'s Macro Ledger',appVersion:APP_VERSION,backupFormat:3,exportedAt:new Date().toISOString(),foods,logs,categories,meals,weightLogs,weightTarget,macroTargets,localPreferences:{librarySort:$('librarySort')?.value||libraryPreferences.sort,libraryCategory:$('categoryFilter')?.value||libraryPreferences.category,librarySearch:$('librarySearch')?.value??libraryPreferences.search,theme:document.documentElement.dataset.theme||'orange',colesLibrarySeeded:!!localStorage.getItem(COLES_SEED_KEY)}};}
 function renderBackupStatus(){const host=$('backupStatus');if(!host)return;const stamp=Number(localStorage.getItem('macroLastBackupAt')||0);if(!stamp){host.classList.add('needs-backup');host.textContent='No JSON backup recorded on this browser yet. Download a backup periodically and keep a copy somewhere safe.';return;}const age=Math.floor((Date.now()-stamp)/86400000),label=new Date(stamp).toLocaleString();host.classList.toggle('needs-backup',age>=30);host.textContent=`Last JSON backup downloaded: ${label}.${age>=30?' It has been 30 days or more — consider downloading a fresh copy.':' Remember to keep the downloaded file somewhere safe.'}`;}
 function exportFullBackup(){const backup=makeBackup();download('mk-macro-ledger-backup.json',JSON.stringify(backup,null,2),'application/json');localStorage.setItem('macroLastBackupAt',String(Date.now()));renderBackupStatus();}
 $('exportJSON').onclick=exportFullBackup;
@@ -391,6 +391,7 @@ function mergeBackupData(data){
  }
  if(weightTarget===null&&data.weightTarget!==undefined&&data.weightTarget!==null&&Number(data.weightTarget)>0)weightTarget=Number(data.weightTarget);
  if(data.macroTargets&&typeof data.macroTargets==='object')for(const key of ['kcal','protein','carbs','fat'])if(!validTarget(macroTargets[key])&&validTarget(data.macroTargets[key]))macroTargets[key]=Number(data.macroTargets[key]);
+ if(!localStorage.getItem('macroLedgerTheme')&&['orange','blue','monochrome'].includes(data.localPreferences?.theme)){applyTheme(data.localPreferences.theme);}
  if(!localStorage.getItem('macroLibraryPreferences')&&data.localPreferences&&typeof data.localPreferences==='object'){libraryPreferences={sort:['alphabetical','favourites','recent','custom'].includes(data.localPreferences.librarySort)?data.localPreferences.librarySort:'alphabetical',category:String(data.localPreferences.libraryCategory||'All'),search:String(data.localPreferences.librarySearch||'')};$('librarySort').value=libraryPreferences.sort;$('librarySearch').value=libraryPreferences.search;saveLibraryPreferences();}
  saveMeals();localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));localStorage.setItem('macroWeightTarget',JSON.stringify(weightTarget));localStorage.setItem('macroTargets',JSON.stringify(macroTargets));save();
  return report;
@@ -566,9 +567,12 @@ $('resetMacroTargets').onclick=()=>{
 syncMacroTargetInputs();
 
 renderDiary();
+function applyTheme(theme){if(!['orange','blue','monochrome'].includes(theme))theme='orange';document.documentElement.dataset.theme=theme;localStorage.setItem('macroLedgerTheme',theme);const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content='#080808';document.querySelectorAll('[data-theme-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.themeChoice===theme)));const about=$('aboutVersion');if(about)about.textContent='v'+APP_VERSION;}
+document.querySelectorAll('[data-theme-choice]').forEach(button=>button.addEventListener('click',()=>applyTheme(button.dataset.themeChoice)));
+applyTheme(localStorage.getItem('macroLedgerTheme')||'orange');
 function setupAppUpdater(){
  const button=$('checkAppUpdate'),status=$('appUpdateStatus'),versionLabel=$('installedVersion');if(!button||!status)return;
- if(versionLabel)versionLabel.textContent='v'+APP_VERSION;
+ if(versionLabel)versionLabel.textContent='v'+APP_VERSION;const aboutVersion=$('aboutVersion');if(aboutVersion)aboutVersion.textContent='v'+APP_VERSION;
  const safetyButton=$('downloadPreUpdateBackup');if(safetyButton){if(localStorage.getItem('macroPreUpdateBackupV1'))safetyButton.classList.remove('hide');safetyButton.onclick=()=>{const snapshot=localStorage.getItem('macroPreUpdateBackupV1');if(snapshot)download('mk-macro-ledger-pre-update-safety-copy.json',snapshot,'application/json')};}
  button.onclick=async()=>{
   button.disabled=true;status.textContent='Checking GitHub for updates…';

@@ -175,7 +175,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </style>
 </head>
 <body>
-<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to Daily log">MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div></div></header>
+<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to Daily log">MK's Macro Ledger</h1><div class="sub">The food you eat, written down.</div></div><button id="openSettings" class="settings-gear" type="button" aria-label="Open Settings" title="Settings">⚙</button></div></header>
 <main>
 <div class="tabs">
 <button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Scanner</button><button class="tab" data-tab="weight">Weight</button>
@@ -319,16 +319,23 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div id="weightEntries" class="daily-history-list"><div class="muted tiny">No weight entries yet.</div></div>
 </div>
 </section>
+<section id="settings" class="section hide">
+<div class="card section"><div class="row between"><h2 style="margin:0">Settings</h2><button class="btn ghost smallbtn" id="closeSettings" type="button">Done</button></div>
+<details class="target-settings settings-section" id="appearanceSettings"><summary>Appearance</summary><p class="tiny muted">Choose the colour palette used throughout the app.</p><div class="theme-options">
+<button type="button" class="theme-choice" data-theme-choice="orange" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Orange</strong><small>Black, charcoal and orange</small></button>
+<button type="button" class="theme-choice" data-theme-choice="blue" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Blue</strong><small>Black, charcoal and blue</small></button>
+<button type="button" class="theme-choice" data-theme-choice="monochrome" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Monochrome</strong><small>Black, charcoal, white and grey</small></button>
+</div></details>
+<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v75</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
+<details class="target-settings settings-section" id="dataSettings"><summary>Data &amp; backups</summary><p class="tiny muted">Export or merge your data. Imports are non-destructive and retain existing records.</p><div class="toolbar"><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div><div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div><div class="field"><label>Import and merge a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div></details>
+<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Macro Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v75</span></p></details>
+</div></section>
 <section id="history" class="section hide">
 <div class="card section">
-<h2>History & backup</h2>
+<h2>History</h2>
 <div class="field"><label>Choose a day to view</label><input id="historyDate" type="date"></div>
 <div id="historySummary" class="result">No saved log for this date.</div>
-<div class="toolbar"><button class="btn secondary" id="loadHistory">Load day into diary</button><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div>
-<div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div>
-<div class="field"><label>Import and merge a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div>
-<p class="tiny muted">Importing a JSON backup merges it with the data on this device. Existing foods, diary entries and settings are retained; matching diary entries are not imported twice.</p>
-<div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v67</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div>
+<button class="btn secondary" id="loadHistory">Load day into diary</button>
 </div>
 </section>
 
@@ -353,10 +360,9 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="toolbar"><button class="btn" type="submit">Save changes</button><button class="btn ghost" type="button" id="cancelEditor">Cancel</button></div>
 </form></dialog>
 <style>
- :root{--header:#080808;--accent:#f5f5f5;--accent-ink:#111;--surface2:#222;--surface3:#303030;--input:#1d1d1d;--progress:#f5f5f5}
+ :root{--bg:#080808;--panel:#151515;--ink:#f4f0ec;--muted:#aaa29b;--line:#403127;--green:#ff7a24;--green2:#2c211a;--header:#050505;--accent:#ff7a24;--accent-ink:#1b0d04;--surface2:#202020;--surface3:#33271f;--input:#1b1b1b;--progress:#ff7a24}
+html[data-theme="blue"]{--bg:#080808;--panel:#151515;--ink:#f4f0ec;--muted:#aaa9b0;--line:#303b4b;--green:#3989e6;--green2:#1d2b3b;--header:#050505;--accent:#3989e6;--accent-ink:#071321;--surface2:#20242b;--surface3:#2b3542;--input:#1b2028;--progress:#3989e6}
 html[data-theme="monochrome"]{--bg:#080808;--panel:#151515;--ink:#f4f4f4;--muted:#a7a7a7;--line:#363636;--green:#f0f0f0;--green2:#292929;--header:#050505;--accent:#f5f5f5;--accent-ink:#111;--surface2:#202020;--surface3:#303030;--input:#1b1b1b;--progress:#f2f2f2}
-html[data-theme="yellow"]{--bg:#080808;--panel:#151515;--ink:#f4f2e9;--muted:#aaa69a;--line:#38352b;--green:#f2cf45;--green2:#292820;--header:#050505;--accent:#f2cf45;--accent-ink:#171307;--surface2:#202020;--surface3:#302d22;--input:#1b1b1b;--progress:#f2cf45}
-html[data-theme="orange"]{--bg:#080808;--panel:#151515;--ink:#f4f0ec;--muted:#aaa29b;--line:#403127;--green:#ff7a24;--green2:#2c211a;--header:#050505;--accent:#ff7a24;--accent-ink:#1b0d04;--surface2:#202020;--surface3:#33271f;--input:#1b1b1b;--progress:#ff7a24}
 /* Consistent food-library action buttons across all colour modes */
 html[data-theme="orange"] .food-actions [data-addfood]{background:#ff7a24!important;border:1px solid #ff7a24!important;color:#17100b!important}
 html[data-theme="orange"] .food-actions [data-editfood]{background:#292725!important;border:1px solid #49443f!important;color:#f2efeb!important}
@@ -464,13 +470,23 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 .library-card-top .drag-handle{flex:0 0 28px}
 @media(min-width:601px){#foodList{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.library-item{height:auto}}
 @media(max-width:380px){.library-item{padding:10px}.library-item-meta{font-size:10.5px}.library-quantity-row .qtyadd{grid-template-columns:minmax(52px,.75fr) minmax(0,1fr) 76px;gap:5px}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{font-size:11px;padding:7px 5px}}
+
+.settings-gear{width:42px;height:42px;flex:0 0 42px;border:0;border-radius:12px;background:transparent;color:var(--accent);font-size:27px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.settings-gear:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.settings-section{margin-top:10px}
+.settings-section summary{font-size:14px;font-weight:750}
+.theme-options{display:grid;gap:8px;margin-top:12px}
+.theme-choice{display:grid;grid-template-columns:58px 1fr;grid-template-rows:auto auto;column-gap:12px;text-align:left;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);color:var(--ink);font:inherit;cursor:pointer}
+.theme-choice[aria-pressed="true"]{outline:2px solid var(--accent);border-color:var(--accent)}
+.theme-choice strong{font-size:14px}.theme-choice small{color:var(--muted);font-size:12px}
+.swatches{grid-row:1/3;display:flex;gap:3px}.swatches i{width:15px;height:30px;border-radius:4px;background:#080808;border:1px solid #777}
+.theme-choice[data-theme-choice="blue"] i:nth-child(2){background:#252b34}.theme-choice[data-theme-choice="blue"] i:nth-child(3){background:#3989e6}
+.theme-choice[data-theme-choice="orange"] i:nth-child(2){background:#252525}.theme-choice[data-theme-choice="orange"] i:nth-child(3){background:#ff7a24}
+.theme-choice[data-theme-choice="monochrome"] i:nth-child(2){background:#555}.theme-choice[data-theme-choice="monochrome"] i:nth-child(3){background:#f5f5f5}
 </style>
 <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-hidden="true"></div>
 <script src="foods.js"></script><script src="app.js"></script>
 <script>
-// Keep the app on its orange theme; the colour selector has been removed.
-document.documentElement.dataset.theme='orange';
-localStorage.setItem('macroLedgerTheme','orange');
-document.querySelector('meta[name="theme-color"]').content='#080808';
+(()=>{const allowed=['orange','blue','monochrome'];const saved=localStorage.getItem('macroLedgerTheme');const theme=allowed.includes(saved)?saved:'orange';document.documentElement.dataset.theme=theme;const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content='#080808';})();
 </script>
 </body></html>
