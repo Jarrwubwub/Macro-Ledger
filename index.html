@@ -194,6 +194,14 @@ body > main {
   grid-auto-rows: max-content !important;
 }
 
+
+/* v96: add breathing room above the fixed header on phone screens. */
+body > header { padding-top: 19px !important; }
+
+
+/* v96: weekly context appears only inside the expanded weigh-in history panel. */
+.weight-history-week { margin: 8px 0 10px; }
+
 </style>
 
 <style>
@@ -388,7 +396,8 @@ body > main {
 <div class="tiny muted" id="weightTargetStatus" aria-live="polite"></div>
 </details>
 <details class="target-settings weight-history-details" id="weightHistoryDetails">
-<summary><span>Weigh-in history</span> <span class="pill" id="weightCount">0 entries</span></summary>
+<summary><span>Weigh-in history</span></summary>
+<div class="tiny muted weight-history-week" id="weightWeekLabel"></div>
 <div id="weightEntries" class="daily-history-list" style="margin-top:10px"><div class="muted tiny">No weight entries yet.</div></div>
 <button type="button" class="btn ghost smallbtn" id="weightHistoryMore" style="width:100%;margin-top:10px" hidden>View more</button>
 </details>

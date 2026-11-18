@@ -447,7 +447,17 @@ function renderWeightChart(items){
 function renderWeight(){
  const host=$('weightEntries');if(!host)return;
  const sorted=[...weightLogs].sort((a,b)=>String(b.date).localeCompare(String(a.date))||(Number(b.loggedAt)||0)-(Number(a.loggedAt)||0));
- $('weightCount').textContent=`${sorted.length} ${sorted.length===1?'entry':'entries'}`;
+ const weekLabel=$('weightWeekLabel');
+ if(weekLabel){
+  const now=weightDateValue(today())||new Date();
+  const monday=new Date(now);monday.setHours(12,0,0,0);
+  monday.setDate(monday.getDate()-((monday.getDay()+6)%7));
+  const sunday=new Date(monday);sunday.setDate(sunday.getDate()+6);
+  const fmtWeekDate=d=>d.toLocaleDateString('en-AU',{month:'short',day:'numeric'});
+  weekLabel.textContent=`${fmtWeekDate(monday)} to ${fmtWeekDate(sunday)}`;
+ }
+
+
  const valid=sorted.filter(x=>Number.isFinite(Number(x.weight))&&weightDateValue(x.date));
  if(!valid.length){host.innerHTML='<div class="muted tiny">No weight entries yet.</div>';}
  else host.innerHTML=valid.slice(0,weightHistoryVisible).map(item=>{
