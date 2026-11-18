@@ -103,6 +103,8 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .library-manage-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .library-manage-row button{width:100%;min-height:38px}
 .library-manage-row [data-deletefood]{background:#c9362e!important;border:1px solid #e34b42!important;color:#fff!important}
+/* Shared Library-style destructive action used by Library, Daily Log and weigh-in history. */
+.library-delete-action{min-height:38px;padding:7px 10px!important;font-size:12px;line-height:1.2;background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important;box-shadow:none}
 .library-item.is-dragging{opacity:.5}
 @media(max-width:600px){#foodList{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:380px){.library-item{padding:11px}.library-quantity-row .qtyadd{grid-template-columns:minmax(48px,68px) minmax(0,1fr) 68px;gap:6px}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{font-size:12px;padding-left:6px;padding-right:6px}}
@@ -158,12 +160,8 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 
 <style>
 /* v59: button-only styling refinements requested by the user. */
-/* Daily Log: make Remove clearly destructive without changing its size or position. */
-#diaryEntries [data-remove]{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important}
 /* Library: Add matches the orange primary Add food action. */
 #foodList [data-addfood]{background:#ff7a24!important;border:1px solid #ff7a24!important;color:#17100b!important}
-/* Library: Delete uses the same treatment as Daily Log Remove. */
-#foodList [data-deletefood]{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important}
 
 /* v70: compact Option B Library cards, stacked filters and expandable sections */
 .history-settings{margin-top:10px}
