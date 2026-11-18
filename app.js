@@ -1,4 +1,5 @@
 (()=>{
+const APP_VERSION=67;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -68,6 +69,16 @@ function addEntry(food,qty=food.baseQty,unit=food.unit){
  const entry={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),loggedAt:Date.now(),name:food.name,qty,unit,displayUnit:isServe?`${food.serveName||'Serve'} (${fmt(food.serveGrams)} g)`:unit,kcal:food.kcal*factor,protein:food.protein*factor,carbs:food.carbs*factor,fat:food.fat*factor};
  logs[currentDate]=[...entries(),entry];save();renderDiary();
 }
+function showEntryContextMenu(entryId,x,y){
+ const menu=$('entryContextMenu');if(!menu)return;
+ const entry=entries().find(item=>String(item.id)===String(entryId));if(!entry)return;
+ menu.dataset.entryId=String(entryId);menu.classList.remove('hide');
+ const left=Math.min(Math.max(8,x),window.innerWidth-168),top=Math.min(Math.max(8,y),window.innerHeight-58);
+ menu.style.left=left+'px';menu.style.top=top+'px';
+}
+function closeEntryContextMenu(){const menu=$('entryContextMenu');if(menu)menu.classList.add('hide')}
+$('duplicateEntryAction').onclick=()=>{const menu=$('entryContextMenu'),id=menu?.dataset.entryId,source=entries().find(item=>String(item.id)===String(id));if(!source)return;const copy={...source,id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),loggedAt:Date.now()};const day=entries(),index=day.findIndex(item=>String(item.id)===String(id));day.splice(index+1,0,copy);logs[currentDate]=day;save();closeEntryContextMenu();renderDiary();showToast('Entry duplicated')};
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('#entryContextMenu'))closeEntryContextMenu()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEntryContextMenu()});
 function setTab(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));['diary','library','scanner','weight','history'].forEach(id=>$(id).classList.toggle('hide',id!==tab));if(tab==='library')renderLibrary();if(tab==='history')renderHistory();if(tab==='weight')renderWeight()}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 const appTitle=$('appTitle');appTitle.addEventListener('click',()=>setTab('diary'));appTitle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTab('diary')}});
@@ -83,24 +94,25 @@ function renderDiary(){
  const notice=$('discrepancy');notice.classList.toggle('hide',entries().length===0||Math.abs(diff)<25);notice.textContent=`Your supplied food calories differ from calories calculated from macros by ${Math.round(diff)} kcal. Supplied calorie values are preserved.`;
  $('diaryEntries').innerHTML=entries().length?entries().map(x=>`<div class="entry" data-entry-id="${esc(x.id)}"><div class="entry-drag-area" role="button" tabindex="0" aria-label="Hold and drag to reorder ${esc(x.name)}" title="Hold and drag to reorder"><b>${esc(x.name)}</b><div class="tiny">${fmt(x.qty)} ${esc(x.displayUnit||x.unit)} · ${fmt(x.kcal)} kcal · P ${fmt(x.protein)} g · C ${fmt(x.carbs)} g · F ${fmt(x.fat)} g</div></div><button class="btn danger smallbtn" data-remove="${esc(x.id)}">Remove</button></div>`).join(''):'<div class="muted tiny">No foods logged yet.</div>';
  $('diaryEntries').querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{logs[currentDate]=entries().filter(x=>x.id!==b.dataset.remove);save();renderDiary()});
- enableLongPressReorder($('diaryEntries'),'.entry','.entry-drag-area',()=>{const byId=new Map(entries().map(x=>[String(x.id),x]));logs[currentDate]=[...$('diaryEntries').querySelectorAll('[data-entry-id]')].map(row=>byId.get(row.dataset.entryId)).filter(Boolean);save();});
+ enableLongPressReorder($('diaryEntries'),'.entry','.entry-drag-area',()=>{const byId=new Map(entries().map(x=>[String(x.id),x]));logs[currentDate]=[...$('diaryEntries').querySelectorAll('[data-entry-id]')].map(row=>byId.get(row.dataset.entryId)).filter(Boolean);save();},(row,x,y)=>showEntryContextMenu(row.dataset.entryId,x,y));
+ $('diaryEntries').querySelectorAll('.entry-drag-area').forEach(area=>area.addEventListener('contextmenu',e=>{e.preventDefault();const row=area.closest('[data-entry-id]');if(row)showEntryContextMenu(row.dataset.entryId,e.clientX,e.clientY)}));
  $('clearDay').disabled=!entries().length;
  renderDailyHistory();
 }
 
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 const reorderControllers=new WeakMap();
-function enableLongPressReorder(container,rowSelector,handleSelector,onCommit){
+function enableLongPressReorder(container,rowSelector,handleSelector,onCommit,onLongPress=null){
  // Each render replaces the previous listeners instead of accumulating document handlers.
  reorderControllers.get(container)?.abort();
  const controller=new AbortController(),signal=controller.signal;
  reorderControllers.set(container,controller);
- let timer=null,active=false,pointerId=null,row=null,activeHandle=null,moved=false,startX=0,startY=0;
+ let timer=null,active=false,pointerId=null,row=null,activeHandle=null,moved=false,startX=0,startY=0,startedAt=0;
  const clear=()=>{if(timer)clearTimeout(timer);timer=null;};
  container.querySelectorAll(handleSelector).forEach(handle=>{
   handle.addEventListener('pointerdown',e=>{
    if(e.button!==undefined&&e.button!==0)return;
-   clear();active=false;moved=false;pointerId=e.pointerId;row=handle.closest(rowSelector);activeHandle=handle;startX=e.clientX;startY=e.clientY;
+   clear();active=false;moved=false;pointerId=e.pointerId;row=handle.closest(rowSelector);activeHandle=handle;startX=e.clientX;startY=e.clientY;startedAt=Date.now();
    timer=setTimeout(()=>{active=true;row?.classList.add('is-dragging');handle.classList.add('is-grabbing');},260);
    e.preventDefault();
   },{signal});
@@ -119,8 +131,8 @@ function enableLongPressReorder(container,rowSelector,handleSelector,onCommit){
  const finish=e=>{
   if(pointerId!==e.pointerId)return;
   clear();
-  if(active){row?.classList.remove('is-dragging');activeHandle?.classList.remove('is-grabbing');if(moved)onCommit();}
-  active=false;pointerId=null;row=null;activeHandle=null;moved=false;
+  if(active){row?.classList.remove('is-dragging');activeHandle?.classList.remove('is-grabbing');if(moved)onCommit();else if(onLongPress&&Date.now()-startedAt>=550){const rect=row?.getBoundingClientRect();onLongPress(row,e.clientX||rect?.left||12,e.clientY||rect?.bottom||60);}}
+  active=false;pointerId=null;row=null;activeHandle=null;moved=false;startedAt=0;
  };
  document.addEventListener('pointermove',move,{passive:false,signal});
  document.addEventListener('pointerup',finish,{signal});
@@ -144,11 +156,13 @@ function renderLibrary(){
  const usage=foodUsage();
  const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q));
  if(sort==='recent')list.sort((a,b)=>{const au=usage.get(a.name.toLocaleLowerCase())||{last:0},bu=usage.get(b.name.toLocaleLowerCase())||{last:0};return bu.last-au.last||a.name.localeCompare(b.name,undefined,{sensitivity:'base'});});
+ else if(sort==='favourites')list.sort((a,b)=>Number(!!b.favourite)-Number(!!a.favourite)||a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
  else if(sort==='alphabetical')list.sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
  // Custom order deliberately preserves the underlying Library array order.
  $('foodCount').textContent=foods.length+' foods';
- $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item" data-food-id="${esc(f.id)}"><div class="library-card-top">${sort==='custom'?`<button class="drag-handle library-drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(f.name)}" title="Hold, then drag to reorder">⠿</button>`:''}<input class="food-select" type="checkbox" aria-label="Select ${esc(f.name)} for deletion" data-selectfood="${i}"></div><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||'<div class="tiny muted">No matching foods.</div>';
+ $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item" data-food-id="${esc(f.id)}"><div class="library-card-top"><button class="food-favourite${f.favourite?' is-favourite':''}" type="button" data-favourite="${i}" aria-label="${f.favourite?'Remove':'Add'} ${esc(f.name)} ${f.favourite?'from':'to'} favourites" aria-pressed="${!!f.favourite}">★</button>${sort==='custom'?`<button class="drag-handle library-drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(f.name)}" title="Hold, then drag to reorder">⠿</button>`:''}<input class="food-select" type="checkbox" aria-label="Select ${esc(f.name)} for deletion" data-selectfood="${i}"></div><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||'<div class="tiny muted">No matching foods.</div>';
  bindFoodActions($('foodList'));
+ $('foodList').querySelectorAll('[data-favourite]').forEach(button=>button.onclick=()=>{const food=foods[Number(button.dataset.favourite)];if(!food)return;food.favourite=!food.favourite;save();renderLibrary()});
  if(sort==='custom')enableLongPressReorder($('foodList'),'.library-item','.library-drag-handle',()=>{const visible=[...$('foodList').querySelectorAll('[data-food-id]')].map(x=>x.dataset.foodId),visibleSet=new Set(visible),ordered=foods.filter(f=>visibleSet.has(String(f.id))),byId=new Map(ordered.map(f=>[String(f.id),f])),ranked=visible.map(id=>byId.get(id)).filter(Boolean);let cursor=0;foods=foods.map(f=>visibleSet.has(String(f.id))?ranked[cursor++]:f);save();renderLibrary();});
  const updateSelection=()=>{const boxes=[...$('foodList').querySelectorAll('[data-selectfood]')],selected=boxes.filter(x=>x.checked).length;$('selectedFoodCount').textContent=selected+' selected';$('deleteSelectedFoods').disabled=selected===0;$('deleteSelectedFoods').textContent=`Delete selected (${selected})`;};
  $('foodList').querySelectorAll('[data-selectfood]').forEach(box=>box.addEventListener('change',updateSelection));
@@ -266,7 +280,7 @@ function renderHistory(){
 }
 $('historyDate').onchange=renderHistory;$('loadHistory').onclick=()=>{currentDate=$('historyDate').value||today();$('logDate').value=currentDate;setTab('diary');renderDiary()};
 function download(name,content,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-function makeBackup(){return {app:'MK\'s Macro Ledger',backupFormat:2,exportedAt:new Date().toISOString(),foods,logs,categories,weightLogs,weightTarget,macroTargets,localPreferences:{librarySort:$('librarySort')?.value||'alphabetical',colesLibrarySeeded:!!localStorage.getItem(COLES_SEED_KEY)}};}
+function makeBackup(){return {app:'MK\'s Macro Ledger',appVersion:APP_VERSION,backupFormat:3,exportedAt:new Date().toISOString(),foods,logs,categories,weightLogs,weightTarget,macroTargets,localPreferences:{librarySort:$('librarySort')?.value||'alphabetical',colesLibrarySeeded:!!localStorage.getItem(COLES_SEED_KEY)}};}
 function renderBackupStatus(){const host=$('backupStatus');if(!host)return;const stamp=Number(localStorage.getItem('macroLastBackupAt')||0);if(!stamp){host.classList.add('needs-backup');host.textContent='No JSON backup recorded on this browser yet. Download a backup periodically and keep a copy somewhere safe.';return;}const age=Math.floor((Date.now()-stamp)/86400000),label=new Date(stamp).toLocaleString();host.classList.toggle('needs-backup',age>=30);host.textContent=`Last JSON backup downloaded: ${label}.${age>=30?' It has been 30 days or more — consider downloading a fresh copy.':' Remember to keep the downloaded file somewhere safe.'}`;}
 function exportFullBackup(){const backup=makeBackup();download('mk-macro-ledger-backup.json',JSON.stringify(backup,null,2),'application/json');localStorage.setItem('macroLastBackupAt',String(Date.now()));renderBackupStatus();}
 $('exportJSON').onclick=exportFullBackup;
@@ -274,10 +288,46 @@ $('exportCSV').onclick=()=>{const rows=[['Date','Food','Quantity','Unit','Calori
 function historyExportText(){const dates=Object.keys(logs).filter(date=>Array.isArray(logs[date])&&logs[date].length).sort();if(!dates.length)return "MK's Macro Ledger\n\nNo diary entries saved.";return ["MK's Macro Ledger — Food Diary Export",'',...dates.flatMap(date=>{const items=logs[date],t=totals(items);return [date,`${items.length} entries | ${Math.round(t.kcal)} kcal | Protein ${fmt(t.protein)} g | Carbs ${fmt(t.carbs)} g | Fat ${fmt(t.fat)} g`,'',...items.map(x=>`${x.name} — ${fmt(x.qty)} ${x.displayUnit||x.unit} | ${fmt(x.kcal)} kcal | P ${fmt(x.protein)} g | C ${fmt(x.carbs)} g | F ${fmt(x.fat)} g`),'','----------------------------------------','']})].join('\n')}
 $('exportTXT').onclick=()=>download('macro-ledger-history.txt',historyExportText(),'text/plain;charset=utf-8');
 $('exportPDF').onclick=()=>{const content=historyExportText(),printWindow=window.open('','_blank');if(!printWindow){alert('Please allow pop-ups for this site to create the PDF.');return;}const safe=esc(content);printWindow.document.open();printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Macro Ledger — Food Diary</title><style>body{font:12pt/1.5 Arial,sans-serif;color:#111;margin:24mm;white-space:pre-wrap}h1{font-size:18pt}@page{size:auto;margin:18mm}</style></head><body><h1>MK's Macro Ledger</h1><pre>${safe}</pre><script>window.onload=()=>{window.focus();window.print()}</script></body></html>`);printWindow.document.close();};
-$('importJSON').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.foods)||!data.logs||typeof data.logs!=='object'||Array.isArray(data.logs))throw Error('invalid');if(data.foods.some(f=>!f||typeof f.name!=='string'||!Number.isFinite(Number(f.kcal))||!Number.isFinite(Number(f.protein))||!Number.isFinite(Number(f.carbs))||!Number.isFinite(Number(f.fat))))throw Error('invalid');if(data.weightLogs!==undefined&&!Array.isArray(data.weightLogs))throw Error('invalid');if(data.categories!==undefined&&!Array.isArray(data.categories))throw Error('invalid');if(!confirm('Restore this backup? This will replace the current food Library, diary and any settings included in the backup. Before replacing them, the app will download a safety backup of your current data.')){e.target.value='';return;}
- // Download a complete snapshot of the current browser data before any replacement.
- exportFullBackup();
- foods=data.foods;logs=data.logs;if(Array.isArray(data.categories))categories=data.categories;if(Array.isArray(data.weightLogs))weightLogs=data.weightLogs;if(data.weightTarget===null||Number.isFinite(Number(data.weightTarget))&&Number(data.weightTarget)>0)weightTarget=data.weightTarget===null?null:Number(data.weightTarget);if(data.macroTargets&&typeof data.macroTargets==='object'){macroTargets={kcal:validTarget(data.macroTargets.kcal)?Number(data.macroTargets.kcal):null,protein:validTarget(data.macroTargets.protein)?Number(data.macroTargets.protein):null,carbs:validTarget(data.macroTargets.carbs)?Number(data.macroTargets.carbs):null,fat:validTarget(data.macroTargets.fat)?Number(data.macroTargets.fat):null};localStorage.setItem('macroTargets',JSON.stringify(macroTargets));}localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));localStorage.setItem('macroWeightTarget',JSON.stringify(weightTarget));save();renderDiary();renderLibrary();renderWeight();renderHistory();alert('Backup restored. Your previous data was downloaded first as a safety backup.')}catch{alert('That file does not look like a valid Macro Ledger backup. No data was intentionally replaced.')}e.target.value=''};
+function mergeBackupData(data){
+ const report={foodsAdded:0,logsAdded:0,weightsAdded:0};
+ const foodKey=f=>`${String(f.name||'').trim().toLocaleLowerCase()}|${String(f.unit||'').trim().toLocaleLowerCase()}`;
+ const byFoodKey=new Map(foods.map(f=>[foodKey(f),f]));
+ const byFoodId=new Map(foods.filter(f=>f.id).map(f=>[String(f.id),f]));
+ for(const imported of data.foods){
+  const key=foodKey(imported),sameId=imported.id?byFoodId.get(String(imported.id)):null,existing=(sameId&&foodKey(sameId)===key)?sameId:byFoodKey.get(key);
+  if(existing){if(imported.favourite)existing.favourite=true;continue;}
+  const copy={...imported};
+  if(!copy.id||byFoodId.has(String(copy.id)))copy.id=newFoodId();
+  foods.push(copy);byFoodKey.set(key,copy);byFoodId.set(String(copy.id),copy);report.foodsAdded++;
+ }
+ const entryKey=x=>JSON.stringify([x.name,x.qty,x.unit,x.displayUnit,x.kcal,x.protein,x.carbs,x.fat]);
+ for(const [date,importedItems] of Object.entries(data.logs||{})){
+  if(!Array.isArray(importedItems))continue;
+  const current=Array.isArray(logs[date])?logs[date]:[],ids=new Set(current.filter(x=>x.id).map(x=>String(x.id))),counts=new Map();
+  current.forEach(x=>{const key=entryKey(x);counts.set(key,(counts.get(key)||0)+1)});
+  const seenImported=new Map();
+  for(const item of importedItems){
+   if(!item||typeof item!=='object')continue;
+   if(item.id&&ids.has(String(item.id)))continue;
+   const key=entryKey(item),seen=(seenImported.get(key)||0)+1;seenImported.set(key,seen);
+   if(!item.id&&seen<=(counts.get(key)||0))continue;
+   const copy={...item,id:item.id&&!ids.has(String(item.id))?String(item.id):(crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()))};
+   if(ids.has(String(copy.id)))copy.id=crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random());
+   current.push(copy);ids.add(String(copy.id));report.logsAdded++;
+  }
+  logs[date]=current;
+ }
+ if(Array.isArray(data.categories))categories=[...new Set([...categories,...data.categories])];
+ if(Array.isArray(data.weightLogs)){
+  const existing=new Set(weightLogs.map(x=>x.id?String(x.id):`${x.date}|${x.weight}|${x.loggedAt||''}`));
+  for(const item of data.weightLogs){if(!item||!Number.isFinite(Number(item.weight)))continue;const key=item.id?String(item.id):`${item.date}|${item.weight}|${item.loggedAt||''}`;if(existing.has(key))continue;const copy={...item,id:item.id||String(Date.now()+Math.random())};weightLogs.push(copy);existing.add(key);report.weightsAdded++;}
+ }
+ if(weightTarget===null&&data.weightTarget!==undefined&&data.weightTarget!==null&&Number(data.weightTarget)>0)weightTarget=Number(data.weightTarget);
+ if(data.macroTargets&&typeof data.macroTargets==='object')for(const key of ['kcal','protein','carbs','fat'])if(!validTarget(macroTargets[key])&&validTarget(data.macroTargets[key]))macroTargets[key]=Number(data.macroTargets[key]);
+ localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));localStorage.setItem('macroWeightTarget',JSON.stringify(weightTarget));localStorage.setItem('macroTargets',JSON.stringify(macroTargets));save();
+ return report;
+}
+$('importJSON').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!data||!Array.isArray(data.foods)||!data.logs||typeof data.logs!=='object'||Array.isArray(data.logs))throw Error('invalid');if(data.foods.some(f=>!f||typeof f.name!=='string'||!Number.isFinite(Number(f.kcal))||!Number.isFinite(Number(f.protein))||!Number.isFinite(Number(f.carbs))||!Number.isFinite(Number(f.fat))))throw Error('invalid');if(data.weightLogs!==undefined&&!Array.isArray(data.weightLogs))throw Error('invalid');if(data.categories!==undefined&&!Array.isArray(data.categories))throw Error('invalid');if(!confirm('Merge this backup into the data already on this device? Existing diary entries and foods will be kept. Matching entries will not be imported twice. Existing settings take priority; missing settings may be filled from the backup. A safety backup will be downloaded first.')){e.target.value='';return;}exportFullBackup();const report=mergeBackupData(data);renderDiary();renderLibrary();renderWeight();renderHistory();alert(`Backup merged successfully. Added ${report.foodsAdded} foods, ${report.logsAdded} diary entries and ${report.weightsAdded} weigh-ins. Existing data was retained.`)}catch(err){alert('That file does not look like a valid Macro Ledger backup. No data was intentionally replaced.')}e.target.value=''};
 
 // Weight diary and progress chart: stored independently from food logs.
 function weightDateValue(value){const d=new Date(String(value)+'T12:00:00');return Number.isNaN(d.getTime())?null:d;}
@@ -448,5 +498,29 @@ $('resetMacroTargets').onclick=()=>{
 syncMacroTargetInputs();
 
 renderDiary();
+function setupAppUpdater(){
+ const button=$('checkAppUpdate'),status=$('appUpdateStatus'),versionLabel=$('installedVersion');if(!button||!status)return;
+ if(versionLabel)versionLabel.textContent='v'+APP_VERSION;
+ const safetyButton=$('downloadPreUpdateBackup');if(safetyButton){if(localStorage.getItem('macroPreUpdateBackupV1'))safetyButton.classList.remove('hide');safetyButton.onclick=()=>{const snapshot=localStorage.getItem('macroPreUpdateBackupV1');if(snapshot)download('mk-macro-ledger-pre-update-safety-copy.json',snapshot,'application/json')};}
+ button.onclick=async()=>{
+  button.disabled=true;status.textContent='Checking GitHub for updates…';
+  try{
+   const response=await fetch('./version.json?check='+Date.now(),{cache:'no-store'});if(!response.ok)throw Error('Version check unavailable');const remote=await response.json();
+   if(!Number.isFinite(Number(remote.version)))throw Error('Invalid version information');
+   if(Number(remote.version)<=APP_VERSION){status.textContent='You are using the latest version (v'+APP_VERSION+').';button.disabled=false;return;}
+   const backup=JSON.stringify(makeBackup());try{localStorage.setItem('macroPreUpdateBackupV1',backup);localStorage.setItem('macroPreUpdateBackupAt',new Date().toISOString());if(safetyButton)safetyButton.classList.remove('hide')}catch{throw Error('There was not enough browser storage to create the safety snapshot. Please download a JSON backup first.')}
+   if(!('serviceWorker'in navigator))throw Error('This browser cannot update the installed app automatically.');
+   status.textContent='Version '+remote.version+' found. A safety copy has been saved on this device. Download it from this section if needed. Downloading update…';
+   let reloading=false;const reload=()=>{if(reloading)return;reloading=true;status.textContent='Update installed. Reloading…';location.reload()};
+   navigator.serviceWorker.addEventListener('controllerchange',reload,{once:true});
+   const registration=await navigator.serviceWorker.getRegistration()||await navigator.serviceWorker.register('./sw.js');
+   await registration.update();
+   if(registration.waiting){registration.waiting.postMessage({type:'SKIP_WAITING'});}
+   if(registration.installing){registration.installing.addEventListener('statechange',()=>{if(registration.installing?.state==='installed'&&navigator.serviceWorker.controller){registration.waiting?.postMessage({type:'SKIP_WAITING'});}});}
+   if(registration.active&&Number(remote.version)>APP_VERSION){status.textContent='Update check started. The app will reload when the new files are ready.';setTimeout(()=>{if(!reloading){status.textContent='The update is still being prepared. Close and reopen the installed app in a moment.';button.disabled=false}},12000)}
+  }catch(error){status.textContent=error.message||'Could not check for updates. Please try again.';button.disabled=false}
+ };
+}
+setupAppUpdater();
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();

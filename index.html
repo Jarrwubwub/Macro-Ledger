@@ -111,6 +111,17 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .library-item.is-dragging{opacity:.5}
 @media(max-width:600px){#foodList{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:380px){.library-item{padding:11px}.library-quantity-row .qtyadd{grid-template-columns:minmax(48px,68px) minmax(0,1fr) 68px;gap:6px}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{font-size:12px;padding-left:6px;padding-right:6px}}
+
+/* Favourites, entry actions and in-app updater. */
+.food-favourite{border:0;background:transparent;color:#777;padding:0 4px;font-size:20px;line-height:1;cursor:pointer;min-width:28px;min-height:28px}
+.food-favourite.is-favourite{color:#ffb347}
+.food-favourite:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:5px}
+.entry-context-menu{position:fixed;z-index:1000;min-width:152px;padding:5px;background:#292725;border:1px solid #51463d;border-radius:10px;box-shadow:0 8px 28px #0009}
+.entry-context-menu button{width:100%;border:0;background:transparent;color:#f4f0ec;text-align:left;padding:10px 12px;border-radius:7px;font:600 13px "Manrope",system-ui,sans-serif}
+.entry-context-menu button:active{background:#403127}
+.app-update-panel{display:grid;gap:8px;padding:12px;margin-top:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}
+.app-update-panel .btn{justify-self:start}
+.entry-drag-area{touch-action:pan-y;cursor:grab}
 </style>
 
 <style>
@@ -194,8 +205,8 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="card section">
 <div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
 <input id="librarySearch" placeholder="Search foods...">
-<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px"><select id="categoryFilter"><option value="All">All categories</option></select><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="recent">Recently used</option><option value="custom">Custom order (drag to arrange)</option></select></div>
-<p class="tiny muted" style="margin:-4px 0 2px">Choose Custom order to arrange foods by holding the handle and dragging.</p>
+<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px"><select id="categoryFilter"><option value="All">All categories</option></select><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="favourites">Favourites first</option><option value="recent">Recently used</option><option value="custom">Custom order (drag to arrange)</option></select></div>
+<p class="tiny muted" style="margin:-4px 0 2px">Tap the star to favourite a food. Choose Favourites first to sort favourites to the top. Choose Custom order to arrange foods by dragging.</p>
 <div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button><button class="btn danger smallbtn" id="deleteSelectedFoods" type="button" disabled>Delete selected (0)</button></div>
 <div class="row between library-select-all"><span class="tiny muted" id="selectedFoodCount">0 selected</span></div>
 <div id="foodList"></div>
@@ -264,12 +275,14 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div id="historySummary" class="result">No saved log for this date.</div>
 <div class="toolbar"><button class="btn secondary" id="loadHistory">Load day into diary</button><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div>
 <div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div>
-<div class="field"><label>Restore a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div>
-<p class="tiny muted">Restoring replaces the current Library, diary and settings. The app will offer to download a safety backup first.</p>
+<div class="field"><label>Import and merge a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div>
+<p class="tiny muted">Importing a JSON backup merges it with the data on this device. Existing foods, diary entries and settings are retained; matching diary entries are not imported twice.</p>
+<div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v67</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div>
 </div>
 </section>
 <div class="footer">Macro Ledger · Personal estimates, not a clinical nutrition database.</div>
 </main>
+<div id="entryContextMenu" class="entry-context-menu hide" role="menu" aria-label="Food entry actions"><button id="duplicateEntryAction" type="button" role="menuitem">Duplicate entry</button></div>
 <dialog id="foodEditor" style="border:1px solid #ddd;border-radius:16px;padding:18px;width:min(92vw,520px);max-height:90vh;overflow:auto">
 <form id="foodEditorForm" class="section">
 <div class="row between"><h2 id="editorTitle" style="margin:0">Edit food</h2><button type="button" class="btn ghost smallbtn" id="closeEditor">Close</button></div>
