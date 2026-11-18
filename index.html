@@ -142,7 +142,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .meal-diary-entry .meal-entry-ingredients{font-size:11px;color:var(--muted);line-height:1.45;padding:7px 9px;margin-top:4px;background:var(--surface2);border-radius:8px;overflow-wrap:anywhere}
 .meal-diary-entry:not(.is-expanded) .meal-entry-ingredients{display:none}
 .weight-target-details summary,.weight-history-details summary{font-size:13px;font-weight:750;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.weight-history-details .daily-history-row{padding:8px 0}
+.weight-history-details .daily-history-row{padding:10px 12px}
 /* v79: saved Library meals mirror the compact, expandable Daily Log meal cards */
 .saved-meal{gap:8px;min-height:0;cursor:pointer;transition:border-color .15s ease}
 .saved-meal:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -156,6 +156,14 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .saved-meal-actions [data-deletemeal]{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important}
 .saved-meal-actions [data-addmeal]{background:var(--accent)!important;border:1px solid var(--accent)!important;color:var(--accent-ink)!important}
 @media(max-width:420px){.meal-diary-entry .meal-entry-summary{display:block}.meal-diary-entry .meal-entry-macros{display:block;text-align:left;white-space:normal}}
+
+/* v84: restore the red Daily Log Remove action and tidy the weigh-in history rows. */
+.entry .library-delete-action,.weight-history-details .library-delete-action{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important;min-height:38px;padding:7px 10px!important;font-size:12px;line-height:1.2;box-shadow:none}
+.weight-history-details .weight-history-row{padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface2);gap:12px;min-height:60px}
+.weight-history-info{display:grid;gap:2px;min-width:0}
+.weight-history-details .daily-history-date{font-size:13px;line-height:1.35}
+.weight-history-details .daily-history-macros{font-size:13px;line-height:1.4}
+
 </style>
 
 <style>
@@ -204,8 +212,16 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .meal-diary-entry .meal-entry-ingredients{font-size:11px;color:var(--muted);line-height:1.45;padding:7px 9px;margin-top:4px;background:var(--surface2);border-radius:8px;overflow-wrap:anywhere}
 .meal-diary-entry:not(.is-expanded) .meal-entry-ingredients{display:none}
 .weight-target-details summary,.weight-history-details summary{font-size:13px;font-weight:750;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.weight-history-details .daily-history-row{padding:8px 0}
+.weight-history-details .daily-history-row{padding:10px 12px}
 @media(max-width:420px){.meal-diary-entry .meal-entry-summary{display:block}.meal-diary-entry .meal-entry-macros{display:block;text-align:left;white-space:normal}}
+
+/* v84: restore the red Daily Log Remove action and tidy the weigh-in history rows. */
+.entry .library-delete-action,.weight-history-details .library-delete-action{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important;min-height:38px;padding:7px 10px!important;font-size:12px;line-height:1.2;box-shadow:none}
+.weight-history-details .weight-history-row{padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface2);gap:12px;min-height:60px}
+.weight-history-info{display:grid;gap:2px;min-width:0}
+.weight-history-details .daily-history-date{font-size:13px;line-height:1.35}
+.weight-history-details .daily-history-macros{font-size:13px;line-height:1.4}
+
 </style>
 </head>
 <body>
@@ -527,7 +543,7 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 .meal-diary-entry .meal-entry-ingredients{font-size:11px;color:var(--muted);line-height:1.45;padding:7px 9px;margin-top:4px;background:var(--surface2);border-radius:8px;overflow-wrap:anywhere}
 .meal-diary-entry:not(.is-expanded) .meal-entry-ingredients{display:none}
 .weight-target-details summary,.weight-history-details summary{font-size:13px;font-weight:750;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.weight-history-details .daily-history-row{padding:8px 0}
+.weight-history-details .daily-history-row{padding:10px 12px}
 @media(max-width:420px){.meal-diary-entry .meal-entry-summary{display:block}.meal-diary-entry .meal-entry-macros{display:block;text-align:left;white-space:normal}}
 
 /* v80: retained v79 palette colours, with full v78 component styling restored */
@@ -537,6 +553,14 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 .saved-meal-summary{display:grid;grid-template-columns:minmax(0,1fr);align-content:center;justify-content:stretch;gap:3px}
 .saved-meal-summary .meal-macros{white-space:normal;overflow-wrap:anywhere;line-height:1.35}
 .saved-meal .meal-ingredients{cursor:default}
+
+/* v84: restore the red Daily Log Remove action and tidy the weigh-in history rows. */
+.entry .library-delete-action,.weight-history-details .library-delete-action{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important;min-height:38px;padding:7px 10px!important;font-size:12px;line-height:1.2;box-shadow:none}
+.weight-history-details .weight-history-row{padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface2);gap:12px;min-height:60px}
+.weight-history-info{display:grid;gap:2px;min-width:0}
+.weight-history-details .daily-history-date{font-size:13px;line-height:1.35}
+.weight-history-details .daily-history-macros{font-size:13px;line-height:1.4}
+
 </style>
 <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-hidden="true"></div>
 <script src="foods.js"></script><script src="app.js"></script>
