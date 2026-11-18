@@ -248,7 +248,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </style>
 </head>
 <body>
-<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to current ledger">MK's Ledger</h1><div class="sub" id="appSubtitle">The food you eat, written down.</div></div><div class="header-actions" role="group" aria-label="Ledger navigation"><button type="button" class="ledger-icon-button active" data-ledger="nutrition" aria-pressed="true" aria-label="Nutrition" title="Nutrition"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8.1 22.4c-1.8-2.3-1.7-5.8.4-8.3 2.2-2.7 6-3.8 10-3.4 2.8.3 5.1 1.4 7 3.2 1.5-.6 3.2-.5 4.5.3 1.3.8 2 2.1 1.9 3.4-.1 1.4-1.1 2.5-2.7 3.1.1 2.2-1 4.5-3.1 6.1-2.5 1.9-6.2 2.5-9.7 1.5-2.2-.6-4-1.8-5.2-3.4l-3.2 1.3c-1.5.6-3.2-.1-3.8-1.5-.6-1.4.1-3 1.6-3.6l2.3-.9Zm19.2-9.1 1.2-2.3c.5-1 1.8-1.4 2.8-.9 1 .5 1.4 1.7.9 2.7l-.8 1.6M14.2 27.1l-2.8 3.1c-.9 1-.8 2.5.2 3.3 1 .9 2.5.8 3.4-.2l3.1-3.5m3.8-2.2 2.5 3.4c.8 1.1 2.3 1.3 3.4.5 1.1-.8 1.3-2.3.5-3.4l-2.2-3" /></svg></button><button type="button" class="ledger-icon-button" data-ledger="exercise" aria-pressed="false" aria-label="Exercise" title="Exercise"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 12h3V9h4v5h12V9h4v3h3v8h-3v3h-4v-5H10v5H6v-3H3z"/></svg></button><button id="openSettings" class="settings-gear" type="button" aria-label="Open Settings" title="Settings">⚙</button></div></div><div class="tabs">
+<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to current ledger">MK's Ledger</h1><div class="sub" id="appSubtitle">The food you eat, written down.</div></div><div class="header-actions" role="group" aria-label="Ledger navigation"><button type="button" class="ledger-icon-button active" data-ledger="nutrition" aria-pressed="true" aria-label="Nutrition" title="Nutrition"><svg viewBox="0 0 40 40" aria-hidden="true"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8.2 20.1c-1.8-2.4-1.6-5.8.7-8.2 2.5-2.7 6.5-3.8 10.8-3.2 4.1.5 7.5 2.6 9.2 5.6 1.2 2.2 1.2 4.8-.1 7.1-1.5 2.7-4.5 4.8-8.1 5.5-4.5.9-9.2-.6-11.6-3.7l-3.1 1.2c-1.5.6-3.2-.1-3.8-1.6-.6-1.5.1-3.1 1.6-3.7l4.4-1.8Z"/><path d="m14.2 25.6-3.1 4.1c-.8 1.1-.6 2.6.5 3.4 1.1.8 2.6.6 3.4-.5l3.1-4.1m3.1-1.1 3.2 4.1c.8 1.1 2.3 1.3 3.4.5 1.1-.8 1.3-2.3.5-3.4l-3.2-4.1"/></svg></svg></button><button type="button" class="ledger-icon-button" data-ledger="exercise" aria-pressed="false" aria-label="Exercise" title="Exercise"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 12h3V9h4v5h12V9h4v3h3v8h-3v3h-4v-5H10v5H6v-3H3z"/></svg></button><button id="openSettings" class="settings-gear" type="button" aria-label="Open Settings" title="Settings">⚙</button></div></div><div class="tabs">
 <button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Scanner</button><button class="tab" data-tab="weight">Weight</button>
 </div></header>
 <main>
@@ -599,8 +599,119 @@ header .top>div:first-child{min-width:0} header .top h1{line-height:1.2} header 
 @media(max-width:600px){header{padding:7px 12px 9px}header .top{min-height:46px;gap:8px}.header-actions{gap:7px}.ledger-icon-button,.settings-gear{width:40px;height:40px;min-width:40px;flex-basis:40px}.ledger-icon-button svg{width:30px;height:30px}.settings-gear{font-size:29px}.tabs{margin-top:5px;padding:6px 0 0}}
 @media(max-width:360px){header .top{gap:5px}h1{font-size:20px}.header-actions{gap:4px}.ledger-icon-button,.settings-gear{width:36px;height:38px;min-width:36px;flex-basis:36px}.ledger-icon-button svg{width:28px;height:28px}}
 
+
+/* v90: fixed, measured header so navigation cannot scroll away or cover page content. */
+html { scroll-padding-top: var(--ledger-header-height, 150px); }
+body { padding-top: var(--ledger-header-height, 150px) !important; }
+body > header {
+  position: fixed !important;
+  inset: 0 0 auto 0 !important;
+  width: 100% !important;
+  z-index: 1000 !important;
+  background: var(--header, #181b1f) !important;
+  padding: 9px 18px 16px !important;
+  box-shadow: 0 5px 18px #0008 !important;
+}
+body > header .top {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end !important;
+  justify-content: space-between;
+  gap: 18px !important;
+}
+body > header .top > div:first-child { min-width: 0; }
+body > header .top .sub { margin-top: 3px; line-height: 1.35; }
+body > header .header-actions {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  flex: 0 0 auto;
+  align-self: flex-end !important;
+}
+body > header .ledger-icon-button,
+body > header .settings-gear {
+  width: 46px !important;
+  height: 44px !important;
+  min-width: 46px !important;
+  flex: 0 0 46px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  color: var(--accent) !important;
+  line-height: 1 !important;
+}
+body > header .ledger-icon-button svg {
+  width: 34px !important;
+  height: 34px !important;
+  display: block;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: .8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body > header .settings-gear { font-size: 32px !important; }
+body > header .tabs {
+  position: static !important;
+  inset: auto !important;
+  max-width: 760px;
+  margin: 7px auto 0 !important;
+  padding: 7px 0 0 !important;
+  background: transparent !important;
+  z-index: auto !important;
+}
+@media (max-width: 600px) {
+  body > header { padding: 8px 12px 15px !important; }
+  body > header .top { gap: 9px !important; }
+  body > header .header-actions { gap: 7px !important; }
+  body > header .ledger-icon-button,
+  body > header .settings-gear {
+    width: 42px !important;
+    min-width: 42px !important;
+    flex-basis: 42px !important;
+    height: 43px !important;
+  }
+  body > header .ledger-icon-button svg { width: 32px !important; height: 32px !important; }
+  body > header .settings-gear { font-size: 31px !important; }
+  body > header .tabs { margin-top: 6px !important; padding-top: 6px !important; }
+}
+@media (max-width: 360px) {
+  body > header .top { gap: 5px !important; }
+  body > header .header-actions { gap: 4px !important; }
+  body > header .ledger-icon-button,
+  body > header .settings-gear {
+    width: 38px !important;
+    min-width: 38px !important;
+    flex-basis: 38px !important;
+  }
+  body > header .ledger-icon-button svg { width: 30px !important; height: 30px !important; }
+}
+
 </style>
 <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-hidden="true"></div>
+
+<script>
+(() => {
+  const header = document.querySelector('body > header');
+  if (!header) return;
+  const setHeaderSpace = () => {
+    const height = Math.ceil(header.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--ledger-header-height', `${height}px`);
+  };
+  setHeaderSpace();
+  if ('ResizeObserver' in window) {
+    const observer = new ResizeObserver(setHeaderSpace);
+    observer.observe(header);
+  }
+  window.addEventListener('resize', setHeaderSpace, { passive: true });
+  window.addEventListener('orientationchange', () => requestAnimationFrame(setHeaderSpace), { passive: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setHeaderSpace);
+})();
+</script>
+
 <script src="foods.js"></script><script src="app.js"></script>
 <script>
 (()=>{const allowed=['orange','blue','yellow','red','monochrome'];const saved=localStorage.getItem('macroLedgerTheme');const theme=allowed.includes(saved)?saved:'orange';document.documentElement.dataset.theme=theme;const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content='#080808';})();
