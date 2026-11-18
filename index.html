@@ -23,13 +23,8 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .daily-add-food{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:44px;padding:10px 14px;border:1px solid var(--accent);border-radius:12px;background:var(--accent);color:var(--accent-ink);font:700 14px/1.2 "Manrope",system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px #0003}.daily-add-food span{font-size:19px;line-height:1}.daily-add-food:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 
 .library-tools{justify-content:space-between;align-items:center;flex-wrap:wrap;margin:10px 0}
-.library-select-all{padding:8px 2px;border-bottom:1px solid var(--line);margin-bottom:8px}
-.library-select-all label{display:flex;align-items:center;gap:8px;cursor:pointer}
 .food-library-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1px solid var(--line)}
 .food-library-row .foodrow{border:0;margin:0;min-width:0}
-.food-select{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
-#deleteSelectedFoods:disabled{opacity:.45;cursor:not-allowed}
-@media(max-width:430px){.food-library-row{grid-template-columns:24px minmax(0,1fr);gap:5px}.food-library-row .foodrow{gap:6px}.food-library-row .food-actions{gap:4px}}
 
 
 /* Mobile layout refinements: consistent food controls and a complete navigation grid */
@@ -131,7 +126,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 /* Library: Add matches the orange primary Add food action. */
 #foodList [data-addfood]{background:#ff7a24!important;border:1px solid #ff7a24!important;color:#17100b!important}
 /* Library: Delete uses the same treatment as Daily Log Remove. */
-#foodList [data-deletefood],#deleteSelectedFoods{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important}
+#foodList [data-deletefood]{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important}
 </style>
 </head>
 <body>
@@ -205,10 +200,9 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="card section">
 <div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
 <input id="librarySearch" placeholder="Search foods...">
-<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px"><select id="categoryFilter"><option value="All">All categories</option></select><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="favourites">Favourites first</option><option value="recent">Recently used</option><option value="custom">Custom order (drag to arrange)</option></select></div>
-<p class="tiny muted" style="margin:-4px 0 2px">Tap the star to favourite a food. Choose Favourites first to sort favourites to the top. Choose Custom order to arrange foods by dragging.</p>
-<div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button><button class="btn danger smallbtn" id="deleteSelectedFoods" type="button" disabled>Delete selected (0)</button></div>
-<div class="row between library-select-all"><span class="tiny muted" id="selectedFoodCount">0 selected</span></div>
+<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px"><select id="categoryFilter"><option value="All">All categories</option></select><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="favourites">Favourites</option><option value="recent">Recently used</option><option value="custom">Custom order (drag to arrange)</option></select></div>
+<p class="tiny muted" style="margin:-4px 0 2px">Tap the star to add or remove a favourite. Choose Favourites to show only foods you have starred. Choose Custom order to arrange foods by dragging.</p>
+<div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button></div>
 <div id="foodList"></div>
 </div>
 
@@ -280,7 +274,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v67</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div>
 </div>
 </section>
-<div class="footer">Macro Ledger · Personal estimates, not a clinical nutrition database.</div>
+
 </main>
 <div id="entryContextMenu" class="entry-context-menu hide" role="menu" aria-label="Food entry actions"><button id="duplicateEntryAction" type="button" role="menuitem">Duplicate entry</button></div>
 <dialog id="foodEditor" style="border:1px solid #ddd;border-radius:16px;padding:18px;width:min(92vw,520px);max-height:90vh;overflow:auto">
@@ -307,13 +301,8 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 .colour-swatch-button:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
 
 .library-tools{justify-content:space-between;align-items:center;flex-wrap:wrap;margin:10px 0}
-.library-select-all{padding:8px 2px;border-bottom:1px solid var(--line);margin-bottom:8px}
-.library-select-all label{display:flex;align-items:center;gap:8px;cursor:pointer}
 .food-library-row{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1px solid var(--line)}
 .food-library-row .foodrow{border:0;margin:0;min-width:0}
-.food-select{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
-#deleteSelectedFoods:disabled{opacity:.45;cursor:not-allowed}
-@media(max-width:430px){.food-library-row{grid-template-columns:24px minmax(0,1fr);gap:5px}.food-library-row .foodrow{gap:6px}.food-library-row .food-actions{gap:4px}}
 
 
 /* Food library: card-based layout with a clear information/action hierarchy */

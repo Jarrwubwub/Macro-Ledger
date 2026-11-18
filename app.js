@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=67;
+const APP_VERSION=68;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -55,6 +55,11 @@ macroTargets={kcal:validTarget(macroTargets.kcal)?Number(macroTargets.kcal):2100
 localStorage.setItem('macroTargets',JSON.stringify(macroTargets));
 let weightChartRange='30';
 let currentDate=today();
+let libraryPreferences=load('macroLibraryPreferences',{sort:'alphabetical',category:'All',search:''});
+if(!libraryPreferences||typeof libraryPreferences!=='object')libraryPreferences={sort:'alphabetical',category:'All',search:''};
+if(!['alphabetical','favourites','recent','custom'].includes(libraryPreferences.sort))libraryPreferences.sort='alphabetical';
+libraryPreferences={sort:libraryPreferences.sort,category:String(libraryPreferences.category||'All'),search:String(libraryPreferences.search||'')};
+function saveLibraryPreferences(){localStorage.setItem('macroLibraryPreferences',JSON.stringify(libraryPreferences));}
 const num=(v)=>Number(v)||0, fmt=(v)=>Number(v.toFixed(1)).toFixed(1);
 function validTarget(v){return v!==null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>0;}
 function titleCase(value){const acronyms=new Set(['WPC','TVP','BBQ','BCAA','DHA','EPA']);return String(value).trim().split(/\s+/).map(word=>word.split(/([-/])/).map(part=>{if(acronyms.has(part.toUpperCase()))return part.toUpperCase();if(/^[A-Z0-9]{2,3}$/.test(part))return part.toUpperCase();return part.charAt(0).toLocaleUpperCase()+part.slice(1).toLocaleLowerCase()}).join('')).join(' ')}
@@ -149,24 +154,23 @@ function bindFoodActions(container){
  container.querySelectorAll('[data-deletefood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.deletefood);if(!foods[i])return;foods.splice(i,1);save();renderLibrary();});
 }
 function renderLibrary(){
- const cats=['All',...new Set([...categories,...foods.map(f=>f.category||'Custom')])],old=$('categoryFilter').value||'All';
- $('categoryFilter').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');$('categoryFilter').value=cats.includes(old)?old:'All';
+ const cats=['All',...new Set([...categories,...foods.map(f=>f.category||'Custom')])];
+ const firstRender=!$('categoryFilter').dataset.preferencesLoaded;
+ const old=firstRender?libraryPreferences.category:($('categoryFilter').value||'All');
+ $('categoryFilter').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');$('categoryFilter').value=cats.includes(old)?old:'All';$('categoryFilter').dataset.preferencesLoaded='1';
  $('categoryOptions').innerHTML=cats.filter(c=>c!=='All').map(c=>`<option value="${esc(c)}"></option>`).join('');
  const q=$('librarySearch').value.toLowerCase(),cat=$('categoryFilter').value,sort=$('librarySort').value||'alphabetical';
+ libraryPreferences={sort,category:cat,search:$('librarySearch').value};
  const usage=foodUsage();
- const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q));
+ const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q)&&(sort!=='favourites'||!!f.favourite));
  if(sort==='recent')list.sort((a,b)=>{const au=usage.get(a.name.toLocaleLowerCase())||{last:0},bu=usage.get(b.name.toLocaleLowerCase())||{last:0};return bu.last-au.last||a.name.localeCompare(b.name,undefined,{sensitivity:'base'});});
- else if(sort==='favourites')list.sort((a,b)=>Number(!!b.favourite)-Number(!!a.favourite)||a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
- else if(sort==='alphabetical')list.sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
+ else if(sort==='favourites'||sort==='alphabetical')list.sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
  // Custom order deliberately preserves the underlying Library array order.
- $('foodCount').textContent=foods.length+' foods';
- $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item" data-food-id="${esc(f.id)}"><div class="library-card-top"><button class="food-favourite${f.favourite?' is-favourite':''}" type="button" data-favourite="${i}" aria-label="${f.favourite?'Remove':'Add'} ${esc(f.name)} ${f.favourite?'from':'to'} favourites" aria-pressed="${!!f.favourite}">★</button>${sort==='custom'?`<button class="drag-handle library-drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(f.name)}" title="Hold, then drag to reorder">⠿</button>`:''}<input class="food-select" type="checkbox" aria-label="Select ${esc(f.name)} for deletion" data-selectfood="${i}"></div><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||'<div class="tiny muted">No matching foods.</div>';
+ $('foodCount').textContent=(sort==='favourites'?list.length:foods.length)+' '+(sort==='favourites'?'favourites':'foods');
+ $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item" data-food-id="${esc(f.id)}"><div class="library-card-top"><button class="food-favourite${f.favourite?' is-favourite':''}" type="button" data-favourite="${i}" aria-label="${f.favourite?'Remove':'Add'} ${esc(f.name)} ${f.favourite?'from':'to'} favourites" aria-pressed="${!!f.favourite}">★</button>${sort==='custom'?`<button class="drag-handle library-drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(f.name)}" title="Hold, then drag to reorder">⠿</button>`:''}</div><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||`<div class="tiny muted">${sort==='favourites'?'No favourite foods yet. Tap a star on any food to add it to Favourites.':'No matching foods.'}</div>`;
  bindFoodActions($('foodList'));
  $('foodList').querySelectorAll('[data-favourite]').forEach(button=>button.onclick=()=>{const food=foods[Number(button.dataset.favourite)];if(!food)return;food.favourite=!food.favourite;save();renderLibrary()});
  if(sort==='custom')enableLongPressReorder($('foodList'),'.library-item','.library-drag-handle',()=>{const visible=[...$('foodList').querySelectorAll('[data-food-id]')].map(x=>x.dataset.foodId),visibleSet=new Set(visible),ordered=foods.filter(f=>visibleSet.has(String(f.id))),byId=new Map(ordered.map(f=>[String(f.id),f])),ranked=visible.map(id=>byId.get(id)).filter(Boolean);let cursor=0;foods=foods.map(f=>visibleSet.has(String(f.id))?ranked[cursor++]:f);save();renderLibrary();});
- const updateSelection=()=>{const boxes=[...$('foodList').querySelectorAll('[data-selectfood]')],selected=boxes.filter(x=>x.checked).length;$('selectedFoodCount').textContent=selected+' selected';$('deleteSelectedFoods').disabled=selected===0;$('deleteSelectedFoods').textContent=`Delete selected (${selected})`;};
- $('foodList').querySelectorAll('[data-selectfood]').forEach(box=>box.addEventListener('change',updateSelection));
- updateSelection();
 }
 function newFoodId(){return 'food-'+Date.now()+'-'+Math.random().toString(36).slice(2,9)}
 function openFoodEditor(i){
@@ -194,8 +198,10 @@ $('manageCategories').onclick=()=>{
  else if(mode==='DELETE'){const old=prompt('Exact category name to delete:\n'+existing.join('\n'));if(!old||!existing.includes(old))return;const target=prompt('Move foods in this category to which category? Enter an existing category, or leave blank for Custom.');foods.forEach(f=>{if((f.category||'Custom')===old)f.category=target&&existing.includes(target)?target:'Custom'});categories=categories.filter(c=>c!==old);save();renderLibrary();}
  else alert('Please enter ADD, RENAME or DELETE.');
 }
-$('deleteSelectedFoods').onclick=()=>{const selected=[...$('foodList').querySelectorAll('[data-selectfood]:checked')].map(box=>Number(box.dataset.selectfood)).filter(i=>Number.isInteger(i)&&foods[i]);if(!selected.length)return;selected.sort((a,b)=>b-a).forEach(i=>foods.splice(i,1));save();renderLibrary();};
-$('librarySearch').oninput=renderLibrary;$('categoryFilter').onchange=renderLibrary;$('librarySort').onchange=renderLibrary;
+$('librarySearch').value=libraryPreferences.search;$('librarySort').value=libraryPreferences.sort;
+$('librarySearch').oninput=()=>{libraryPreferences.search=$('librarySearch').value;saveLibraryPreferences();renderLibrary()};
+$('categoryFilter').onchange=()=>{libraryPreferences.category=$('categoryFilter').value;saveLibraryPreferences();renderLibrary()};
+$('librarySort').onchange=()=>{libraryPreferences.sort=$('librarySort').value;saveLibraryPreferences();renderLibrary()};
 function foodUsage(){
  const usage=new Map();
  for(const [date,dayEntries] of Object.entries(logs)){
@@ -280,7 +286,7 @@ function renderHistory(){
 }
 $('historyDate').onchange=renderHistory;$('loadHistory').onclick=()=>{currentDate=$('historyDate').value||today();$('logDate').value=currentDate;setTab('diary');renderDiary()};
 function download(name,content,type){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-function makeBackup(){return {app:'MK\'s Macro Ledger',appVersion:APP_VERSION,backupFormat:3,exportedAt:new Date().toISOString(),foods,logs,categories,weightLogs,weightTarget,macroTargets,localPreferences:{librarySort:$('librarySort')?.value||'alphabetical',colesLibrarySeeded:!!localStorage.getItem(COLES_SEED_KEY)}};}
+function makeBackup(){return {app:'MK\'s Macro Ledger',appVersion:APP_VERSION,backupFormat:3,exportedAt:new Date().toISOString(),foods,logs,categories,weightLogs,weightTarget,macroTargets,localPreferences:{librarySort:$('librarySort')?.value||libraryPreferences.sort,libraryCategory:$('categoryFilter')?.value||libraryPreferences.category,librarySearch:$('librarySearch')?.value??libraryPreferences.search,colesLibrarySeeded:!!localStorage.getItem(COLES_SEED_KEY)}};}
 function renderBackupStatus(){const host=$('backupStatus');if(!host)return;const stamp=Number(localStorage.getItem('macroLastBackupAt')||0);if(!stamp){host.classList.add('needs-backup');host.textContent='No JSON backup recorded on this browser yet. Download a backup periodically and keep a copy somewhere safe.';return;}const age=Math.floor((Date.now()-stamp)/86400000),label=new Date(stamp).toLocaleString();host.classList.toggle('needs-backup',age>=30);host.textContent=`Last JSON backup downloaded: ${label}.${age>=30?' It has been 30 days or more — consider downloading a fresh copy.':' Remember to keep the downloaded file somewhere safe.'}`;}
 function exportFullBackup(){const backup=makeBackup();download('mk-macro-ledger-backup.json',JSON.stringify(backup,null,2),'application/json');localStorage.setItem('macroLastBackupAt',String(Date.now()));renderBackupStatus();}
 $('exportJSON').onclick=exportFullBackup;
@@ -324,6 +330,7 @@ function mergeBackupData(data){
  }
  if(weightTarget===null&&data.weightTarget!==undefined&&data.weightTarget!==null&&Number(data.weightTarget)>0)weightTarget=Number(data.weightTarget);
  if(data.macroTargets&&typeof data.macroTargets==='object')for(const key of ['kcal','protein','carbs','fat'])if(!validTarget(macroTargets[key])&&validTarget(data.macroTargets[key]))macroTargets[key]=Number(data.macroTargets[key]);
+ if(!localStorage.getItem('macroLibraryPreferences')&&data.localPreferences&&typeof data.localPreferences==='object'){libraryPreferences={sort:['alphabetical','favourites','recent','custom'].includes(data.localPreferences.librarySort)?data.localPreferences.librarySort:'alphabetical',category:String(data.localPreferences.libraryCategory||'All'),search:String(data.localPreferences.librarySearch||'')};$('librarySort').value=libraryPreferences.sort;$('librarySearch').value=libraryPreferences.search;saveLibraryPreferences();}
  localStorage.setItem('macroWeightLogs',JSON.stringify(weightLogs));localStorage.setItem('macroWeightTarget',JSON.stringify(weightTarget));localStorage.setItem('macroTargets',JSON.stringify(macroTargets));save();
  return report;
 }
