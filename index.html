@@ -117,6 +117,19 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .app-update-panel{display:grid;gap:8px;padding:12px;margin-top:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface2)}
 .app-update-panel .btn{justify-self:start}
 .entry-drag-area{touch-action:pan-y;cursor:grab}
+
+/* Saved meal templates in the Library */
+.library-meals-settings{margin-top:10px}
+#mealList{display:grid;gap:8px}
+.saved-meal{display:grid;gap:9px;padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--surface3)}
+.saved-meal-head{min-width:0}.saved-meal-head strong{font-size:14px}.saved-meal-head .tiny{line-height:1.45;margin-top:3px;overflow-wrap:anywhere}.saved-meal .meal-macros{color:var(--ink);font-weight:650}
+.saved-meal-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.saved-meal-actions button{min-height:34px;padding:6px 10px;font-size:11px}.saved-meal-actions [data-addmeal]{flex:1 1 100%;min-height:40px;font-weight:800}
+.meal-editor-dialog{border:1px solid var(--line);border-radius:16px;padding:18px;width:min(94vw,560px);max-height:90vh;overflow:auto;background:var(--panel);color:var(--ink)}
+.meal-editor-dialog::backdrop{background:#000b}
+#mealIngredientRows{display:grid;gap:9px}
+.meal-ingredient-row{padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--surface2);display:grid;gap:7px}
+.meal-ingredient-qty{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px;gap:7px;align-items:end}
+.meal-ingredient-qty .field{margin:0;min-width:0}.meal-ingredient-qty input,.meal-ingredient-qty select{min-width:0;width:100%;min-height:40px}.meal-remove{min-height:40px;padding:5px;font-size:18px}
 </style>
 
 <style>
@@ -257,6 +270,10 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="field"><label for="categoryFilter">Category</label><select id="categoryFilter"><option value="All">All categories</option></select></div>
 <div class="field"><label for="librarySort">Sort by</label><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="favourites">Favourites</option><option value="recent">Recently used</option><option value="custom">Custom order</option></select></div>
 </div>
+<details class="target-settings library-meals-settings" id="libraryMealsDetails">
+<summary>Meals</summary>
+<div class="library-meals-content" style="margin-top:10px"><div class="toolbar" style="margin:0 0 10px"><button class="btn library-add smallbtn" id="createMeal" type="button">＋ Create meal</button></div><div id="mealList"><div class="tiny muted">No saved meals yet. Create a meal from foods in your Library.</div></div></div>
+</details>
 <p class="tiny muted" style="margin:-4px 0 2px">Tap the star to add or remove a favourite. Choose Favourites to show only foods you have starred. Choose Custom order to arrange foods by dragging.</p>
 <div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button></div>
 <div id="foodList"></div>
@@ -317,6 +334,15 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 
 </main>
 <div id="entryContextMenu" class="entry-context-menu hide" role="menu" aria-label="Food entry actions"><button id="duplicateEntryAction" type="button" role="menuitem">Duplicate entry</button></div>
+<dialog id="mealEditor" class="meal-editor-dialog">
+<form id="mealEditorForm" class="section">
+<div class="row between"><h2 style="margin:0">Create meal</h2><button type="button" class="btn ghost smallbtn" id="closeMealEditor">Close</button></div>
+<div class="field"><label for="mealName">Meal name</label><input id="mealName" required placeholder="e.g. Chicken mince and rice"></div>
+<strong>Meal ingredients</strong><div id="mealIngredientRows"></div>
+<button class="btn secondary" id="addMealIngredient" type="button">＋ Add ingredient</button>
+<div class="result" id="mealEditorTotals" aria-live="polite">Meal total: 0 kcal · P 0 g · C 0 g · F 0 g</div>
+<div class="toolbar"><button class="btn" type="submit">Save meal</button><button class="btn ghost" type="button" id="cancelMealEditor">Cancel</button></div>
+</form></dialog>
 <dialog id="foodEditor" style="border:1px solid #ddd;border-radius:16px;padding:18px;width:min(92vw,520px);max-height:90vh;overflow:auto">
 <form id="foodEditorForm" class="section">
 <div class="row between"><h2 id="editorTitle" style="margin:0">Edit food</h2><button type="button" class="btn ghost smallbtn" id="closeEditor">Close</button></div>
