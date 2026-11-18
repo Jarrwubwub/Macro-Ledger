@@ -249,13 +249,10 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <section id="library" class="section hide">
 <div class="card section">
 <div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
-<details class="target-settings library-search-settings" id="librarySearchDetails">
-<summary>Search library</summary>
-<div style="margin-top:10px"><input id="librarySearch" placeholder="Search foods..." aria-label="Search foods"></div>
-</details>
 <details class="target-settings library-add-food-settings" id="libraryAddFoodDetails">
 <summary>Add food</summary>
 <div style="margin-top:10px">
+<div class="field"><label for="librarySearch">Search library</label><input id="librarySearch" placeholder="Search foods..." aria-label="Search foods"></div>
 <div class="field"><label for="librarySort">Sort by</label><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="favourites">Favourites</option><option value="recent">Recently used</option><option value="custom">Custom order</option></select></div>
 <details class="target-settings" id="libraryCustomFoodDetails" style="margin:10px 0"><summary>＋ Create custom food</summary>
 <div class="library-add-food-form" style="margin-top:10px">
