@@ -164,6 +164,19 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .weight-history-details .daily-history-date{font-size:13px;line-height:1.35}
 .weight-history-details .daily-history-macros{font-size:13px;line-height:1.4}
 
+
+/* v85: compact, responsive weigh-in history rows on narrow screens. */
+.weight-history-details .weight-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;min-width:0;}
+.weight-history-details .weight-history-info{min-width:0;overflow-wrap:anywhere;}
+.weight-history-details .weight-history-row .library-delete-action{justify-self:end;white-space:nowrap;flex:0 0 auto;}
+@media(max-width:420px){
+  .weight-history-details .weight-history-row{grid-template-columns:minmax(0,1fr) auto;gap:7px;padding:9px 9px;min-height:54px;}
+  .weight-history-details .weight-history-info{gap:3px;}
+  .weight-history-details .daily-history-date{font-size:11px;line-height:1.3;overflow-wrap:anywhere;}
+  .weight-history-details .daily-history-macros{font-size:13px;line-height:1.3;font-weight:750;}
+  .weight-history-details .weight-history-row .library-delete-action{min-height:32px;padding:5px 8px!important;font-size:11px;line-height:1.1;}
+}
+
 </style>
 
 <style>
