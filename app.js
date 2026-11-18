@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=75;
+const APP_VERSION=76;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -164,7 +164,7 @@ function renderLibrary(){
  const old=firstRender?libraryPreferences.category:($('categoryFilter').value||'All');
  $('categoryFilter').innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');$('categoryFilter').value=cats.includes(old)?old:'All';$('categoryFilter').dataset.preferencesLoaded='1';
  $('categoryOptions').innerHTML=cats.filter(c=>c!=='All').map(c=>`<option value="${esc(c)}"></option>`).join('');
- const q=$('librarySearch').value.toLowerCase(),cat=$('categoryFilter').value,sort=$('librarySort').value||'alphabetical';
+ const q=$('librarySearch').value.toLowerCase(),cat='All',sort=$('librarySort').value||'alphabetical';
  libraryPreferences={sort,category:cat,search:$('librarySearch').value};
  const usage=foodUsage();
  const list=foods.filter(f=>(cat==='All'||(f.category||'Custom')===cat)&&f.name.toLowerCase().includes(q)&&(sort!=='favourites'||!!f.favourite));
@@ -249,15 +249,6 @@ $('foodEditorForm').onsubmit=e=>{
  foods[i]={...f,name:titleCase($('editName').value.trim()),baseQty:qty,unit:savedUnit,defaultAddQty,defaultAddUnit,category:$('editCategory').value.trim()||'Custom',basis:$('editBasis').value.trim(),serveName:serveGrams>0?(serveName||'Serve'):'',serveGrams:serveGrams>0?serveGrams:null,kcal:num(vals[0]),protein:num(vals[1]),carbs:num(vals[2]),fat:num(vals[3])};
  save();closeFoodEditor();renderLibrary();
 };
-$('manageCategories').onclick=()=>{
- const existing=[...new Set([...categories,...foods.map(f=>f.category||'Custom')])];
- const action=prompt('Category management:\nType ADD to create a category, RENAME to rename one, or DELETE to remove one.');
- if(!action)return;const mode=action.trim().toUpperCase();
- if(mode==='ADD'){const name=prompt('New category name:');if(name&&name.trim()&&!existing.includes(name.trim())){categories.push(name.trim());save();renderLibrary();}}
- else if(mode==='RENAME'){const old=prompt('Exact category name to rename:\n'+existing.join('\n'));if(!old||!existing.includes(old))return;const name=prompt('New category name:');if(name&&name.trim()){foods.forEach(f=>{if((f.category||'Custom')===old)f.category=name.trim()});categories=categories.map(c=>c===old?name.trim():c);save();renderLibrary();}}
- else if(mode==='DELETE'){const old=prompt('Exact category name to delete:\n'+existing.join('\n'));if(!old||!existing.includes(old))return;const target=prompt('Move foods in this category to which category? Enter an existing category, or leave blank for Custom.');foods.forEach(f=>{if((f.category||'Custom')===old)f.category=target&&existing.includes(target)?target:'Custom'});categories=categories.filter(c=>c!==old);save();renderLibrary();}
- else alert('Please enter ADD, RENAME or DELETE.');
-}
 $('librarySearch').value=libraryPreferences.search;$('librarySort').value=libraryPreferences.sort;
 $('librarySearch').oninput=()=>{libraryPreferences.search=$('librarySearch').value;saveLibraryPreferences();renderLibrary()};
 $('categoryFilter').onchange=()=>{libraryPreferences.category=$('categoryFilter').value;saveLibraryPreferences();renderLibrary()};

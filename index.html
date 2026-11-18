@@ -255,6 +255,9 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </details>
 <details class="target-settings library-add-food-settings" id="libraryAddFoodDetails">
 <summary>Add food</summary>
+<div style="margin-top:10px">
+<div class="field"><label for="librarySort">Sort by</label><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="favourites">Favourites</option><option value="recent">Recently used</option><option value="custom">Custom order</option></select></div>
+<details class="target-settings" id="libraryCustomFoodDetails" style="margin:10px 0"><summary>＋ Create custom food</summary>
 <div class="library-add-food-form" style="margin-top:10px">
 <div class="field"><label>Food name</label><input id="customName" placeholder="e.g. Greek yoghurt, 170 g"></div>
 <div class="grid">
@@ -269,22 +272,15 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="field"><label>Fat g</label><input id="customFat" type="number" min="0" step="any"></div>
 </div>
 <div class="field"><label>Weight basis (optional)</label><input id="customBasis" placeholder="e.g. raw, cooked, dry, drained"></div><div class="field"><label>Category</label><input id="customCategory" list="categoryOptions" value="Custom" placeholder="e.g. Dairy & protein"><datalist id="categoryOptions"></datalist></div><button class="btn" id="saveCustom">Save custom food</button>
-</div>
-</details>
-<div class="library-filter-stack">
-<div class="field"><label for="categoryFilter">Category</label><select id="categoryFilter"><option value="All">All categories</option></select></div>
-<div class="field"><label for="librarySort">Sort by</label><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="favourites">Favourites</option><option value="recent">Recently used</option><option value="custom">Custom order</option></select></div>
-</div>
-<details class="target-settings library-meals-settings" id="libraryMealsDetails">
-<summary>Meals</summary>
-<div class="library-meals-content" style="margin-top:10px"><div class="toolbar" style="margin:0 0 10px"><button class="btn library-add smallbtn" id="createMeal" type="button">＋ Create meal</button></div><div id="mealList"><div class="tiny muted">No saved meals yet. Create a meal from foods in your Library.</div></div></div>
-</details>
-<p class="tiny muted" style="margin:-4px 0 2px">Tap the star to add or remove a favourite. Choose Favourites to show only foods you have starred. Choose Custom order to arrange foods by dragging.</p>
-<div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button></div>
+</div></details>
 <div id="foodList"></div>
 </div>
-
-
+</details>
+<details class="target-settings library-meals-settings" id="libraryMealsDetails">
+<summary>Add meal</summary>
+<div class="library-meals-content" style="margin-top:10px"><div class="toolbar" style="margin:0 0 10px"><button class="btn library-add smallbtn" id="createMeal" type="button">＋ Create meal</button></div><div id="mealList"><div class="tiny muted">No saved meals yet. Create a meal from foods in your Library.</div></div></div>
+</details>
+<select id="categoryFilter" class="hide" aria-hidden="true" tabindex="-1"><option value="All">All categories</option></select>
 </section>
 
 <section id="weight" class="section hide">
@@ -328,7 +324,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </div></details>
 <details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v75</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
 <details class="target-settings settings-section" id="dataSettings"><summary>Data &amp; backups</summary><p class="tiny muted">Export or merge your data. Imports are non-destructive and retain existing records.</p><div class="toolbar"><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div><div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div><div class="field"><label>Import and merge a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div></details>
-<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Macro Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v75</span></p></details>
+<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Macro Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v76</span></p></details>
 </div></section>
 <section id="history" class="section hide">
 <div class="card section">
