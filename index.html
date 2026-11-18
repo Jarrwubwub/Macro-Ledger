@@ -248,7 +248,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </style>
 </head>
 <body>
-<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to current ledger">MK's Ledger</h1><div class="sub" id="appSubtitle">The food you eat, written down.</div></div><div class="header-actions" role="group" aria-label="Ledger navigation"><button type="button" class="ledger-icon-button active" data-ledger="nutrition" aria-pressed="true" aria-label="Nutrition" title="Nutrition"><svg viewBox="0 0 40 40" aria-hidden="true"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8.2 20.1c-1.8-2.4-1.6-5.8.7-8.2 2.5-2.7 6.5-3.8 10.8-3.2 4.1.5 7.5 2.6 9.2 5.6 1.2 2.2 1.2 4.8-.1 7.1-1.5 2.7-4.5 4.8-8.1 5.5-4.5.9-9.2-.6-11.6-3.7l-3.1 1.2c-1.5.6-3.2-.1-3.8-1.6-.6-1.5.1-3.1 1.6-3.7l4.4-1.8Z"/><path d="m14.2 25.6-3.1 4.1c-.8 1.1-.6 2.6.5 3.4 1.1.8 2.6.6 3.4-.5l3.1-4.1m3.1-1.1 3.2 4.1c.8 1.1 2.3 1.3 3.4.5 1.1-.8 1.3-2.3.5-3.4l-3.2-4.1"/></svg></svg></button><button type="button" class="ledger-icon-button" data-ledger="exercise" aria-pressed="false" aria-label="Exercise" title="Exercise"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 12h3V9h4v5h12V9h4v3h3v8h-3v3h-4v-5H10v5H6v-3H3z"/></svg></button><button id="openSettings" class="settings-gear" type="button" aria-label="Open Settings" title="Settings">⚙</button></div></div><div class="tabs">
+<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to current ledger">MK's Ledger</h1><div class="sub" id="appSubtitle">The food you eat, written down.</div></div><div class="header-actions" role="group" aria-label="Ledger navigation"><button type="button" class="ledger-icon-button active" data-ledger="nutrition" aria-pressed="true" aria-label="Nutrition" title="Nutrition"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7.1 17.2c-.9-1.8-.5-4.1 1.2-5.3 1.5-1.1 3.6-.9 4.9.4l1.2 1.2c1.7-.8 3.7-1.2 5.9-1.2 3.1 0 5.8 1 7.9 2.7l3.6-.4c2.4-.3 4.5 1.5 4.5 3.9v3.1c0 2.4-1.8 4.3-4.2 4.4l-2.2.1c-1.5 2.2-3.9 3.6-6.7 4.1v4.1c0 1.1-.9 2-2 2s-2-.9-2-2v-3.8h-3.2v3.8c0 1.1-.9 2-2 2s-2-.9-2-2v-5.2c-2.5-1.7-4-4.3-4-7.2v-1.3c-1.2-.2-2.1-1.2-2.1-2.5v-1.5c0-.8.5-1.5 1.2-1.8Z"/><path d="M13.1 13.6 12 9.8c-.3-1.1.3-2.2 1.4-2.5 1.1-.3 2.2.3 2.5 1.4l.9 3.1" /><path d="M33.5 17.9c2.1-.1 3.5 1.1 3.5 2.7 0 1.5-1.1 2.5-2.4 2.5-1.1 0-1.8-.7-1.8-1.6 0-.7.5-1.2 1.1-1.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="32.4" cy="20.2" rx="1.1" ry="1.8" fill="var(--header, #181b1f)"/><circle cx="26.1" cy="17.6" r="1" fill="var(--header, #181b1f)"/></svg></button><button type="button" class="ledger-icon-button" data-ledger="exercise" aria-pressed="false" aria-label="Exercise" title="Exercise"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 12h3V9h4v5h12V9h4v3h3v8h-3v3h-4v-5H10v5H6v-3H3z"/></svg></button><button id="openSettings" class="settings-gear" type="button" aria-label="Open Settings" title="Settings">⚙</button></div></div><div class="tabs">
 <button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Scanner</button><button class="tab" data-tab="weight">Weight</button>
 </div></header>
 <main>
@@ -600,19 +600,32 @@ header .top>div:first-child{min-width:0} header .top h1{line-height:1.2} header 
 @media(max-width:360px){header .top{gap:5px}h1{font-size:20px}.header-actions{gap:4px}.ledger-icon-button,.settings-gear{width:36px;height:38px;min-width:36px;flex-basis:36px}.ledger-icon-button svg{width:28px;height:28px}}
 
 
-/* v90: fixed, measured header so navigation cannot scroll away or cover page content. */
-html { scroll-padding-top: var(--ledger-header-height, 150px); }
-body { padding-top: var(--ledger-header-height, 150px) !important; }
-body > header {
+
+/* v91: fully fixed header, extra title-to-tabs breathing room, and evenly spaced pig/dumbbell/settings icons. */
+html, body {
+  overscroll-behavior-y: none;
+}
+html { scroll-padding-top: var(--ledger-header-height, 160px); }
+body {
+  padding-top: var(--ledger-header-height, 160px) !important;
+}
+header, body > header {
   position: fixed !important;
-  inset: 0 0 auto 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: auto !important;
   width: 100% !important;
-  z-index: 1000 !important;
+  z-index: 10000 !important;
+  transform: translate3d(0,0,0) !important;
+  -webkit-transform: translate3d(0,0,0) !important;
+  will-change: transform;
+  contain: paint;
   background: var(--header, #181b1f) !important;
   padding: 9px 18px 16px !important;
   box-shadow: 0 5px 18px #0008 !important;
 }
-body > header .top {
+header .top {
   max-width: 760px;
   margin: 0 auto;
   display: flex;
@@ -620,18 +633,18 @@ body > header .top {
   justify-content: space-between;
   gap: 18px !important;
 }
-body > header .top > div:first-child { min-width: 0; }
-body > header .top .sub { margin-top: 3px; line-height: 1.35; }
-body > header .header-actions {
+header .top > div:first-child { min-width: 0; }
+header .top .sub { margin-top: 3px; line-height: 1.35; }
+header .header-actions {
   display: flex !important;
   align-items: flex-end !important;
   justify-content: space-between !important;
-  gap: 12px !important;
+  gap: 9px !important;
   flex: 0 0 auto;
   align-self: flex-end !important;
 }
-body > header .ledger-icon-button,
-body > header .settings-gear {
+header .ledger-icon-button,
+header .settings-gear {
   width: 46px !important;
   height: 44px !important;
   min-width: 46px !important;
@@ -643,7 +656,7 @@ body > header .settings-gear {
   color: var(--accent) !important;
   line-height: 1 !important;
 }
-body > header .ledger-icon-button svg {
+header .ledger-icon-button svg {
   width: 34px !important;
   height: 34px !important;
   display: block;
@@ -653,46 +666,47 @@ body > header .ledger-icon-button svg {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-body > header .settings-gear { font-size: 32px !important; }
-body > header .tabs {
+header .settings-gear { font-size: 32px !important; }
+header .tabs {
   position: static !important;
   inset: auto !important;
   max-width: 760px;
-  margin: 7px auto 0 !important;
+  margin: 19px auto 0 !important;
   padding: 7px 0 0 !important;
   background: transparent !important;
   z-index: auto !important;
 }
 @media (max-width: 600px) {
-  body > header { padding: 8px 12px 15px !important; }
-  body > header .top { gap: 9px !important; }
-  body > header .header-actions { gap: 7px !important; }
-  body > header .ledger-icon-button,
-  body > header .settings-gear {
+  header { padding: 8px 12px 15px !important; }
+  header .top { gap: 9px !important; }
+  header .header-actions { gap: 7px !important; }
+  header .ledger-icon-button,
+  header .settings-gear {
     width: 42px !important;
     min-width: 42px !important;
     flex-basis: 42px !important;
     height: 43px !important;
   }
-  body > header .ledger-icon-button svg { width: 32px !important; height: 32px !important; }
-  body > header .settings-gear { font-size: 31px !important; }
-  body > header .tabs { margin-top: 6px !important; padding-top: 6px !important; }
+  header .ledger-icon-button svg { width: 32px !important; height: 32px !important; }
+  header .settings-gear { font-size: 31px !important; }
+  header .tabs { margin-top: 17px !important; padding-top: 6px !important; }
 }
 @media (max-width: 360px) {
-  body > header .top { gap: 5px !important; }
-  body > header .header-actions { gap: 4px !important; }
-  body > header .ledger-icon-button,
-  body > header .settings-gear {
+  header .top { gap: 5px !important; }
+  header .header-actions { gap: 4px !important; }
+  header .ledger-icon-button,
+  header .settings-gear {
     width: 38px !important;
     min-width: 38px !important;
     flex-basis: 38px !important;
   }
-  body > header .ledger-icon-button svg { width: 30px !important; height: 30px !important; }
+  header .ledger-icon-button svg { width: 30px !important; height: 30px !important; }
 }
 
 </style>
 <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-hidden="true"></div>
 
+<script>
 <script>
 (() => {
   const header = document.querySelector('body > header');
@@ -709,6 +723,7 @@ body > header .tabs {
   window.addEventListener('resize', setHeaderSpace, { passive: true });
   window.addEventListener('orientationchange', () => requestAnimationFrame(setHeaderSpace), { passive: true });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(setHeaderSpace);
+  window.addEventListener('pageshow', setHeaderSpace);
 })();
 </script>
 
