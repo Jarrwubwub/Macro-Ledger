@@ -653,6 +653,23 @@ body > main::-webkit-scrollbar-thumb { background: #626a73; border-radius: 8px; 
   body > main { top: var(--ledger-header-height, 170px) !important; }
 }
 
+
+/* v94: increase title-to-navigation breathing room while preserving the fixed layout. */
+body > header .tabs {
+  position: static !important;
+  top: auto !important;
+  margin: 23px auto 0 !important;
+  padding-top: 7px !important;
+  background: transparent !important;
+  z-index: auto !important;
+}
+@media (max-width: 600px) {
+  body > header .tabs {
+    margin-top: 23px !important;
+    padding-top: 6px !important;
+  }
+}
+
 </style>
 <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-hidden="true"></div>
 
