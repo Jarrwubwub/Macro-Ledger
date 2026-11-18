@@ -209,6 +209,11 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div id="dailyHistoryList" class="daily-history-list"><div class="muted tiny">No previous days logged yet.</div></div>
 <div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="openHistory" type="button">Export</button></div>
 </details>
+<details class="target-settings history-settings" id="weeklyReportsCard">
+<summary>Weekly reports</summary>
+<p class="tiny muted" style="margin:10px 0">Weeks run Monday to Sunday. Daily averages are calculated across days with food entries; unlogged days are not treated as zero.</p>
+<div id="weeklyReports" class="weekly-reports"><div class="muted tiny">Your weekly summaries will appear here once you have logged food.</div></div>
+</details>
 </div>
 </section>
 <section id="scanner" class="section hide">
@@ -315,11 +320,6 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 </div>
 </section>
 <section id="history" class="section hide">
-<div class="card section">
-<h2>Weekly report</h2>
-<p class="tiny muted" style="margin-top:-4px">Weeks run Monday to Sunday. Daily averages are calculated across days with food entries; unlogged days are not treated as zero.</p>
-<div id="weeklyReports" class="weekly-reports"><div class="muted tiny">Your weekly summaries will appear here once you have logged food.</div></div>
-</div>
 <div class="card section">
 <h2>History & backup</h2>
 <div class="field"><label>Choose a day to view</label><input id="historyDate" type="date"></div>
