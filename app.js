@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=68;
+const APP_VERSION=70;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -22,6 +22,9 @@ function migrateFoods(list){
     const factor=target/(Number(f.baseQty)||1);
     f.name=titleCase(name);f.baseQty=target;f.kcal*=factor;f.protein*=factor;f.carbs*=factor;f.fat*=factor;
     f.id=f.id||`food-${out.length}-${Date.now()}`;
+    f.defaultAddQty=Number.isFinite(Number(f.defaultAddQty))&&Number(f.defaultAddQty)>0?Number(f.defaultAddQty):(Number(f.baseQty)||1);
+    f.defaultAddUnit=(f.defaultAddUnit==='serve'&&Number(f.serveGrams)>0)?'serve':canonicalUnit;
+    if(f.defaultAddUnit==='serve'&&Number(f.serveGrams)<=0)f.defaultAddUnit=f.unit;
     seen.set(key,true);out.push(f);
   }
   return out;
@@ -67,7 +70,7 @@ const totals=items=>items.reduce((a,x)=>({kcal:a.kcal+x.kcal,protein:a.protein+x
 const save=()=>{localStorage.setItem('macroFoods',JSON.stringify(foods));localStorage.setItem('macroLogs',JSON.stringify(logs));localStorage.setItem('macroCategories',JSON.stringify(categories))};
 save();
 const entries=()=>logs[currentDate]||[];
-function addEntry(food,qty=food.baseQty,unit=food.unit){
+function addEntry(food,qty=food.defaultAddQty??food.baseQty,unit=food.defaultAddUnit||food.unit){
  const isServe=unit==='serve'&&Number(food.serveGrams)>0;
  const effectiveQty=isServe?qty*Number(food.serveGrams):qty;
  const factor=effectiveQty/(Number(food.baseQty)||1);
@@ -143,12 +146,12 @@ function enableLongPressReorder(container,rowSelector,handleSelector,onCommit,on
  document.addEventListener('pointerup',finish,{signal});
  document.addEventListener('pointercancel',finish,{signal});
 }
-function quantityInput(f,index){const gram=isGramUnit(f.unit);const whole=!gram;const qty=whole?Math.max(0,Math.round(Number(f.baseQty)||0)):(Number(f.baseQty)||0);return `<input aria-label="Amount of ${esc(f.name)}" type="number" min="0" step="${whole?'1':'0.1'}" inputmode="${whole?'numeric':'decimal'}" value="${qty}" data-foodqty="${index}" data-whole="${whole?'1':'0'}">`}
-function addControls(f,index){const hasServe=isGramUnit(f.unit)&&Number(f.serveGrams)>0;return `<div class="qtyadd">${quantityInput(f,index)}${hasServe?`<select aria-label="Measurement unit for ${esc(f.name)}" data-foodunit="${index}"><option value="g">Grams (g)</option><option value="serve">${esc(f.serveName||'Serve')} (${fmt(f.serveGrams)} g)</option></select>`:`<span>${esc(f.unit)}</span>`}<button class="btn library-add smallbtn" data-addfood="${index}">Add</button></div>`}
+function quantityInput(f,index,unit=f.defaultAddUnit||f.unit){const gram=isGramUnit(f.unit),isServe=unit==='serve'&&Number(f.serveGrams)>0,whole=!gram&&!isServe;const fallback=isServe?1:(f.defaultAddQty??f.baseQty);const qty=whole?Math.max(0,Math.round(Number(fallback)||0)):(Number(fallback)||0);return `<input aria-label="Amount of ${esc(f.name)}" type="number" min="0" step="${whole?'1':'0.1'}" inputmode="${whole?'numeric':'decimal'}" value="${qty}" data-foodqty="${index}" data-whole="${whole?'1':'0'}">`}
+function addControls(f,index){const hasServe=isGramUnit(f.unit)&&Number(f.serveGrams)>0,defaultUnit=(f.defaultAddUnit==='serve'&&hasServe)?'serve':f.unit;return `<div class="qtyadd">${quantityInput(f,index,defaultUnit)}${hasServe?`<select aria-label="Measurement unit for ${esc(f.name)}" data-foodunit="${index}"><option value="g"${defaultUnit==='g'?' selected':''}>Grams (g)</option><option value="serve"${defaultUnit==='serve'?' selected':''}>${esc(f.serveName||'Serve')} (${fmt(f.serveGrams)} g)</option></select>`:`<span>${esc(f.unit)}</span>`}<button class="btn library-add smallbtn" data-addfood="${index}">Add</button></div>`}
 function foodRow(f,button=true,index=foods.indexOf(f)){return `<div class="foodrow"><div class="info"><strong>${esc(f.name)}</strong><div class="tiny">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="toolbar food-actions">${button?`<div class="qtyadd">${quantityInput(f,index)}<span>${esc(f.unit)}</span><button class="btn library-add smallbtn" data-addfood="${index}">Add</button></div>`:''}<button class="btn ghost smallbtn" data-editfood="${index}">Edit</button><button class="btn danger smallbtn" data-deletefood="${index}">Delete</button></div></div>`}
 function bindFoodActions(container){
  container.querySelectorAll('[data-foodqty][data-whole="1"]').forEach(input=>input.addEventListener('change',()=>{input.value=String(Math.max(0,Math.round(Number(input.value)||0)))}));
- container.querySelectorAll('[data-foodunit]').forEach(select=>select.addEventListener('change',()=>{const i=Number(select.dataset.foodunit),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`);if(!f||!input)return;input.value=select.value==='serve'?'1':String(f.baseQty);input.step=select.value==='serve'?'0.1':(isGramUnit(f.unit)?'0.1':'1');input.inputMode=select.value==='serve'?'decimal':(isGramUnit(f.unit)?'decimal':'numeric')}));
+ container.querySelectorAll('[data-foodunit]').forEach(select=>select.addEventListener('change',()=>{const i=Number(select.dataset.foodunit),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`);if(!f||!input)return;const isServe=select.value==='serve';input.value=isServe?(f.defaultAddUnit==='serve'?(f.defaultAddQty||1):1):(f.defaultAddUnit==='g'?(f.defaultAddQty??f.baseQty):f.baseQty);input.step=isServe||isGramUnit(f.unit)?'0.1':'1';input.inputMode=isServe||isGramUnit(f.unit)?'decimal':'numeric';input.dataset.whole=isServe||isGramUnit(f.unit)?'0':'1'}));
  container.querySelectorAll('[data-addfood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.addfood),f=foods[i],input=container.querySelector(`[data-foodqty="${i}"]`),unitSelect=container.querySelector(`[data-foodunit="${i}"]`),qty=input?num(input.value):f?.baseQty,unit=unitSelect?.value||f?.unit;if(f&&qty>0){addEntry(f,qty,unit);if(container.id==='foodList'){showToast('Item added')}else{if(container.id==='quickResults')renderQuick();setTab('diary')}}});
  container.querySelectorAll('[data-editfood]').forEach(b=>b.onclick=()=>openFoodEditor(Number(b.dataset.editfood)));
  container.querySelectorAll('[data-deletefood]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.deletefood);if(!foods[i])return;foods.splice(i,1);save();renderLibrary();});
@@ -167,16 +170,27 @@ function renderLibrary(){
  else if(sort==='favourites'||sort==='alphabetical')list.sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:'base'}));
  // Custom order deliberately preserves the underlying Library array order.
  $('foodCount').textContent=(sort==='favourites'?list.length:foods.length)+' '+(sort==='favourites'?'favourites':'foods');
- $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item" data-food-id="${esc(f.id)}"><div class="library-card-top"><button class="food-favourite${f.favourite?' is-favourite':''}" type="button" data-favourite="${i}" aria-label="${f.favourite?'Remove':'Add'} ${esc(f.name)} ${f.favourite?'from':'to'} favourites" aria-pressed="${!!f.favourite}">★</button>${sort==='custom'?`<button class="drag-handle library-drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(f.name)}" title="Hold, then drag to reorder">⠿</button>`:''}</div><div class="library-item-main"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} <span>·</span> ${fmt(f.kcal)} kcal <span>·</span> P ${fmt(f.protein)} g <span>·</span> C ${fmt(f.carbs)} g <span>·</span> F ${fmt(f.fat)} g</div></div><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||`<div class="tiny muted">${sort==='favourites'?'No favourite foods yet. Tap a star on any food to add it to Favourites.':'No matching foods.'}</div>`;
+ $('foodList').innerHTML=list.map(f=>{const i=foods.indexOf(f);return `<article class="library-item" data-food-id="${esc(f.id)}"><div class="library-card-top"><div class="library-item-info"><strong>${esc(f.name)}</strong><div class="library-item-meta">Per ${fmt(f.baseQty)} ${esc(f.unit)} · ${fmt(f.kcal)} kcal · P ${fmt(f.protein)} g · C ${fmt(f.carbs)} g · F ${fmt(f.fat)} g</div></div><div class="row" style="gap:5px;flex:0 0 auto"><button class="food-favourite${f.favourite?' is-favourite':''}" type="button" data-favourite="${i}" aria-label="${f.favourite?'Remove':'Add'} ${esc(f.name)} ${f.favourite?'from':'to'} favourites" aria-pressed="${!!f.favourite}">★</button>${sort==='custom'?`<button class="drag-handle library-drag-handle" type="button" aria-label="Hold and drag to reorder ${esc(f.name)}" title="Hold, then drag to reorder">⠿</button>`:''}</div></div><div class="library-item-main"><div class="library-quantity-row">${addControls(f,i)}</div><div class="library-manage-row"><button class="btn ghost smallbtn" data-editfood="${i}">Edit</button><button class="btn danger smallbtn" data-deletefood="${i}">Delete</button></div></div></article>`}).join('')||`<div class="tiny muted">${sort==='favourites'?'No favourite foods yet. Tap a star on any food to add it to Favourites.':'No matching foods.'}</div>`;
  bindFoodActions($('foodList'));
  $('foodList').querySelectorAll('[data-favourite]').forEach(button=>button.onclick=()=>{const food=foods[Number(button.dataset.favourite)];if(!food)return;food.favourite=!food.favourite;save();renderLibrary()});
  if(sort==='custom')enableLongPressReorder($('foodList'),'.library-item','.library-drag-handle',()=>{const visible=[...$('foodList').querySelectorAll('[data-food-id]')].map(x=>x.dataset.foodId),visibleSet=new Set(visible),ordered=foods.filter(f=>visibleSet.has(String(f.id))),byId=new Map(ordered.map(f=>[String(f.id),f])),ranked=visible.map(id=>byId.get(id)).filter(Boolean);let cursor=0;foods=foods.map(f=>visibleSet.has(String(f.id))?ranked[cursor++]:f);save();renderLibrary();});
 }
 function newFoodId(){return 'food-'+Date.now()+'-'+Math.random().toString(36).slice(2,9)}
+function updateDefaultUnitOptions(food,selected){
+ const unit=$('editUnit').value.trim()||food.unit,gram=isGramUnit(unit),serveGrams=num($('editServeGrams').value),select=$('editDefaultUnit');
+ const options=gram&&serveGrams>0?[['g','Grams (g)'],['serve',`${$('editServeName').value.trim()||'Serve'} (${fmt(serveGrams)} g)`]]:[[unit,unit]];
+ select.innerHTML=options.map(([value,label])=>`<option value="${esc(value)}">${esc(label)}</option>`).join('');
+ select.value=options.some(([value])=>value===selected)?selected:options[0][0];
+ select.disabled=options.length===1;
+}
+$('editUnit').addEventListener('input',()=>{const f=foods[Number($('foodEditor').dataset.index)]||{unit:'g'};updateDefaultUnitOptions(f,$('editDefaultUnit').value)});
+$('editServeGrams').addEventListener('input',()=>{const f=foods[Number($('foodEditor').dataset.index)]||{unit:'g'};updateDefaultUnitOptions(f,$('editDefaultUnit').value)});
+$('editServeName').addEventListener('input',()=>{const f=foods[Number($('foodEditor').dataset.index)]||{unit:'g'};updateDefaultUnitOptions(f,$('editDefaultUnit').value)});
 function openFoodEditor(i){
  const f=foods[i];if(!f)return;$('foodEditor').dataset.index=i;
  $('editName').value=f.name;$('editQty').value=f.baseQty;$('editUnit').value=f.unit;
- $('editCategory').value=f.category||'Custom';$('editBasis').value=f.basis||'';$('editServeName').value=f.serveName||'';$('editServeGrams').value=f.serveGrams||'';$('editKcal').value=f.kcal;$('editProtein').value=f.protein;$('editCarbs').value=f.carbs;$('editFat').value=f.fat;
+ $('editCategory').value=f.category||'Custom';$('editBasis').value=f.basis||'';$('editServeName').value=f.serveName||'';$('editServeGrams').value=f.serveGrams||'';$('editDefaultQty').value=f.defaultAddQty??f.baseQty;
+ updateDefaultUnitOptions(f,f.defaultAddUnit||f.unit);$('editKcal').value=f.kcal;$('editProtein').value=f.protein;$('editCarbs').value=f.carbs;$('editFat').value=f.fat;
  $('foodEditor').showModal();
 }
 function closeFoodEditor(){$('foodEditor').close()}
@@ -185,8 +199,9 @@ $('foodEditorForm').onsubmit=e=>{
  e.preventDefault();const i=Number($('foodEditor').dataset.index),f=foods[i];if(!f)return;
  const qty=num($('editQty').value),vals=['editKcal','editProtein','editCarbs','editFat'].map(id=>$(id).value);
  if(!$('editName').value.trim()||qty<=0||!$('editUnit').value.trim()||vals.some(v=>v===''||num(v)<0)){alert('Check the food name, serving quantity, unit and nutrition values.');return}
- const serveName=$('editServeName').value.trim(),serveGrams=num($('editServeGrams').value);if(serveGrams<0||($('editServeGrams').value.trim()!==''&&serveGrams<=0)){alert('Enter a serving weight greater than zero, or leave it blank.');return}
- foods[i]={...f,name:titleCase($('editName').value.trim()),baseQty:qty,unit:isGramUnit($('editUnit').value)?'g':$('editUnit').value.trim(),category:$('editCategory').value.trim()||'Custom',basis:$('editBasis').value.trim(),serveName:serveGrams>0?(serveName||'Serve'):'',serveGrams:serveGrams>0?serveGrams:null,kcal:num(vals[0]),protein:num(vals[1]),carbs:num(vals[2]),fat:num(vals[3])};
+ const serveName=$('editServeName').value.trim(),serveGrams=num($('editServeGrams').value),defaultAddQty=num($('editDefaultQty').value);if(serveGrams<0||($('editServeGrams').value.trim()!==''&&serveGrams<=0)){alert('Enter a serving weight greater than zero, or leave it blank.');return}if(defaultAddQty<=0){alert('Enter a default amount greater than zero.');return}
+ const savedUnit=isGramUnit($('editUnit').value)?'g':$('editUnit').value.trim(),defaultAddUnit=$('editDefaultUnit').value==='serve'&&serveGrams>0?'serve':savedUnit;
+ foods[i]={...f,name:titleCase($('editName').value.trim()),baseQty:qty,unit:savedUnit,defaultAddQty,defaultAddUnit,category:$('editCategory').value.trim()||'Custom',basis:$('editBasis').value.trim(),serveName:serveGrams>0?(serveName||'Serve'):'',serveGrams:serveGrams>0?serveGrams:null,kcal:num(vals[0]),protein:num(vals[1]),carbs:num(vals[2]),fat:num(vals[3])};
  save();closeFoodEditor();renderLibrary();
 };
 $('manageCategories').onclick=()=>{
@@ -230,11 +245,11 @@ function renderQuick(){
 
 }
 $('saveCustom').onclick=()=>{
- const name=titleCase($('customName').value.trim()),qty=num($('customQty').value),unit=$('customUnit').value.trim()||'serve';
+ const name=titleCase($('customName').value.trim()),qty=num($('customQty').value),unitRaw=$('customUnit').value.trim()||'serve',unit=isGramUnit(unitRaw)?'g':unitRaw,defaultAddQty=$('customDefaultQty').value.trim()===''?qty:num($('customDefaultQty').value);
  const vals=['customKcal','customProtein','customCarbs','customFat'].map(id=>$(id).value);
- if(!name||qty<=0||vals.some(v=>v===''||num(v)<0)){alert('Enter a name, serving quantity and all four nutrition values.');return}
- const [kcal,protein,carbs,fat]=vals.map(num),f={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name,baseQty:qty,unit,kcal,protein,carbs,fat,category:$('customCategory').value.trim()||'Custom',basis:$('customBasis').value.trim()};
- foods.push(f);save();['customName','customKcal','customProtein','customCarbs','customFat'].forEach(id=>$(id).value='');renderLibrary();alert('Food saved to your library.');
+ if(!name||qty<=0||defaultAddQty<=0||vals.some(v=>v===''||num(v)<0)){alert('Enter a name, base quantity, valid default amount and all four nutrition values.');return}
+ const [kcal,protein,carbs,fat]=vals.map(num),f={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name,baseQty:qty,unit,defaultAddQty,defaultAddUnit:unit,kcal,protein,carbs,fat,category:$('customCategory').value.trim()||'Custom',basis:$('customBasis').value.trim()};
+ foods.push(f);save();['customName','customKcal','customProtein','customCarbs','customFat','customDefaultQty'].forEach(id=>$(id).value='');renderLibrary();alert('Food saved to your library.');
 };
 $('clearDay').onclick=()=>{if(confirm('Clear all entries for this day?')){logs[currentDate]=[];save();renderDiary()}};
 function renderDailyHistory(){

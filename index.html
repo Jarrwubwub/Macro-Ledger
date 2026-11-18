@@ -127,6 +127,30 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 #foodList [data-addfood]{background:#ff7a24!important;border:1px solid #ff7a24!important;color:#17100b!important}
 /* Library: Delete uses the same treatment as Daily Log Remove. */
 #foodList [data-deletefood]{background:#c9362b!important;border:1px solid #e04a3e!important;color:#fff!important}
+
+/* v70: compact Option B Library cards, stacked filters and expandable sections */
+.history-settings{margin-top:10px}
+.library-search-settings summary,.history-settings summary{font-size:13px;font-weight:750}
+.library-filter-stack{display:grid;grid-template-columns:1fr;gap:8px}
+.library-filter-stack select{min-height:42px}
+.library-item{display:grid;grid-template-columns:minmax(0,1fr);gap:0;padding:11px 12px;border-radius:13px;background:var(--surface2);min-width:0}
+.library-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0}
+.library-item-info{min-width:0}
+.library-item-info strong{font-size:14px;line-height:1.3}
+.library-item-meta{font-size:11.5px;line-height:1.4;margin-top:3px}
+.library-item-main{display:grid;grid-template-rows:auto auto;gap:8px;min-width:0}
+.library-quantity-row .qtyadd{display:grid;grid-template-columns:minmax(58px,.8fr) minmax(0,1fr) minmax(82px,1.1fr);gap:7px;align-items:center;width:100%}
+.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{min-height:40px;width:100%;min-width:0;padding:7px 8px}
+.library-quantity-row .qtyadd span{font-size:11px;white-space:nowrap}
+.library-quantity-row .qtyadd .library-add{min-height:42px;font-weight:800;font-size:14px;letter-spacing:.1px;box-shadow:0 2px 7px #0004}
+.library-manage-row{display:flex;justify-content:flex-end;gap:14px;border-top:1px solid var(--line);padding-top:6px;margin-top:1px}
+.library-manage-row button{width:auto;min-height:28px;padding:4px 7px;font-size:11px;background:transparent!important;border:0!important;box-shadow:none!important}
+.library-manage-row [data-editfood]{color:var(--muted)!important}
+.library-manage-row [data-deletefood]{color:#c98780!important;background:transparent!important;border:0!important}
+.library-card-top .food-favourite{flex:0 0 28px}
+.library-card-top .drag-handle{flex:0 0 28px}
+@media(min-width:601px){#foodList{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.library-item{height:auto}}
+@media(max-width:380px){.library-item{padding:10px}.library-item-meta{font-size:10.5px}.library-quantity-row .qtyadd{grid-template-columns:minmax(52px,.75fr) minmax(0,1fr) 76px;gap:5px}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{font-size:11px;padding:7px 5px}}
 </style>
 </head>
 <body>
@@ -158,12 +182,12 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="field"><label for="targetFat">Fat (g)</label><input id="targetFat" type="number" min="0.1" max="2000" step="0.1" inputmode="decimal"></div>
 </div><div class="toolbar"><button class="btn" id="saveMacroTargets" type="button">Save targets</button><button class="btn ghost" id="resetMacroTargets" type="button">Restore defaults</button></div><div class="tiny" id="macroTargetStatus" aria-live="polite"></div>
 </details>
-</div>
-<div class="card section" id="dailyHistoryCard">
-<h2>History</h2>
-<p class="muted tiny" style="margin:0 0 10px">Daily macro totals from your previous logged days.</p>
+<details class="target-settings history-settings" id="dailyHistoryCard">
+<summary>History</summary>
+<p class="muted tiny" style="margin:10px 0">Daily macro totals from your previous logged days.</p>
 <div id="dailyHistoryList" class="daily-history-list"><div class="muted tiny">No previous days logged yet.</div></div>
 <div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="openHistory" type="button">Export</button></div>
+</details>
 </div>
 </section>
 <section id="scanner" class="section hide">
@@ -199,8 +223,14 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <section id="library" class="section hide">
 <div class="card section">
 <div class="row between"><h2 style="margin:0">Saved food library</h2><span class="pill" id="foodCount"></span></div>
-<input id="librarySearch" placeholder="Search foods...">
-<div class="grid" style="grid-template-columns:1fr 1fr;gap:8px"><select id="categoryFilter"><option value="All">All categories</option></select><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="favourites">Favourites</option><option value="recent">Recently used</option><option value="custom">Custom order (drag to arrange)</option></select></div>
+<details class="target-settings library-search-settings" id="librarySearchDetails">
+<summary>Search library</summary>
+<div style="margin-top:10px"><input id="librarySearch" placeholder="Search foods..." aria-label="Search foods"></div>
+</details>
+<div class="library-filter-stack">
+<div class="field"><label for="categoryFilter">Category</label><select id="categoryFilter"><option value="All">All categories</option></select></div>
+<div class="field"><label for="librarySort">Sort by</label><select id="librarySort" aria-label="Sort food library"><option value="alphabetical">Alphabetical</option><option value="favourites">Favourites</option><option value="recent">Recently used</option><option value="custom">Custom order</option></select></div>
+</div>
 <p class="tiny muted" style="margin:-4px 0 2px">Tap the star to add or remove a favourite. Choose Favourites to show only foods you have starred. Choose Custom order to arrange foods by dragging.</p>
 <div class="toolbar library-tools"><button class="btn secondary smallbtn" id="manageCategories">Manage categories</button></div>
 <div id="foodList"></div>
@@ -215,6 +245,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="field"><label>Base serving quantity</label><input id="customQty" type="number" min="0.01" step="any" value="1"></div>
 <div class="field"><label>Unit</label><input id="customUnit" value="serve" placeholder="g, mL, serve"></div>
 </div>
+<div class="field"><label>Default amount when adding (optional)</label><input id="customDefaultQty" type="number" min="0.01" step="any" placeholder="Leave blank to use base quantity"><p class="tiny muted">Pre-filled each time you add this food. You can change it for an individual entry without changing this default.</p></div>
 <div class="grid4">
 <div class="field"><label>kcal</label><input id="customKcal" type="number" min="0" step="any"></div>
 <div class="field"><label>Protein g</label><input id="customProtein" type="number" min="0" step="any"></div>
@@ -282,7 +313,7 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 <div class="row between"><h2 id="editorTitle" style="margin:0">Edit food</h2><button type="button" class="btn ghost smallbtn" id="closeEditor">Close</button></div>
 <div class="field"><label>Food name</label><input id="editName" required></div>
 <div class="grid"><div class="field"><label>Base serving quantity</label><input id="editQty" type="number" min="0.01" step="any" required></div><div class="field"><label>Unit</label><input id="editUnit" required></div></div>
-<div class="field"><label>Weight basis (optional)</label><input id="editBasis" placeholder="e.g. raw, cooked, dry, drained"></div><div class="card" style="padding:12px"><strong>Serving option (optional)</strong><p class="tiny muted" style="margin:4px 0 10px">For foods measured in grams, set a serving size to enable gram or serve when adding to your Daily Log. Example: WPC, Scoop, 30 g.</p><div class="grid"><div class="field"><label>Serving name</label><input id="editServeName" placeholder="e.g. Scoop"></div><div class="field"><label>Serving weight (g)</label><input id="editServeGrams" type="number" min="0" step="0.1" placeholder="e.g. 30"></div></div></div><div class="field"><label>Category</label><input id="editCategory" list="categoryOptions" required></div>
+<div class="field"><label>Weight basis (optional)</label><input id="editBasis" placeholder="e.g. raw, cooked, dry, drained"></div><div class="card" style="padding:12px"><strong>Default amount when adding</strong><p class="tiny muted" style="margin:4px 0 10px">This is pre-filled whenever you add the food. Changing the amount in the Daily Log or Library only affects that entry, not this saved default.</p><div class="grid"><div class="field"><label>Default amount</label><input id="editDefaultQty" type="number" min="0.01" step="any" required></div><div class="field"><label>Default unit</label><select id="editDefaultUnit"></select></div></div></div><div class="card" style="padding:12px"><strong>Serving option (optional)</strong><p class="tiny muted" style="margin:4px 0 10px">For foods measured in grams, set a serving size to enable gram or serve when adding to your Daily Log. Example: WPC, Scoop, 30 g.</p><div class="grid"><div class="field"><label>Serving name</label><input id="editServeName" placeholder="e.g. Scoop"></div><div class="field"><label>Serving weight (g)</label><input id="editServeGrams" type="number" min="0" step="0.1" placeholder="e.g. 30"></div></div></div><div class="field"><label>Category</label><input id="editCategory" list="categoryOptions" required></div>
 <div class="grid4"><div class="field"><label>kcal</label><input id="editKcal" type="number" min="0" step="any" required></div><div class="field"><label>Protein g</label><input id="editProtein" type="number" min="0" step="any" required></div><div class="field"><label>Carbs g</label><input id="editCarbs" type="number" min="0" step="any" required></div><div class="field"><label>Fat g</label><input id="editFat" type="number" min="0" step="any" required></div></div>
 <div class="toolbar"><button class="btn" type="submit">Save changes</button><button class="btn ghost" type="button" id="cancelEditor">Cancel</button></div>
 </form></dialog>
@@ -375,6 +406,29 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
   .app-toast{right:12px;bottom:12px;max-width:calc(100vw - 24px);padding:9px 12px}
 }
 @media(prefers-reduced-motion:reduce){.app-toast{transition:none}}
+
+/* v70 final overrides: compact Option B Library cards and stacked filter controls */
+.history-settings{margin-top:10px}
+.library-filter-stack{display:grid;grid-template-columns:1fr;gap:8px}
+.library-filter-stack select{min-height:42px}
+.library-item{display:grid;grid-template-columns:minmax(0,1fr);gap:0;padding:11px 12px;border-radius:13px;background:var(--surface2);min-width:0;height:auto}
+.library-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0}
+.library-item-info{min-width:0}
+.library-item-info strong{font-size:14px;line-height:1.3}
+.library-item-meta{font-size:11.5px;line-height:1.4;margin-top:3px}
+.library-item-main{display:grid;grid-template-rows:auto auto;gap:8px;min-width:0}
+.library-quantity-row .qtyadd{display:grid;grid-template-columns:minmax(58px,.8fr) minmax(0,1fr) minmax(82px,1.1fr);gap:7px;align-items:center;width:100%}
+.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{min-height:40px;width:100%;min-width:0;padding:7px 8px}
+.library-quantity-row .qtyadd span{font-size:11px;white-space:nowrap}
+.library-quantity-row .qtyadd .library-add{min-height:42px;font-weight:800;font-size:14px;letter-spacing:.1px;box-shadow:0 2px 7px #0004}
+.library-manage-row{display:flex;justify-content:flex-end;gap:14px;border-top:1px solid var(--line);padding-top:6px;margin-top:1px}
+.library-manage-row button{width:auto;min-height:28px;padding:4px 7px;font-size:11px;background:transparent!important;border:0!important;box-shadow:none!important}
+.library-manage-row [data-editfood]{color:var(--muted)!important}
+.library-manage-row [data-deletefood]{color:#c98780!important;background:transparent!important;border:0!important}
+.library-card-top .food-favourite{flex:0 0 28px}
+.library-card-top .drag-handle{flex:0 0 28px}
+@media(min-width:601px){#foodList{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.library-item{height:auto}}
+@media(max-width:380px){.library-item{padding:10px}.library-item-meta{font-size:10.5px}.library-quantity-row .qtyadd{grid-template-columns:minmax(52px,.75fr) minmax(0,1fr) 76px;gap:5px}.library-quantity-row .qtyadd input,.library-quantity-row .qtyadd select{font-size:11px;padding:7px 5px}}
 </style>
 <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-hidden="true"></div>
 <script src="foods.js"></script><script src="app.js"></script>
