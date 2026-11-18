@@ -601,15 +601,14 @@ header .top>div:first-child{min-width:0} header .top h1{line-height:1.2} header 
 
 
 
-/* v91: fully fixed header, extra title-to-tabs breathing room, and evenly spaced pig/dumbbell/settings icons. */
-html, body {
-  overscroll-behavior-y: none;
-}
-html { scroll-padding-top: var(--ledger-header-height, 160px); }
+
+/* v92: fixed header and navigation; deliberate spacing and viewport-aware first-screen layout. */
+html { scroll-padding-top: var(--ledger-header-height, 170px); }
 body {
-  padding-top: var(--ledger-header-height, 160px) !important;
+  padding-top: var(--ledger-header-height, 170px) !important;
+  overflow-x: hidden;
 }
-header, body > header {
+body > header {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -617,15 +616,14 @@ header, body > header {
   bottom: auto !important;
   width: 100% !important;
   z-index: 10000 !important;
-  transform: translate3d(0,0,0) !important;
-  -webkit-transform: translate3d(0,0,0) !important;
-  will-change: transform;
-  contain: paint;
+  transform: none !important;
+  -webkit-transform: none !important;
+  will-change: auto !important;
   background: var(--header, #181b1f) !important;
-  padding: 9px 18px 16px !important;
+  padding: 10px 18px 17px !important;
   box-shadow: 0 5px 18px #0008 !important;
 }
-header .top {
+body > header .top {
   max-width: 760px;
   margin: 0 auto;
   display: flex;
@@ -633,18 +631,18 @@ header .top {
   justify-content: space-between;
   gap: 18px !important;
 }
-header .top > div:first-child { min-width: 0; }
-header .top .sub { margin-top: 3px; line-height: 1.35; }
-header .header-actions {
+body > header .top > div:first-child { min-width: 0; }
+body > header .top .sub { margin-top: 3px; line-height: 1.35; }
+body > header .header-actions {
   display: flex !important;
   align-items: flex-end !important;
   justify-content: space-between !important;
-  gap: 9px !important;
+  gap: 10px !important;
   flex: 0 0 auto;
   align-self: flex-end !important;
 }
-header .ledger-icon-button,
-header .settings-gear {
+body > header .ledger-icon-button,
+body > header .settings-gear {
   width: 46px !important;
   height: 44px !important;
   min-width: 46px !important;
@@ -656,7 +654,7 @@ header .settings-gear {
   color: var(--accent) !important;
   line-height: 1 !important;
 }
-header .ledger-icon-button svg {
+body > header .ledger-icon-button svg {
   width: 34px !important;
   height: 34px !important;
   display: block;
@@ -666,47 +664,54 @@ header .ledger-icon-button svg {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-header .settings-gear { font-size: 32px !important; }
-header .tabs {
+body > header .settings-gear { font-size: 32px !important; }
+body > header .tabs {
   position: static !important;
-  inset: auto !important;
+  top: auto !important;
   max-width: 760px;
-  margin: 19px auto 0 !important;
+  margin: 22px auto 0 !important;
   padding: 7px 0 0 !important;
   background: transparent !important;
   z-index: auto !important;
 }
+/* Give the daily summary enough vertical breathing room to keep the first logged
+   food row below the initial fold; the Add food action remains the last visible control. */
+#diary > .card:first-child {
+  padding-bottom: 18px;
+}
+#diary #diaryEntries {
+  margin-top: 18px !important;
+}
 @media (max-width: 600px) {
-  header { padding: 8px 12px 15px !important; }
-  header .top { gap: 9px !important; }
-  header .header-actions { gap: 7px !important; }
-  header .ledger-icon-button,
-  header .settings-gear {
+  body > header { padding: 9px 12px 16px !important; }
+  body > header .top { gap: 9px !important; }
+  body > header .header-actions { gap: 7px !important; }
+  body > header .ledger-icon-button,
+  body > header .settings-gear {
     width: 42px !important;
     min-width: 42px !important;
     flex-basis: 42px !important;
     height: 43px !important;
   }
-  header .ledger-icon-button svg { width: 32px !important; height: 32px !important; }
-  header .settings-gear { font-size: 31px !important; }
-  header .tabs { margin-top: 17px !important; padding-top: 6px !important; }
+  body > header .ledger-icon-button svg { width: 32px !important; height: 32px !important; }
+  body > header .settings-gear { font-size: 31px !important; }
+  body > header .tabs { margin-top: 20px !important; padding-top: 6px !important; }
 }
 @media (max-width: 360px) {
-  header .top { gap: 5px !important; }
-  header .header-actions { gap: 4px !important; }
-  header .ledger-icon-button,
-  header .settings-gear {
+  body > header .top { gap: 5px !important; }
+  body > header .header-actions { gap: 4px !important; }
+  body > header .ledger-icon-button,
+  body > header .settings-gear {
     width: 38px !important;
     min-width: 38px !important;
     flex-basis: 38px !important;
   }
-  header .ledger-icon-button svg { width: 30px !important; height: 30px !important; }
+  body > header .ledger-icon-button svg { width: 30px !important; height: 30px !important; }
 }
 
 </style>
 <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-hidden="true"></div>
 
-<script>
 <script>
 (() => {
   const header = document.querySelector('body > header');
@@ -722,8 +727,8 @@ header .tabs {
   }
   window.addEventListener('resize', setHeaderSpace, { passive: true });
   window.addEventListener('orientationchange', () => requestAnimationFrame(setHeaderSpace), { passive: true });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setHeaderSpace);
   window.addEventListener('pageshow', setHeaderSpace);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setHeaderSpace);
 })();
 </script>
 
