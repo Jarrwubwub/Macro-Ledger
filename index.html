@@ -209,6 +209,24 @@ body > header { padding-top: 38px !important; }
   font-weight: 750 !important;
 }
 
+ 
+/* v108 Workout Tracker functional interface */
+.stack-list{display:grid;gap:9px;margin-top:12px}
+.workout-item{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface)}
+.workout-item strong{display:block}
+.workout-item .meta{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45}
+.workout-item .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.editor-panel{border:1px solid var(--line);border-radius:12px;padding:13px;margin:12px 0;background:var(--surface)}
+.editor-panel label{display:grid;gap:5px;font-size:12px;color:var(--muted);margin:8px 0}
+.editor-panel input,.editor-panel select,.editor-panel textarea{width:100%;min-width:0}
+.editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.exercise-template-row{display:grid;grid-template-columns:minmax(0,1fr) 64px 74px;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.exercise-template-row input{padding:7px}
+.set-row{display:grid;grid-template-columns:38px repeat(3,minmax(0,1fr));gap:6px;align-items:center;margin-top:7px}
+.set-row input{min-width:0;width:100%;padding:8px}
+.set-row span{font-size:12px;color:var(--muted)}
+.workout-screen .toolbar{align-items:center}
+@media(max-width:420px){.editor-grid{grid-template-columns:1fr 1fr}.set-row{grid-template-columns:30px repeat(3,minmax(0,1fr));gap:4px}}
 </style>
 
 <style>
@@ -442,17 +460,37 @@ body > header { padding-top: 38px !important; }
 </div>
 </section>
 <section id="workout-daily" class="section hide workout-screen" aria-label="Workout Daily Log">
-<div class="card section"><div class="row between"><h2 style="margin:0">Daily log</h2><input id="workoutLogDate" type="date" aria-label="Workout log date" style="width:auto;max-width:155px"></div><p class="muted">Record your training session for the selected day.</p><div class="notice">Your workout log will live here. You'll be able to add individual exercises or start with a saved workout, then record sets, reps and other performance details.</div><div class="grid"><div class="stat"><div class="l">Exercises logged</div><div class="v">—</div></div><div class="stat"><div class="l">Working sets</div><div class="v">—</div></div></div><div class="toolbar"><button class="btn" type="button" disabled>＋ Add exercise</button><button class="btn secondary" type="button" disabled>Start a workout</button></div><p class="tiny muted">Logging controls will be added in the next development step.</p></div>
-</section>
+<div class="card section">
+ <div class="row between"><h2 style="margin:0">Daily log</h2><input id="workoutLogDate" type="date" aria-label="Workout log date" style="width:auto;max-width:155px"></div>
+ <div class="row wrap"><button class="btn" id="dailyAddExercise">＋ Add exercise</button><button class="btn secondary" id="dailyStartWorkout">Start saved workout</button></div>
+ <div id="dailyWorkoutSummary" class="notice">No training recorded for this date.</div>
+ <div id="dailyWorkoutEntries" class="stack-list"></div>
+</div></section>
 <section id="workouts" class="section hide workout-screen" aria-label="Saved Workouts">
-<div class="card section"><div class="row between"><h2 style="margin:0">Workouts</h2><span class="pill">Templates</span></div><p class="muted">Create and store repeatable workout plans, such as Push 1 or Pull 1.</p><div class="notice">Saved workouts will be reusable templates made up of exercises from your exercise repository.</div><div class="toolbar"><button class="btn" type="button" disabled>＋ Create workout</button></div><div class="muted tiny">No workouts created yet.</div></div>
-</section>
+<div class="card section">
+ <div class="row between"><h2 style="margin:0">Workouts</h2><span class="pill" id="workoutTemplateCount">0 saved</span></div>
+ <p class="muted">Build reusable workout templates from your exercise repository.</p>
+ <div class="toolbar"><button class="btn" id="createWorkout">＋ Create workout</button></div>
+ <div id="workoutEditor" class="editor-panel hide"></div>
+ <div id="workoutTemplateList" class="stack-list"></div>
+</div></section>
 <section id="exercises" class="section hide workout-screen" aria-label="Exercise Repository">
-<div class="card section"><div class="row between"><h2 style="margin:0">Exercises</h2><span class="pill">Repository</span></div><p class="muted">A central library of exercises and movements.</p><div class="notice">Add and manage individual exercises here. Exercises can be added directly to a Daily Log or included in saved workouts.</div><div class="toolbar"><button class="btn" type="button" disabled>＋ Add exercise</button></div><div class="muted tiny">Your exercise repository is empty.</div></div>
-</section>
+<div class="card section">
+ <div class="row between"><h2 style="margin:0">Exercises</h2><span class="pill" id="exerciseCount">0 exercises</span></div>
+ <p class="muted">Browse the exercise repository or add your own movements.</p>
+ <div class="toolbar"><input id="exerciseSearch" type="search" placeholder="Search exercises…" aria-label="Search exercises"><button class="btn" id="createExercise">＋ Add exercise</button></div>
+ <div id="exerciseEditor" class="editor-panel hide"></div>
+ <div class="row wrap"><select id="exerciseCategoryFilter" aria-label="Filter exercise category"><option>All categories</option></select></div>
+ <div id="exerciseRepository" class="stack-list"></div>
+</div></section>
 <section id="runs" class="section hide workout-screen" aria-label="Run Tracker">
-<div class="card section"><div class="row between"><h2 style="margin:0">Run</h2><span class="pill">Running log</span></div><p class="muted">Record and review your runs separately from strength workouts.</p><div class="notice">Your running log will let you record each run and build a history of distance, duration, pace and date.</div><div class="toolbar"><button class="btn" type="button" disabled>＋ Log a run</button></div><div class="muted tiny">No runs recorded yet.</div></div>
-</section>
+<div class="card section">
+ <div class="row between"><h2 style="margin:0">Run</h2><span class="pill" id="runCount">0 runs</span></div>
+ <p class="muted">Keep a separate record of your running sessions.</p>
+ <button class="btn" id="createRun">＋ Log a run</button>
+ <div id="runEditor" class="editor-panel hide"></div>
+ <div id="runHistory" class="stack-list"></div>
+</div></section>
 <section id="settings" class="section hide">
 <div class="card section"><div class="row between"><h2 style="margin:0">Settings</h2><button class="btn ghost smallbtn" id="closeSettings" type="button">Done</button></div>
 <details class="target-settings settings-section" id="appearanceSettings"><summary>Appearance</summary><p class="tiny muted">Choose the colour palette used throughout the app.</p><div class="theme-options">
