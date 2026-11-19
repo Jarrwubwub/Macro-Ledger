@@ -275,7 +275,7 @@ body > header { padding-top: 38px !important; }
 .active-workout-exercise input{width:19px;height:19px;accent-color:var(--accent);flex:0 0 auto}
 .active-workout-exercise-copy{display:grid;gap:3px;min-width:0;flex:1}
 .active-workout-exercise.is-complete{opacity:.72}
-.active-workout-exercise.is-complete strong{text-decoration:line-through}
+.active-workout-exercise.is-complete strong{text-decoration:none;opacity:1}
 .active-workout-check{font-size:11px;color:var(--accent);font-weight:750}
 .active-workout-actions{margin-top:14px}
 </style>
@@ -450,7 +450,7 @@ body > header { padding-top: 38px !important; }
 #workouts-exercises .active-workout-exercise{display:block!important;padding:0!important;overflow:hidden!important;border:1px solid var(--line)!important;background:var(--surface)!important}
 #workouts-exercises .active-exercise-toggle{width:100%;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:0;background:transparent;color:var(--text);text-align:left;cursor:pointer}
 #workouts-exercises .active-exercise-title{display:flex;flex-direction:column;gap:3px;min-width:0}
-#workouts-exercises .active-workout-exercise.is-complete .active-exercise-title strong{text-decoration:line-through;opacity:.72}
+#workouts-exercises .active-workout-exercise.is-complete .active-exercise-title strong{text-decoration:none;opacity:1}
 #workouts-exercises .active-workout-check{font-size:11px;font-weight:750;white-space:nowrap;color:var(--muted)}
 #workouts-exercises .active-exercise-details{padding:0 12px 12px;border-top:1px solid var(--line)}
 #workouts-exercises .active-session-set{display:grid;grid-template-columns:52px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -491,7 +491,7 @@ body > header { padding-top: 38px !important; }
 #workout-daily .active-workout-exercise{display:block!important;padding:0!important;overflow:hidden!important;border:1px solid var(--line)!important;background:var(--surface)!important;border-radius:10px!important;margin:8px 0}
 #workout-daily .active-exercise-toggle{width:100%;min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:0;background:transparent;color:var(--text);text-align:left;cursor:pointer}
 #workout-daily .active-exercise-title{display:flex;flex-direction:column;gap:3px;min-width:0}
-#workout-daily .active-workout-exercise.is-complete .active-exercise-title strong{text-decoration:line-through;opacity:.72}
+#workout-daily .active-workout-exercise.is-complete .active-exercise-title strong{text-decoration:none;opacity:1}
 #workout-daily .active-workout-check{font-size:11px;font-weight:750;white-space:nowrap;color:var(--muted)}
 #workout-daily .active-exercise-details{padding:0 12px 12px;border-top:1px solid var(--line)}
 #workout-daily .active-session-set{display:grid;grid-template-columns:52px minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);align-items:center;gap:7px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -592,7 +592,7 @@ body > header { padding-top: 38px !important; }
 </style>
 
 
-<style id="mobile-first-workout-v120">
+<style id="mobile-first-workout-v121">
 /* Mobile-first Workout Tracker visual system. Nutrition remains untouched. */
 body.workout-mode{
  --bg:#101720;--panel:#17222e;--ink:#edf3f9;--muted:#9eafc0;--line:#2d4052;
@@ -733,10 +733,8 @@ body.workout-mode .empty-state{display:grid;gap:5px;padding:22px 14px;text-align
 body.workout-mode .empty-state strong{font-size:14px;color:#e6eff7}
 body.workout-mode .empty-state span{font-size:11px}
 @media(max-width:700px){
- body.workout-mode{padding-bottom:calc(75px + env(safe-area-inset-bottom))!important}
+ body.workout-mode{padding-bottom:calc(24px + env(safe-area-inset-bottom))!important}
  body.workout-mode main{padding:12px 11px calc(18px + env(safe-area-inset-bottom));max-width:540px}
- body.workout-mode #exerciseTabs:not(.hide){position:fixed!important;left:0;right:0;bottom:0;top:auto!important;z-index:60;width:100%;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));padding:5px 8px calc(6px + env(safe-area-inset-bottom))!important;margin:0!important;background:rgba(17,26,36,.97)!important;border-top:1px solid #2c3d4e;box-shadow:0 -6px 20px #0003;backdrop-filter:blur(14px)}
- body.workout-mode #exerciseTabs .tab{min-height:52px!important}
  body.workout-mode .workout-date-controls{grid-template-columns:38px minmax(0,1fr) 38px auto;gap:5px}
  body.workout-mode .workout-date-controls button{min-width:38px;padding:6px}
  body.workout-mode .workout-template-actions{grid-template-columns:minmax(0,1.3fr) minmax(0,.8fr) 60px}
@@ -750,9 +748,63 @@ body.workout-mode .empty-state span{font-size:11px}
  body.workout-mode .workout-template-actions .template-delete{grid-column:1/-1}
 }
 @media(min-width:701px){
- body.workout-mode #exerciseTabs:not(.hide){position:sticky;top:60px;display:flex;justify-content:space-between;gap:8px;padding:8px 0;background:var(--header);z-index:10}
+ body.workout-mode #exerciseTabs:not(.hide){position:static;top:auto;display:flex;justify-content:space-between;gap:8px;padding:7px 0 0;background:transparent;z-index:5}
  body.workout-mode #exerciseTabs .tab{flex:1;text-align:center;min-height:42px;border-radius:12px}
 }
+</style>
+
+
+<style id="v121-workout-navigation-library-cleanup">
+/* Workout navigation follows the same header-tab pattern as Nutrition. */
+body.workout-mode #exerciseTabs:not(.hide){
+ position:static!important;inset:auto!important;z-index:5!important;width:auto!important;
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:8px!important;margin:5px auto 0!important;padding:7px 0 0!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;
+}
+body.workout-mode #exerciseTabs .tab{
+ display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;
+ min-width:0!important;min-height:44px!important;padding:10px 8px!important;border:1px solid #34465d!important;
+ border-radius:12px!important;background:#1a2530!important;color:#aab8ca!important;
+ font-size:13px!important;font-weight:650!important;line-height:1.2!important;white-space:normal!important;
+}
+body.workout-mode #exerciseTabs .tab.active{background:#2878e0!important;border-color:#2878e0!important;color:#fff!important;border-top:1px solid #2878e0!important}
+body.workout-mode #exerciseTabs .nav-glyph{display:none!important}
+body.workout-mode{padding-bottom:calc(24px + env(safe-area-inset-bottom))!important}
+@media(min-width:601px){body.workout-mode #exerciseTabs:not(.hide){display:flex!important;gap:8px!important;padding:7px 0 0!important}body.workout-mode #exerciseTabs .tab{flex:1 1 0!important}}
+/* Active exercises remain visually legible when marked complete; no strikethrough or dimming. */
+body.workout-mode #workout-daily .active-workout-exercise.is-complete,
+body.workout-mode #workout-daily .active-workout-exercise.is-complete strong,
+body.workout-mode #workouts-exercises .active-workout-exercise.is-complete,
+body.workout-mode #workouts-exercises .active-workout-exercise.is-complete strong{
+ text-decoration:none!important;opacity:1!important;filter:none!important;
+}
+/* Exercise Library card inside Workouts. */
+body.workout-mode #exerciseLibraryCard{margin-top:16px!important;padding:14px!important;border:1px solid #304356!important;border-radius:15px!important;background:#17222e!important;box-shadow:none!important}
+body.workout-mode #exerciseLibraryCard>.training-card-summary{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;min-height:44px!important;padding:0 0 10px!important;font-size:14px!important;font-weight:800!important;list-style:none!important;cursor:pointer}
+body.workout-mode #exerciseLibraryCard>.training-card-summary::-webkit-details-marker{display:none}
+body.workout-mode #exerciseLibraryCard[open]>.training-card-summary{border-bottom:1px solid #304356!important;margin-bottom:12px!important}
+body.workout-mode #exerciseLibraryCard .training-card-content{display:grid;gap:10px}
+body.workout-mode #exerciseLibraryCard .workout-builder-filter{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);gap:8px}
+body.workout-mode #exerciseLibraryCard .workout-builder-filter input,
+body.workout-mode #exerciseLibraryCard .workout-builder-filter select{min-width:0;width:100%;min-height:44px;background:#111c28;color:#eaf2fa;border:1px solid #3a4e63;border-radius:10px;padding:9px;font:inherit;font-size:12px}
+body.workout-mode #exerciseLibraryCard .exercise-category-group{border:1px solid #304356;border-radius:12px;overflow:hidden;background:#141f2b;margin:0}
+body.workout-mode #exerciseLibraryCard .exercise-category-group>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;padding:11px 12px;cursor:pointer;font-size:12px;font-weight:750;list-style:none}
+body.workout-mode #exerciseLibraryCard .exercise-category-group>summary::-webkit-details-marker{display:none}
+body.workout-mode #exerciseLibraryCard .exercise-category-list{display:grid;padding:0 12px 8px}
+body.workout-mode #exerciseLibraryCard .exercise-category-item{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:52px;padding:9px 0;border-top:1px solid #293a4a}
+body.workout-mode #exerciseLibraryCard .exercise-category-copy{min-width:0;flex:1}
+body.workout-mode #exerciseLibraryCard .exercise-category-copy strong{display:block;font-size:12px;line-height:1.35}
+body.workout-mode #exerciseLibraryCard .exercise-category-copy .meta{font-size:10px;margin-top:3px;color:#91a6ba}
+body.workout-mode #exerciseLibraryCard .exercise-row-actions .btn{min-height:36px;padding:7px 10px;font-size:11px;white-space:nowrap}
+body.workout-mode #exerciseLibraryCard .editor-panel{margin:0;padding:12px;border:1px solid #304356;border-radius:12px;background:#141f2b}
+body.workout-mode #exerciseLibraryCard .custom-exercise-form{display:grid;gap:9px}
+body.workout-mode #exerciseLibraryCard .custom-exercise-form label{display:grid;gap:5px;margin:0}
+body.workout-mode #exerciseLibraryCard .custom-exercise-form input,
+body.workout-mode #exerciseLibraryCard .custom-exercise-form select{min-height:42px;background:#111c28;color:#eaf2fa;border:1px solid #3a4e63;border-radius:9px;padding:8px;font:inherit}
+body.workout-mode #exerciseLibraryCard .custom-exercise-form .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding:16px;text-align:center;color:#a7b7c7}
+@media(max-width:420px){body.workout-mode #exerciseLibraryCard{padding:12px!important}body.workout-mode #exerciseLibraryCard .workout-builder-filter{grid-template-columns:1fr}body.workout-mode #exerciseLibraryCard .exercise-category-item{gap:6px}body.workout-mode #exerciseLibraryCard .exercise-row-actions .btn{padding:7px 8px}}
 </style>
 
 </head>
@@ -913,6 +965,16 @@ body.workout-mode .empty-state span{font-size:11px}
  <button class="btn ghost full hide" id="resumeWorkoutDraft">Continue saved draft</button>
  <div id="workoutEditor" class="workout-editor-panel hide"></div>
  <div id="workoutTemplateList" class="stack-list"></div>
+ <details class="card section training-library-card" id="exerciseLibraryCard">
+  <summary class="training-card-summary"><span>Exercise Library</span><span class="meta" id="exerciseLibraryCount">177 exercises</span></summary>
+  <div class="training-card-content">
+   <p class="meta">View and manage the exercises available when building your workouts.</p>
+   <div class="workout-builder-filter"><input id="exerciseLibrarySearch" type="search" placeholder="Search exercises…" aria-label="Search exercise library"><select id="exerciseLibraryCategory" aria-label="Filter exercise library by category"><option value="">All categories</option><option>Chest</option><option>Back</option><option>Shoulders</option><option>Arms</option><option>Legs &amp; Glutes</option><option>Core</option><option>Full Body &amp; Conditioning</option></select></div>
+   <button type="button" class="btn primary full" id="addLibraryExercise">＋ Add exercise</button>
+   <div id="exerciseLibraryForm" class="editor-panel hide"></div>
+   <div id="exerciseRepository"></div>
+  </div>
+ </details>
 </section>
 <section id="progress" class="section hide workout-screen" aria-label="Training Progress">
 <div class="card section">
@@ -938,9 +1000,9 @@ body.workout-mode .empty-state span{font-size:11px}
 <button type="button" class="theme-choice" data-theme-choice="red" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Red</strong><small>Black, charcoal and red</small></button>
 <button type="button" class="theme-choice" data-theme-choice="monochrome" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Monochrome</strong><small>Black, charcoal, white and grey</small></button>
 </div></details>
-<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v120</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
+<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v121</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
 <details class="target-settings settings-section" id="dataSettings"><summary>Data &amp; backups</summary><p class="tiny muted">Export or merge your data. Imports are non-destructive and retain existing records.</p><div class="toolbar"><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div><div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div><div class="field"><label>Import and merge a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div></details>
-<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v120</span></p></details>
+<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v121</span></p></details>
 </div></section>
 <section id="history" class="section hide">
 <div class="card section">
