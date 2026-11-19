@@ -635,8 +635,16 @@ function renderExerciseRepository(){
  const filtered=workoutExercises.filter(x=>!q||x.name.toLowerCase().includes(q)||x.category.toLowerCase().includes(q)||String(x.equipment||'').toLowerCase().includes(q));
  $('exerciseCount').textContent=workoutExercises.length+' exercises';
  const cats=workoutCategories.filter(c=>filtered.some(x=>x.category===c));
- $('exerciseRepository').innerHTML=cats.map(c=>{const items=filtered.filter(x=>x.category===c).sort((x,y)=>x.name.localeCompare(y.name));return `<details class="exercise-category-group"><summary><span>${esc(c)}</span><span class="meta">${items.length} exercises　⌄</span></summary><div class="exercise-category-list">${items.map(x=>`<div class="exercise-category-item"><div style="min-width:0"><strong>${esc(x.name)}</strong><div class="meta">${esc(x.equipment||'Other')}</div></div><button class="btn smallbtn" data-add-workout="${esc(x.id)}">Add</button></div>`).join('')}</div></details>`}).join('')||'<div class="muted tiny">No matching exercises.</div>';
+ $('exerciseRepository').innerHTML=cats.map(c=>{const items=filtered.filter(x=>x.category===c).sort((x,y)=>x.name.localeCompare(y.name));return `<details class="exercise-category-group"><summary><span>${esc(c)}</span><span class="meta">${items.length} exercises　⌄</span></summary><div class="exercise-category-list">${items.map(x=>`<div class="exercise-category-item"><div style="min-width:0"><strong>${esc(x.name)}</strong><div class="meta">${esc(x.equipment||'Other')}</div></div><div class="exercise-row-actions"><button class="btn smallbtn" data-add-workout="${esc(x.id)}">Add</button><button class="btn danger smallbtn" data-delete-exercise="${esc(x.id)}">Delete</button></div></div>`).join('')}</div></details>`}).join('')||'<div class="muted tiny">No matching exercises.</div>';
  $('exerciseRepository').querySelectorAll('[data-add-workout]').forEach(b=>b.onclick=()=>addExerciseToWorkout(b.dataset.addWorkout));
+ $('exerciseRepository').querySelectorAll('[data-delete-exercise]').forEach(b=>b.onclick=()=>{
+  const ex=workoutExerciseById(b.dataset.deleteExercise);if(!ex)return;
+  if(!confirm(`Delete ${ex.name} from the exercise library and remove it from saved workout templates? Existing daily-log history will be preserved.`))return;
+  workoutExercises=workoutExercises.filter(x=>x.id!==ex.id);
+  workoutTemplates.forEach(w=>w.exercises=w.exercises.filter(item=>item.exerciseId!==ex.id));
+  saveWorkoutData();renderExerciseRepository();renderWorkoutTemplates();syncTrainingLibraryView();
+  if(!$('workoutEditor').classList.contains('hide'))openWorkoutEditor();
+ });
 }
 function addExerciseToWorkout(exerciseId){
  const ex=workoutExerciseById(exerciseId);if(!ex)return;
@@ -704,8 +712,6 @@ function renderRuns(){
 }
 $('createExercise').onclick=()=>{$('exercisesCard').open=true;openExerciseEditor();};
 $('exerciseSearch').oninput=renderExerciseRepository;
-$('exerciseCategoryFilter').innerHTML='<option>All categories</option>'+workoutCategories.map(c=>`<option>${esc(c)}</option>`).join('');
-$('exerciseCategoryFilter').onchange=renderExerciseRepository;
 $('createWorkout').onclick=()=>{$('workoutsCard').open=true;openWorkoutEditor();};
 $('dailyAddExercise').onclick=()=>{setTab('workouts-exercises');$('exercisesCard').open=true;};
 $('dailyStartWorkout').onclick=()=>{setTab('workouts-exercises');$('workoutsCard').open=true;};

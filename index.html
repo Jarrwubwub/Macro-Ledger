@@ -239,24 +239,31 @@ body > header { padding-top: 38px !important; }
 .workout-template-card details>summary::-webkit-details-marker{display:none}
 .workout-order-actions{display:flex;gap:5px}
 
-/* v110 expandable Workouts and Exercises cards */
-.training-library-card{padding:0!important;overflow:hidden}
-.training-card-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 14px;cursor:pointer;list-style:none;font-weight:800}
+/* v111: align Workout & Exercises cards and controls with the Nutrition design system */
+.training-library-card{padding:15px!important;overflow:hidden}
+.training-card-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 0 12px;cursor:pointer;list-style:none;font-weight:750;font-size:15px}
+.training-library-card details[open]>.training-card-summary{border-bottom:1px solid var(--line);margin-bottom:12px}
 .training-card-summary::-webkit-details-marker{display:none}
-.training-card-summary:after{content:"＋";color:var(--accent);font-size:18px}
+.training-card-summary:after{content:"＋";color:var(--accent);font-size:17px;line-height:1}
 .training-library-card details[open]>.training-card-summary:after{content:"−"}
-.training-card-content{padding:0 13px 14px}
-#exerciseRepository .exercise-category-group{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface2)}
-#exerciseRepository .exercise-category-group summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px;cursor:pointer;font-weight:750;list-style:none}
-#exerciseRepository .exercise-category-group summary::-webkit-details-marker{display:none}
-#exerciseRepository .exercise-category-list{padding:0 10px 10px;display:grid;gap:7px}
-#exerciseRepository .exercise-category-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;border-top:1px solid var(--line)}
-#exerciseRepository .exercise-category-item .meta{font-size:11px;color:var(--muted)}
-#exerciseRepository .exercise-category-item .btn{flex:0 0 auto}
-#workoutExerciseChoices .workout-category-group{border:1px solid var(--line);border-radius:10px;margin-top:8px;overflow:hidden}
-#workoutExerciseChoices .workout-category-group summary{padding:10px 12px;cursor:pointer;font-weight:750;list-style:none;display:flex;justify-content:space-between}
-#workoutExerciseChoices .workout-category-group summary::-webkit-details-marker{display:none}
-#workoutExerciseChoices .workout-category-list{padding:0 10px 8px}
+.training-card-content{padding:0}
+.training-library-card .toolbar{gap:8px;align-items:center}
+.training-library-card input[type="search"]{min-height:42px}
+#exerciseRepository{display:grid;gap:9px;margin-top:12px}
+#exerciseRepository .exercise-category-group,#workoutExerciseChoices .workout-category-group{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface2);margin:0}
+#exerciseRepository .exercise-category-group summary,#workoutExerciseChoices .workout-category-group summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:11px 12px;min-height:44px;cursor:pointer;font-weight:750;list-style:none}
+#exerciseRepository .exercise-category-group summary::-webkit-details-marker,#workoutExerciseChoices .workout-category-group summary::-webkit-details-marker{display:none}
+#exerciseRepository .exercise-category-list{padding:0 12px 8px;display:grid;gap:0}
+#exerciseRepository .exercise-category-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);min-height:52px}
+#exerciseRepository .exercise-category-item .meta{font-size:11px;color:var(--muted);margin-top:2px}
+#exerciseRepository .exercise-category-item .exercise-row-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+#exerciseRepository .exercise-category-item .btn{flex:0 0 auto;min-height:34px;padding:7px 10px;font-size:12px}
+#workoutExerciseChoices{display:grid;gap:8px}
+#workoutExerciseChoices .workout-category-list{padding:0 12px 8px}
+.workout-item{border-radius:12px;padding:12px}
+.editor-panel{border-radius:12px;padding:13px;margin:12px 0}
+.training-library-card .btn{min-height:40px}
+@media(max-width:420px){.training-library-card{padding:13px!important}#exerciseRepository .exercise-category-item{gap:7px}#exerciseRepository .exercise-category-item .btn{padding:7px 8px}}
 </style>
 
 <style>
@@ -512,7 +519,6 @@ body > header { padding-top: 38px !important; }
   <summary class="training-card-summary"><span>Exercises</span><span id="exerciseCount" class="pill">0 exercises</span></summary>
   <div class="training-card-content">
    <div class="toolbar"><input id="exerciseSearch" type="search" placeholder="Search exercises…" aria-label="Search exercises"><button class="btn" id="createExercise">＋ Add exercise</button></div>
-   <select id="exerciseCategoryFilter" aria-label="Filter exercise category"><option>All categories</option></select>
    <div id="exerciseEditor" class="editor-panel hide"></div>
    <div id="exerciseRepository" class="stack-list"></div>
   </div>
