@@ -528,6 +528,69 @@ body > header { padding-top: 38px !important; }
 #workout-daily .active-exercise-details .actions .btn{min-height:42px}
 @media(max-width:420px){#workout-daily .active-stepper-row,#workout-daily .active-time-row label{grid-template-columns:64px minmax(0,1fr);gap:7px}#workout-daily .active-stepper{grid-template-columns:48px minmax(0,1fr) 48px;gap:6px}#workout-daily .active-stepper button{height:50px}#workout-daily .active-stepper input{height:50px;font-size:20px}}
 </style>
+
+<style id="fitnotes-inspired-workout-layout-v119">
+/* FitNotes-informed refinements: date-led training log, easy routine scanning, and richer exercise history. */
+.workout-screen .workout-daily-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.workout-screen .workout-date-controls{display:flex;align-items:center;gap:5px;flex-wrap:nowrap}
+.workout-screen .workout-date-controls input{width:142px;min-width:0;min-height:38px;padding:6px 8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);font:inherit;font-size:12px}
+.workout-screen #workoutToday{min-height:38px}
+.workout-screen .workout-template-card{padding:15px!important;border-radius:14px!important;background:var(--surface)!important}
+.workout-screen .workout-template-card .workout-template-heading{align-items:flex-start}
+.workout-screen .workout-template-card .workout-template-heading>div:first-child{gap:5px}
+.workout-screen .workout-template-card .workout-template-heading strong{font-size:15px}
+.workout-screen .workout-template-card .workout-template-exercises{margin-top:12px;padding-top:9px}
+.workout-screen .workout-template-card .workout-template-exercises .meta>div{padding:7px 0!important;align-items:center}
+.workout-screen .workout-template-card .actions .btn{min-height:40px;padding:8px 13px;font-size:12px}
+.workout-screen .workout-builder-selected{padding:12px!important;border-radius:12px!important}
+.workout-screen .workout-builder-order{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.workout-screen .workout-builder-order .btn{min-width:34px;min-height:34px;padding:5px 7px}
+.workout-screen .active-workout-exercise{border-radius:14px!important;overflow:hidden}
+.workout-screen .active-exercise-toggle{min-height:68px!important;padding:15px!important}
+.workout-screen .active-exercise-title .meta{line-height:1.45;white-space:normal}
+.workout-screen .active-session-set-card{padding:14px!important;border-radius:14px!important;gap:11px!important}
+.workout-screen .active-stepper{grid-template-columns:58px minmax(0,1fr) 58px!important;gap:9px!important}
+.workout-screen .active-stepper button{height:56px!important;min-height:56px!important;border-radius:12px!important;font-size:27px!important;font-weight:600!important}
+.workout-screen .active-stepper input{height:56px!important;border-radius:12px!important;font-size:23px!important}
+.workout-screen .active-save-set{min-height:48px!important;border-radius:10px!important;font-size:13px!important}
+.workout-screen .active-workout-actions .btn{min-height:48px}
+.workout-screen .progress-filter-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,.85fr) minmax(0,1fr);gap:8px;margin:14px 0}
+.workout-screen .progress-filter-grid label{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:11px;color:var(--muted);font-weight:650}
+.workout-screen .progress-filter-grid select{width:100%;min-width:0;min-height:42px;padding:8px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);font:inherit;font-size:12px}
+.workout-screen .progress-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.workout-screen .progress-stat{display:flex;flex-direction:column;gap:4px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.workout-screen .progress-stat span,.workout-screen .progress-stat small{font-size:10px;color:var(--muted)}
+.workout-screen .progress-stat strong{font-size:21px;line-height:1.15;font-variant-numeric:tabular-nums}
+.workout-screen .progress-chart-panel{padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-top:12px}
+.workout-screen .progress-chart-best{font-size:16px;font-variant-numeric:tabular-nums}
+.workout-screen .progress-history-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:18px 0 8px}
+.workout-screen .progress-session{padding:13px!important}
+.workout-screen .progress-session-sets{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.workout-screen .progress-set-chip{font-size:10px;padding:4px 7px;border-radius:7px;background:var(--surface2);color:var(--muted);font-variant-numeric:tabular-nums}
+@media(max-width:560px){
+ .workout-screen .workout-daily-heading{align-items:flex-start}
+ .workout-screen .workout-date-controls{width:100%}
+ .workout-screen .workout-date-controls input{flex:1;width:auto}
+ .workout-screen .progress-filter-grid{grid-template-columns:1fr 1fr}
+ .workout-screen .progress-filter-grid label:first-child{grid-column:1/-1}
+}
+@media(max-width:380px){
+ .workout-screen .active-stepper{grid-template-columns:48px minmax(0,1fr) 48px!important;gap:6px!important}
+ .workout-screen .progress-stat strong{font-size:18px}
+ .workout-screen .workout-template-card .workout-template-heading{display:block}
+ .workout-screen .workout-template-card .actions{margin-top:8px!important}
+}
+</style>
+
+
+<style id="fitnotes-audit-final-v119">
+.workout-screen .active-set-actions{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(90px,.7fr);gap:8px}
+.workout-screen .active-set-actions .active-save-set{width:100%;min-height:48px}
+.workout-screen .active-set-actions .active-clear-set{min-height:48px;border-radius:10px}
+.workout-screen .workout-builder-name{align-items:center}
+.workout-screen .workout-date-controls button{min-width:38px}
+</style>
+
 </head>
 <body>
 <header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to current ledger">MK's Ledger</h1><div class="sub" id="appSubtitle">The food you eat, written down.</div></div><div class="header-actions" role="group" aria-label="Ledger navigation"><button type="button" class="ledger-icon-button active" data-ledger="nutrition" aria-pressed="true" aria-label="Nutrition" title="Nutrition"><svg class="outline-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M8.1 19.2c0-6.1 5.5-10.8 12.6-10.8 3.1 0 5.9.9 8.1 2.5l3.6-3.5c.8-.8 2.2-.2 2.2.9v7.2c2.1 1.3 3.4 3.4 3.4 5.8v2.1c0 3.1-2.5 5.6-5.6 5.6h-1.2l-1.4 5.2h-4.2l-1.1-5.2H16l-1.1 5.2h-4.2l-1.1-6.4c-2.2-2-3.5-4.9-3.5-8.6Z" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.4 18.9c-3.3-.2-4.7-2.4-4.2-4.5.4-1.7 2.1-2.6 3.5-1.9 1.2.6 1.4 2 .6 2.8" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><circle cx="29.3" cy="18.5" r="1.25" fill="currentColor"/></svg></button><button type="button" class="ledger-icon-button" data-ledger="exercise" aria-pressed="false" aria-label="Exercise" title="Exercise"><svg class="outline-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M3.5 12v8m3-11v14m0-11h4v8h-4m4-4h11m0-4h4v8h-4m4-11v14m3-11v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="openSettings" class="settings-gear" type="button" aria-label="Open Settings" title="Settings">⚙</button></div></div><div class="tabs nutrition-tabs" id="nutritionTabs">
@@ -675,7 +738,7 @@ body > header { padding-top: 38px !important; }
 </section>
 <section id="workout-daily" class="section hide workout-screen" aria-label="Workout Daily Log">
 <div class="card section">
- <div class="row between"><h2 style="margin:0">Daily log</h2><input id="workoutLogDate" type="date" aria-label="Workout log date" style="width:auto;max-width:155px"></div>
+ <div class="workout-daily-heading"><div><h2 style="margin:0">Daily log</h2><div class="meta" id="workoutDailyDateLabel">Training history</div></div><div class="workout-date-controls"><button type="button" class="btn ghost smallbtn" id="workoutPrevDay" aria-label="Previous day">‹</button><input id="workoutLogDate" type="date" aria-label="Workout log date"><button type="button" class="btn ghost smallbtn" id="workoutNextDay" aria-label="Next day">›</button><button type="button" class="btn secondary smallbtn" id="workoutToday">Today</button></div></div>
  <div class="card section hide" id="activeWorkoutCard" aria-live="polite"><div id="activeWorkoutPanel"></div></div>
  <div id="dailyWorkoutSummary" class="notice">No training recorded for this date.</div>
  <div id="dailyWorkoutEntries" class="stack-list"></div>
@@ -696,7 +759,7 @@ body > header { padding-top: 38px !important; }
 <div class="card section">
  <div class="row between"><h2 style="margin:0">Progress</h2><span class="pill" id="progressExerciseCount">0 exercises</span></div>
  <p class="muted">Track strength, repetitions and training volume for each exercise.</p>
- <div class="editor-grid"><label>Exercise<select id="progressExercise"><option value="">Select an exercise</option></select></label><label>Period<select id="progressPeriod"><option value="30">1 month</option><option value="90" selected>3 months</option><option value="180">6 months</option><option value="365">1 year</option><option value="0">All time</option></select></label></div>
+ <div class="progress-filter-grid"><label>Exercise<select id="progressExercise"><option value="">Select an exercise</option></select></label><label>Period<select id="progressPeriod"><option value="30">1 month</option><option value="90" selected>3 months</option><option value="180">6 months</option><option value="365">1 year</option><option value="0">All time</option></select></label><label>Chart<select id="progressMetric"><option value="load">Max load</option><option value="oneRep">Estimated 1-rep max</option><option value="volume">Workout volume</option><option value="totalReps">Total reps</option><option value="maxReps">Max reps</option></select></label></div>
  <div id="progressContent"><div class="notice">Choose an exercise to view your progress.</div></div>
 </div></section>
 <section id="runs" class="section hide workout-screen" aria-label="Run Tracker">
