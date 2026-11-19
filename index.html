@@ -264,6 +264,20 @@ body > header { padding-top: 38px !important; }
 .editor-panel{border-radius:12px;padding:13px;margin:12px 0}
 .training-library-card .btn{min-height:40px}
 @media(max-width:420px){.training-library-card{padding:13px!important}#exerciseRepository .exercise-category-item{gap:7px}#exerciseRepository .exercise-category-item .btn{padding:7px 8px}}
+/* v112: independent blue accent for the Workout Tracker; Nutrition retains the selected global palette */
+.workout-screen{--green:#2468c5;--green2:#172b45;--accent:#2878e0;--accent-ink:#fff;--progress:#2878e0}
+.tab[data-tab="workout-daily"].active,.tab[data-tab="workouts-exercises"].active,.tab[data-tab="runs"].active{background:#2878e0;border-color:#2878e0;color:#fff}
+/* v113 guided workout session card */
+.active-workout-progress{height:6px;background:var(--surface3);border-radius:99px;overflow:hidden;margin:13px 0}
+.active-workout-progress span{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .2s ease}
+.active-workout-list{display:grid;gap:8px;margin-top:12px}
+.active-workout-exercise{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);cursor:pointer;min-height:58px}
+.active-workout-exercise input{width:19px;height:19px;accent-color:var(--accent);flex:0 0 auto}
+.active-workout-exercise-copy{display:grid;gap:3px;min-width:0;flex:1}
+.active-workout-exercise.is-complete{opacity:.72}
+.active-workout-exercise.is-complete strong{text-decoration:line-through}
+.active-workout-check{font-size:11px;color:var(--accent);font-weight:750}
+.active-workout-actions{margin-top:14px}
 </style>
 
 <style>
@@ -523,6 +537,9 @@ body > header { padding-top: 38px !important; }
    <div id="exerciseRepository" class="stack-list"></div>
   </div>
  </details>
+</div>
+<div class="card section training-library-card hide" id="activeWorkoutCard" aria-live="polite">
+ <div id="activeWorkoutPanel"></div>
 </div>
 </section>
 <section id="runs" class="section hide workout-screen" aria-label="Run Tracker">
