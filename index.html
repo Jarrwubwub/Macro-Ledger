@@ -1002,9 +1002,9 @@ body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding
 <button type="button" class="theme-choice" data-theme-choice="red" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Red</strong><small>Black, charcoal and red</small></button>
 <button type="button" class="theme-choice" data-theme-choice="monochrome" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Monochrome</strong><small>Black, charcoal, white and grey</small></button>
 </div></details>
-<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v122</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
+<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v123</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
 <details class="target-settings settings-section" id="dataSettings"><summary>Data &amp; backups</summary><p class="tiny muted">Export or merge your data. Imports are non-destructive and retain existing records.</p><div class="toolbar"><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div><div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div><div class="field"><label>Import and merge a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div></details>
-<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v122</span></p></details>
+<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v123</span></p></details>
 </div></section>
 <section id="history" class="section hide">
 <div class="card section">
@@ -1321,4 +1321,345 @@ body
 </style>
 
 <style id="diary-entry-spacing-v104">#diary #diaryEntries{margin-top:19px!important}</style>
+
+<style id="workout-macro-card-system-v122">
+/* Workout Ledger now follows Macro Ledger's compact header and card rhythm. */
+body.workout-mode{
+ --bg:#080808;--panel:#151515;--ink:#f2f2f2;--muted:#aaa;--line:#373737;
+ --green:#2878e0;--green2:#292929;--header:#050505;--accent:#2878e0;--accent-ink:#fff;
+ --surface:#151515;--surface2:#202020;--surface3:#2d2d2d;--input:#1b1b1b;--progress:#bdbdbd;--text:#f2f2f2;
+ background:#080808!important;color:#f2f2f2!important;padding-bottom:24px!important;
+}
+/* Match the Macro Ledger header proportions; only the active accent differs. */
+body.workout-mode header{background:#050505!important;border-bottom:0!important;box-shadow:0 5px 14px #0005!important}
+body.workout-mode header .top{max-width:760px!important;margin:0 auto!important;min-height:48px!important;align-items:flex-end!important;gap:14px!important}
+body.workout-mode header .top h1{font-size:22px!important;line-height:1.2!important;letter-spacing:-.5px!important}
+body.workout-mode header .top .sub{font-size:12px!important;line-height:1.35!important;margin-top:3px!important;color:#d0d0d0!important}
+@media(max-width:600px){
+ body.workout-mode header{padding:7px 12px 9px!important}
+ body.workout-mode header .top{min-height:46px!important;gap:8px!important}
+ body.workout-mode header .header-actions{gap:7px!important}
+ body.workout-mode header .ledger-icon-button,body.workout-mode header .settings-gear{width:40px!important;height:40px!important;min-width:40px!important;flex-basis:40px!important}
+ body.workout-mode header .ledger-icon-button svg{width:30px!important;height:30px!important}
+ body.workout-mode header .settings-gear{font-size:29px!important}
+}
+@media(max-width:360px){body.workout-mode header .top{gap:5px!important}body.workout-mode header h1{font-size:20px!important}body.workout-mode header .header-actions{gap:4px!important}body.workout-mode header .ledger-icon-button,body.workout-mode header .settings-gear{width:36px!important;height:38px!important;min-width:36px!important;flex-basis:36px!important}}
+/* Same navigation dimensions, spacing and breakpoints as the Nutrition tabs. */
+body.workout-mode header #exerciseTabs:not(.hide){position:static!important;top:auto!important;inset:auto!important;z-index:auto!important;max-width:760px!important;width:auto!important;margin:23px auto 0!important;padding:7px 0 0!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;overflow:visible!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important}
+body.workout-mode header #exerciseTabs .tab{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;min-height:44px!important;padding:10px 8px!important;text-align:center!important;white-space:normal!important;line-height:1.2!important;border:1px solid #383838!important;border-radius:12px!important;background:#202020!important;color:#c4c4c4!important;font-size:13px!important;font-weight:650!important}
+body.workout-mode header #exerciseTabs .tab.active{background:#2878e0!important;border-color:#2878e0!important;color:#fff!important;box-shadow:none!important}
+body.workout-mode header #exerciseTabs .nav-glyph{display:none!important}
+@media(min-width:601px){body.workout-mode header #exerciseTabs:not(.hide){display:flex!important;gap:8px!important;padding:7px 0 0!important}body.workout-mode header #exerciseTabs .tab{flex:1 1 0!important}}
+/* Main content uses the same max width and spacing as Nutrition. */
+body.workout-mode main{max-width:760px!important;padding:15px!important;gap:14px!important}
+body.workout-mode .workout-screen{gap:12px!important;color:#f2f2f2!important}
+body.workout-mode .workout-screen>.card,
+body.workout-mode .workouts-exercises>.workout-section-card{
+ display:grid!important;gap:12px!important;padding:15px!important;margin:0!important;
+ border:1px solid #373737!important;border-radius:17px!important;background:#151515!important;
+ box-shadow:0 5px 20px #0004!important;overflow:hidden!important;
+}
+body.workout-mode .workout-screen .meta,body.workout-mode .workout-screen .muted{color:#aaa!important}
+body.workout-mode .workout-screen h2{color:#f2f2f2!important}
+/* Blue is reserved for interactive elements; surfaces stay black and charcoal. */
+body.workout-mode .workout-screen .workout-template-card,
+body.workout-mode .workout-screen .daily-log-exercise,
+body.workout-mode .workout-screen #activeWorkoutCard,
+body.workout-mode .workout-screen #exerciseLibraryCard,
+body.workout-mode .workout-screen .progress-stat,
+body.workout-mode .workout-screen .progress-chart-panel,
+body.workout-mode .workout-screen .progress-session,
+body.workout-mode .workout-screen .editor-panel,
+body.workout-mode .workout-screen .workout-builder-selected,
+body.workout-mode .workout-screen .workout-builder-result,
+body.workout-mode .workout-screen .exercise-category-group,
+body.workout-mode .workout-screen .workout-category-group,
+body.workout-mode .workout-screen .notice,
+body.workout-mode .workout-screen .result,
+body.workout-mode .workout-screen .stat,
+body.workout-mode .workout-screen .active-workout-exercise,
+body.workout-mode .workout-screen .active-next-set-panel,
+body.workout-mode .workout-screen .previous-performance,
+body.workout-mode .workout-screen .workout-dropdown-card{
+ background:#202020!important;border-color:#383838!important;color:#f0f0f0!important;box-shadow:none!important;
+}
+body.workout-mode .workout-screen #activeWorkoutCard{background:#151515!important;border:1px solid #383838!important}
+body.workout-mode .workout-screen .active-session-count{background:#252525!important;color:#f1f1f1!important;border:1px solid #414141!important}
+body.workout-mode .workout-screen .eyebrow,
+body.workout-mode .workout-screen .active-workout-check,
+body.workout-mode .workout-screen .active-exercise-title .meta,
+body.workout-mode .workout-screen .active-session-count{color:#c9c9c9!important}
+body.workout-mode .workout-screen .active-workout-progress{background:#333!important}
+body.workout-mode .workout-screen .active-workout-progress span{background:#c5c5c5!important}
+body.workout-mode .workout-screen .active-workout-exercise.is-complete{border-color:#444!important}
+body.workout-mode .workout-screen .active-workout-exercise.is-complete .active-workout-check{color:#cfcfcf!important}
+body.workout-mode .workout-screen .workout-template-exercises,
+body.workout-mode .workout-screen .daily-log-exercise-content{border-color:#3a3a3a!important}
+body.workout-mode .workout-screen .workout-template-exercise-row,
+body.workout-mode .workout-screen .exercise-category-item,
+body.workout-mode .workout-screen .logged-set-row,
+body.workout-mode .workout-screen .daily-log-exercise .set-row{border-color:#353535!important}
+body.workout-mode .workout-screen .workout-builder-selected,
+body.workout-mode .workout-screen .workout-builder-result,
+body.workout-mode .workout-screen .editor-panel,
+body.workout-mode .workout-screen .exercise-category-group{background:#191919!important}
+body.workout-mode .workout-screen .workout-builder-filter input,
+body.workout-mode .workout-screen .workout-builder-filter select,
+body.workout-mode .workout-screen .progress-filter-grid select,
+body.workout-mode .workout-screen input,
+body.workout-mode .workout-screen select,
+body.workout-mode .workout-screen textarea{background:#111!important;border-color:#3c3c3c!important;color:#f2f2f2!important}
+body.workout-mode .workout-screen .btn:not(.ghost):not(.secondary):not(.danger){background:#2878e0!important;border-color:#2878e0!important;color:#fff!important}
+body.workout-mode .workout-screen .btn.ghost,
+body.workout-mode .workout-screen .btn.secondary{background:#252525!important;border-color:#414141!important;color:#e6e6e6!important}
+body.workout-mode .workout-screen .btn.danger{background:#302326!important;border-color:#70434a!important;color:#ffc4ca!important}
+body.workout-mode .workout-screen :focus-visible{outline:2px solid #2878e0!important;outline-offset:2px!important}
+/* Reusable accordion/card treatment throughout the Workout Ledger. */
+body.workout-mode .workout-screen details.workout-dropdown-card,
+body.workout-mode .workout-screen details.workout-template-dropdown,
+body.workout-mode .workout-screen details.run-history-dropdown,
+body.workout-mode .workout-screen details.progress-history-dropdown{
+ display:block!important;min-width:0;border:1px solid #383838!important;border-radius:14px!important;background:#191919!important;overflow:hidden!important;
+}
+body.workout-mode .workout-screen details.workout-dropdown-card>summary,
+body.workout-mode .workout-screen details.workout-template-dropdown>summary{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;min-height:48px!important;
+ padding:12px 13px!important;list-style:none!important;cursor:pointer!important;color:#f0f0f0!important;font-size:13px!important;font-weight:750!important;
+}
+body.workout-mode .workout-screen details.workout-dropdown-card>summary::-webkit-details-marker,
+body.workout-mode .workout-screen details.workout-template-dropdown>summary::-webkit-details-marker{display:none!important}
+body.workout-mode .workout-screen details.workout-dropdown-card[open]>summary,
+body.workout-mode .workout-screen details.workout-template-dropdown[open]>summary{border-bottom:1px solid #383838!important}
+body.workout-mode .workout-screen .workout-dropdown-card>summary:after,
+body.workout-mode .workout-screen .workout-template-dropdown>summary:after{content:'＋';color:#bdbdbd;font-size:17px;line-height:1;flex:0 0 auto}
+body.workout-mode .workout-screen .workout-dropdown-card[open]>summary:after,
+body.workout-mode .workout-screen .workout-template-dropdown[open]>summary:after{content:'−'}
+body.workout-mode .workout-screen .workout-dropdown-card>.stack-list,
+body.workout-mode .workout-screen .workout-dropdown-card>.progress-filter-grid,
+body.workout-mode .workout-screen .workout-template-exercises{padding:11px 13px!important}
+body.workout-mode .workout-screen .workout-template-card{padding:0!important;overflow:hidden!important;gap:0!important;border:1px solid #383838!important;border-radius:14px!important;background:#191919!important}
+body.workout-mode .workout-screen .workout-template-dropdown{border:0!important;border-radius:0!important;background:transparent!important}
+body.workout-mode .workout-screen .workout-template-summary{align-items:center!important;padding:13px!important;min-height:64px!important}
+body.workout-mode .workout-screen .workout-template-heading{display:grid!important;gap:4px!important;min-width:0!important;flex:1!important}
+body.workout-mode .workout-screen .workout-template-heading strong{font-size:15px!important;color:#f3f3f3!important}
+body.workout-mode .workout-screen .workout-template-heading .meta{font-size:11px!important;color:#aaa!important}
+body.workout-mode .workout-screen .workout-template-exercises{display:grid!important;gap:0!important;padding:5px 13px 11px!important;border-top:0!important}
+body.workout-mode .workout-screen .workout-template-exercise-row{display:flex!important;justify-content:space-between!important;gap:8px!important;padding:8px 0!important;border-bottom:1px solid #353535!important;font-size:12px!important}
+body.workout-mode .workout-screen .workout-template-exercise-row:last-child{border-bottom:0!important}
+body.workout-mode .workout-screen .workout-template-actions{display:grid!important;grid-template-columns:minmax(0,1.3fr) minmax(0,.8fr) 72px!important;gap:7px!important;padding:0 13px 13px!important;margin:0!important}
+body.workout-mode .workout-screen .workout-template-actions .btn{min-height:42px!important;padding:8px 9px!important;font-size:11px!important}
+body.workout-mode .workout-screen #exerciseLibraryCard{margin-top:2px!important;padding:0!important;background:#191919!important;border:1px solid #383838!important;border-radius:14px!important}
+body.workout-mode .workout-screen #exerciseLibraryCard>.training-card-summary{min-height:48px!important;padding:12px 13px!important;margin:0!important;border:0!important;font-size:13px!important}
+body.workout-mode .workout-screen #exerciseLibraryCard[open]>.training-card-summary{border-bottom:1px solid #383838!important;margin:0!important}
+body.workout-mode .workout-screen #exerciseLibraryCard .training-card-content{padding:12px!important}
+body.workout-mode .workout-screen #exerciseLibraryCard .exercise-category-group{background:#191919!important;border-color:#383838!important}
+body.workout-mode .workout-screen #exerciseLibraryCard .exercise-category-group>summary{min-height:46px!important;color:#ededed!important}
+body.workout-mode .workout-screen #exerciseLibraryCard .exercise-category-item{border-color:#353535!important}
+body.workout-mode .workout-screen .progress-stat{background:#202020!important;border-color:#383838!important}
+body.workout-mode .workout-screen .progress-chart-panel{background:#191919!important;border-color:#383838!important}
+body.workout-mode .workout-screen .progress-chart-panel svg polyline{stroke:#dedede!important}
+body.workout-mode .workout-screen .progress-chart-panel svg circle{fill:#dedede!important}
+body.workout-mode .workout-screen .progress-session{background:#202020!important;border-color:#383838!important}
+body.workout-mode .workout-screen .progress-set-chip{background:#303030!important;color:#ddd!important}
+body.workout-mode .workout-screen .notice{background:#202020!important;border-color:#383838!important;color:#ddd!important}
+body.workout-mode .workout-screen .pill{background:#303030!important;color:#ddd!important}
+body.workout-mode .workout-screen .stat{background:#202020!important;color:#eee!important}
+body.workout-mode .workout-screen .stat .l,body.workout-mode .workout-screen .tiny{color:#aaa!important}
+body.workout-mode .workout-screen .daily-log-exercise{padding:0!important;border:1px solid #383838!important;border-radius:14px!important;background:#191919!important;overflow:hidden!important}
+body.workout-mode .workout-screen .daily-log-exercise>summary{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:9px!important;min-height:54px!important;padding:12px 13px!important;list-style:none!important;cursor:pointer!important}
+body.workout-mode .workout-screen .daily-log-exercise>summary::-webkit-details-marker{display:none!important}
+body.workout-mode .workout-screen .daily-log-exercise>summary>span:first-child{display:grid;gap:4px;min-width:0}
+body.workout-mode .workout-screen .daily-log-exercise>summary strong{font-size:13px!important}
+body.workout-mode .workout-screen .daily-log-exercise>summary small{font-size:10px!important;color:#aaa!important}
+body.workout-mode .workout-screen .daily-log-exercise-content{display:grid;gap:9px;padding:12px!important;border-top:1px solid #383838!important}
+body.workout-mode .workout-screen .workout-page-heading{margin:0!important}
+body.workout-mode .workout-screen .workout-page-heading h2{font-size:19px!important}
+body.workout-mode .workout-screen .progress-history-dropdown{margin-top:14px!important}
+body.workout-mode .workout-screen .run-history-dropdown{margin-top:6px!important}
+@media(max-width:600px){
+ body.workout-mode main{padding:15px!important;max-width:760px!important}
+ body.workout-mode .workout-screen>.card,body.workout-mode .workouts-exercises>.workout-section-card{padding:14px!important}
+ body.workout-mode .workout-screen .workout-template-actions{grid-template-columns:minmax(0,1fr) minmax(0,.8fr)!important}
+ body.workout-mode .workout-screen .workout-template-actions .template-delete{grid-column:1/-1}
+ body.workout-mode .workout-screen .workout-date-controls{grid-template-columns:38px minmax(0,1fr) 38px auto!important}
+}
+@media(max-width:360px){body.workout-mode .workout-screen .workout-date-controls{grid-template-columns:34px minmax(0,1fr) 34px auto!important;gap:4px!important}}
+</style>
+
+
+<style id="workout-macro-geometry-v123">
+/* v123: exact shared Macro / Workout dimensions. The Workout ledger changes
+   only its palette accents and content; its header, tabs and card geometry
+   deliberately use the same measurements as the Macro ledger. */
+body.workout-mode > header {
+  padding-top: 38px !important; /* Macro Ledger's existing safe-area clearance */
+}
+body.workout-mode header {
+  border-bottom: 0 !important;
+}
+body.workout-mode header .top {
+  max-width: 760px !important;
+  margin: 0 auto !important;
+  min-height: 48px !important;
+  align-items: flex-end !important;
+  gap: 14px !important;
+}
+body.workout-mode header .top h1 {
+  font-size: 22px !important;
+  line-height: 1.2 !important;
+  letter-spacing: -.5px !important;
+}
+body.workout-mode header .top .sub {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  margin-top: 3px !important;
+}
+
+/* The same two-column mobile / horizontal desktop navigation geometry as
+   .nutrition-tabs. Text inherits the app's normal 15px size (13px <380px). */
+body.workout-mode header #exerciseTabs:not(.hide) {
+  position: static !important;
+  top: auto !important;
+  inset: auto !important;
+  z-index: auto !important;
+  max-width: 760px !important;
+  width: auto !important;
+  margin: 23px auto 0 !important;
+  padding: 7px 0 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+body.workout-mode header #exerciseTabs .tab {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  padding: 10px 8px !important;
+  text-align: center !important;
+  white-space: normal !important;
+  line-height: 1.2 !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 12px !important;
+  background: var(--surface2) !important;
+  color: var(--muted) !important;
+  font-size: inherit !important;
+  font-weight: 650 !important;
+}
+body.workout-mode header #exerciseTabs .tab.active {
+  background: #2878e0 !important;
+  border-color: #2878e0 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+body.workout-mode header #exerciseTabs .nav-glyph { display: none !important; }
+
+/* Same outer content width, inset and rhythm as Macro's main container. */
+body.workout-mode main {
+  max-width: 760px !important;
+  margin: 0 auto !important;
+  padding: 15px !important;
+  gap: 14px !important;
+}
+body.workout-mode .workout-screen {
+  gap: 11px !important; /* same as .section */
+}
+/* A workout page's primary card is geometrically identical to .card.section
+   on the Macro Daily Log: 15px inset, 17px radius and the shared shadow. */
+body.workout-mode .workout-screen > .card,
+body.workout-mode .workouts-exercises > .workout-section-card {
+  display: grid !important;
+  gap: 11px !important;
+  padding: 15px !important;
+  margin: 0 !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 17px !important;
+  background: var(--panel) !important;
+  box-shadow: var(--shadow) !important;
+  overflow: hidden !important;
+}
+body.workout-mode .workout-screen .workout-page-heading h2 {
+  font-size: 17px !important; /* shared h2 size */
+  line-height: 1.35 !important;
+}
+
+@media (max-width: 600px) {
+  body.workout-mode > header {
+    padding-top: 38px !important;
+    padding-right: 12px !important;
+    padding-bottom: 9px !important;
+    padding-left: 12px !important;
+  }
+  body.workout-mode header .top {
+    min-height: 46px !important;
+    gap: 8px !important;
+  }
+  body.workout-mode header .header-actions { gap: 7px !important; }
+  body.workout-mode header .ledger-icon-button,
+  body.workout-mode header .settings-gear {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    flex-basis: 40px !important;
+  }
+  body.workout-mode header .ledger-icon-button svg {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  body.workout-mode header .settings-gear { font-size: 29px !important; }
+  body.workout-mode header #exerciseTabs:not(.hide) {
+    margin-top: 23px !important;
+    padding: 6px 0 0 !important;
+  }
+  body.workout-mode .workout-screen > .card,
+  body.workout-mode .workouts-exercises > .workout-section-card {
+    padding: 15px !important;
+  }
+}
+@media (max-width: 380px) {
+  body.workout-mode header #exerciseTabs:not(.hide) { gap: 6px !important; }
+  body.workout-mode header #exerciseTabs .tab {
+    padding: 8px 9px !important;
+    font-size: 13px !important;
+  }
+}
+@media (max-width: 360px) {
+  body.workout-mode header .top { gap: 5px !important; }
+  body.workout-mode header .top h1 { font-size: 20px !important; }
+  body.workout-mode header .header-actions { gap: 4px !important; }
+  body.workout-mode header .ledger-icon-button,
+  body.workout-mode header .settings-gear {
+    width: 36px !important;
+    height: 38px !important;
+    min-width: 36px !important;
+    flex-basis: 36px !important;
+  }
+  body.workout-mode header .ledger-icon-button svg {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+@media (min-width: 601px) {
+  body.workout-mode header #exerciseTabs:not(.hide) {
+    display: flex !important;
+    gap: 7px !important;
+    padding: 7px 0 0 !important;
+  }
+  body.workout-mode header #exerciseTabs .tab {
+    flex: 1 1 auto !important;
+    border-radius: 999px !important;
+    padding: 9px 14px !important;
+    white-space: nowrap !important;
+  }
+}
+</style>
+
 </body></html>
