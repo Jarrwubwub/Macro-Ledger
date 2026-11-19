@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=88;
+const APP_VERSION=114;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -773,9 +773,20 @@ function setupAppUpdater(){
    navigator.serviceWorker.addEventListener('controllerchange',reload,{once:true});
    const registration=await navigator.serviceWorker.getRegistration()||await navigator.serviceWorker.register('./sw.js');
    await registration.update();
-   if(registration.waiting){registration.waiting.postMessage({type:'SKIP_WAITING'});}
-   if(registration.installing){registration.installing.addEventListener('statechange',()=>{if(registration.installing?.state==='installed'&&navigator.serviceWorker.controller){registration.waiting?.postMessage({type:'SKIP_WAITING'});}});}
-   if(registration.active&&Number(remote.version)>APP_VERSION){status.textContent='Update check started. The app will reload when the new files are ready.';setTimeout(()=>{if(!reloading){status.textContent='The update is still being prepared. Close and reopen the installed app in a moment.';button.disabled=false}},12000)}
+   const waiting=registration.waiting;
+   if(waiting){waiting.postMessage({type:'SKIP_WAITING'});}
+   else if(registration.installing){
+    const installing=registration.installing;
+    installing.addEventListener('statechange',()=>{
+     if(installing.state==='installed'&&navigator.serviceWorker.controller){installing.postMessage({type:'SKIP_WAITING'});}
+    });
+   }else{
+    await registration.unregister();
+    await navigator.serviceWorker.register('./sw.js?update='+remote.version);
+    location.reload();
+   }
+   status.textContent='Installing version '+remote.version+'…';
+   setTimeout(()=>{if(!reloading){status.textContent='The update is ready. Reload this page to finish installing it.';button.disabled=false}},15000);
   }catch(error){status.textContent=error.message||'Could not check for updates. Please try again.';button.disabled=false}
  };
 }
