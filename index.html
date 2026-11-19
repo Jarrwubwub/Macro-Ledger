@@ -809,7 +809,7 @@ body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding
 
 </head>
 <body>
-<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to current ledger">MK's Ledger</h1><div class="sub" id="appSubtitle">The food you eat, written down.</div></div><div class="header-actions" role="group" aria-label="Ledger navigation"><button type="button" class="ledger-icon-button active" data-ledger="nutrition" aria-pressed="true" aria-label="Nutrition" title="Nutrition"><svg class="outline-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M8.1 19.2c0-6.1 5.5-10.8 12.6-10.8 3.1 0 5.9.9 8.1 2.5l3.6-3.5c.8-.8 2.2-.2 2.2.9v7.2c2.1 1.3 3.4 3.4 3.4 5.8v2.1c0 3.1-2.5 5.6-5.6 5.6h-1.2l-1.4 5.2h-4.2l-1.1-5.2H16l-1.1 5.2h-4.2l-1.1-6.4c-2.2-2-3.5-4.9-3.5-8.6Z" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.4 18.9c-3.3-.2-4.7-2.4-4.2-4.5.4-1.7 2.1-2.6 3.5-1.9 1.2.6 1.4 2 .6 2.8" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><circle cx="29.3" cy="18.5" r="1.25" fill="currentColor"/></svg></button><button type="button" class="ledger-icon-button" data-ledger="exercise" aria-pressed="false" aria-label="Exercise" title="Exercise"><svg class="outline-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M3.5 12v8m3-11v14m0-11h4v8h-4m4-4h11m0-4h4v8h-4m4-11v14m3-11v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="openSettings" class="settings-gear" type="button" aria-label="Open Settings" title="Settings">⚙</button></div></div><div class="tabs nutrition-tabs" id="nutritionTabs">
+<header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to current ledger">MK's Ledger</h1><div class="sub" id="appSubtitle">The food you eat, written down.</div></div><div class="header-actions" role="group" aria-label="Ledger navigation"><button type="button" class="ledger-icon-button active" data-ledger="nutrition" aria-pressed="true" aria-label="Nutrition" title="Nutrition"><svg class="outline-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M8.1 19.2c0-6.1 5.5-10.8 12.6-10.8 3.1 0 5.9.9 8.1 2.5l3.6-3.5c.8-.8 2.2-.2 2.2.9v7.2c2.1 1.3 3.4 3.4 3.4 5.8v2.1c0 3.1-2.5 5.6-5.6 5.6h-1.2l-1.4 5.2h-4.2l-1.1-5.2H16l-1.1 5.2h-4.2l-1.1-6.4c-2.2-2-3.5-4.9-3.5-8.6Z" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.4 18.9c-3.3-.2-4.7-2.4-4.2-4.5.4-1.7 2.1-2.6 3.5-1.9 1.2.6 1.4 2 .6 2.8" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><circle cx="29.3" cy="18.5" r="1.25" fill="currentColor"/></svg></button><button type="button" class="ledger-icon-button" data-ledger="exercise" aria-pressed="false" aria-label="Exercise" title="Exercise"><svg class="outline-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M3.5 12v8m3-11v14m0-11h4v8h-4m4-4h11m0-4h4v8h-4m4-11v14m3-11v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="openSettings" class="settings-gear" data-ledger="settings" type="button" aria-pressed="false" aria-label="Settings" title="Settings">⚙</button></div></div><div class="tabs nutrition-tabs" id="nutritionTabs">
 <button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Scanner</button><button class="tab" data-tab="weight">Weight</button>
 </div>
 <div class="tabs exercise-tabs hide" id="exerciseTabs" aria-label="Workout Tracker navigation">
@@ -994,7 +994,7 @@ body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding
  <details class="workout-dropdown-card run-history-dropdown" open><summary><span>Run history</span><span class="meta" id="runHistorySummary">Latest runs</span></summary><div id="runHistory" class="stack-list"></div></details>
 </div></section>
 <section id="settings" class="section hide">
-<div class="card section"><div class="row between"><h2 style="margin:0">Settings</h2><button class="btn ghost smallbtn" id="closeSettings" type="button">Done</button></div>
+<div class="card section"><div class="row between"><h2 style="margin:0">Settings</h2></div>
 <details class="target-settings settings-section" id="appearanceSettings"><summary>Appearance</summary><p class="tiny muted">Choose the colour palette used throughout the app.</p><div class="theme-options">
 <button type="button" class="theme-choice" data-theme-choice="orange" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Orange</strong><small>Black, charcoal and orange</small></button>
 <button type="button" class="theme-choice" data-theme-choice="blue" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Blue</strong><small>Black, charcoal and deep blue</small></button>
@@ -1002,9 +1002,9 @@ body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding
 <button type="button" class="theme-choice" data-theme-choice="red" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Red</strong><small>Black, charcoal and red</small></button>
 <button type="button" class="theme-choice" data-theme-choice="monochrome" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Monochrome</strong><small>Black, charcoal, white and grey</small></button>
 </div></details>
-<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v123</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
+<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v124</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
 <details class="target-settings settings-section" id="dataSettings"><summary>Data &amp; backups</summary><p class="tiny muted">Export or merge your data. Imports are non-destructive and retain existing records.</p><div class="toolbar"><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div><div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div><div class="field"><label>Import and merge a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div></details>
-<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v123</span></p></details>
+<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v124</span></p></details>
 </div></section>
 <section id="history" class="section hide">
 <div class="card section">
@@ -1660,6 +1660,119 @@ body.workout-mode .workout-screen .workout-page-heading h2 {
     white-space: nowrap !important;
   }
 }
+</style>
+
+
+<style id="settings-section-and-shared-typography-v124">
+/* v124: top-level section switching: Nutrition, Workout, Settings. */
+#openSettings.settings-gear{color:#df4545!important}
+#openSettings.settings-gear.active{background:rgba(223,69,69,.13)!important;box-shadow:inset 0 0 0 1px rgba(223,69,69,.34)!important;opacity:1!important}
+#openSettings.settings-gear:focus-visible{outline:2px solid #df4545!important;outline-offset:2px}
+body.settings-mode{background:var(--bg)!important;color:var(--ink)!important}
+body.settings-mode header{background:var(--header)!important}
+body.settings-mode header #nutritionTabs,
+body.settings-mode header #exerciseTabs{display:none!important}
+body.settings-mode main{max-width:760px!important;margin:0 auto!important;padding:15px!important;gap:14px!important;overflow-y:auto!important}
+body.settings-mode #settings{display:grid!important;gap:11px!important;align-content:start!important}
+body.settings-mode #settings>.card{display:grid!important;gap:11px!important;padding:15px!important;border:1px solid var(--line)!important;border-radius:17px!important;background:var(--panel)!important;box-shadow:var(--shadow)!important}
+body.settings-mode #settings h2{font-size:17px!important;line-height:1.35!important;margin:0!important}
+body.settings-mode .settings-section{margin-top:0!important}
+body.settings-mode .settings-section>summary{font-size:13px!important;font-weight:750!important}
+
+/* Match the Workout navigation buttons to the existing Macro .tabs/.tab sizing.
+   Desktop uses the same pill row; phones use the same two-column 44px grid. */
+body.workout-mode header #exerciseTabs:not(.hide){
+ position:static!important;top:auto!important;inset:auto!important;z-index:auto!important;
+ display:flex!important;flex-wrap:wrap!important;justify-content:space-between!important;gap:7px!important;
+ width:auto!important;max-width:760px!important;margin:5px auto 0!important;padding:6px 0 0!important;
+ overflow:visible!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;
+}
+body.workout-mode header #exerciseTabs .tab{
+ display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;
+ flex:1 1 auto!important;width:auto!important;min-width:0!important;min-height:0!important;
+ padding:9px 14px!important;border:1px solid var(--line)!important;border-radius:999px!important;
+ background:var(--surface2)!important;color:var(--muted)!important;
+ font-family:"Manrope",system-ui,sans-serif!important;font-size:15px!important;font-weight:650!important;line-height:1.45!important;
+ text-align:center!important;white-space:nowrap!important;
+}
+body.workout-mode header #exerciseTabs .tab.active{background:#2878e0!important;border-color:#2878e0!important;color:#fff!important;box-shadow:none!important}
+body.workout-mode header #exerciseTabs .nav-glyph{display:none!important}
+@media(max-width:600px){
+ body.workout-mode header #exerciseTabs:not(.hide){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;overflow:visible!important;padding:6px 0 0!important;margin:5px auto 0!important}
+ body.workout-mode header #exerciseTabs .tab{width:100%!important;min-width:0!important;min-height:44px!important;padding:10px 8px!important;border-radius:12px!important;white-space:normal!important;line-height:1.2!important;font-size:15px!important}
+}
+@media(max-width:360px){
+ body.workout-mode header #exerciseTabs:not(.hide){gap:6px!important}
+ body.workout-mode header #exerciseTabs .tab{padding:8px 9px!important;font-size:13px!important}
+}
+
+/* Use the same typography scale as Macro Ledger's global system:
+   body 15px, h2 17px, supporting copy/tiny 12px, labels 12px,
+   buttons 14px, pills 11px and headline statistics 24px. */
+body.workout-mode .workout-screen{font-family:"Manrope",system-ui,sans-serif!important;font-size:15px!important;line-height:1.45!important}
+body.workout-mode .workout-screen h2,
+body.workout-mode .workout-screen .workout-page-heading h2,
+body.workout-mode .workout-screen .workout-daily-heading h2{font-size:17px!important;line-height:1.35!important;font-weight:750!important;letter-spacing:-.2px!important}
+body.workout-mode .workout-screen h3{font-size:15px!important;line-height:1.35!important;font-weight:750!important}
+body.workout-mode .workout-screen p,
+body.workout-mode .workout-screen .meta,
+body.workout-mode .workout-screen .muted,
+body.workout-mode .workout-screen .tiny,
+body.workout-mode .workout-screen .small,
+body.workout-mode .workout-screen small{font-size:12px!important;line-height:1.45!important}
+body.workout-mode .workout-screen label,
+body.workout-mode .workout-screen .fieldlabel,
+body.workout-mode .workout-screen .eyebrow,
+body.workout-mode .workout-screen .active-controls-grid>label,
+body.workout-mode .workout-screen .active-duration-input{font-size:12px!important;line-height:1.35!important;letter-spacing:0!important;font-weight:700!important}
+body.workout-mode .workout-screen input,
+body.workout-mode .workout-screen select,
+body.workout-mode .workout-screen textarea{font-size:15px!important;line-height:1.35!important}
+body.workout-mode .workout-screen .btn:not(.smallbtn),
+body.workout-mode .workout-screen button.btn:not(.smallbtn){font-size:14px!important;line-height:1.2!important;font-weight:700!important}
+body.workout-mode .workout-screen .smallbtn,
+body.workout-mode .workout-screen button.smallbtn{font-size:12px!important}
+body.workout-mode .workout-screen .pill{font-size:11px!important;line-height:1.3!important}
+body.workout-mode .workout-screen .workout-template-heading strong,
+body.workout-mode .workout-screen .workout-template-exercise-row,
+body.workout-mode .workout-screen .exercise-category-group>summary,
+body.workout-mode .workout-screen .exercise-category-copy strong,
+body.workout-mode .workout-screen .active-exercise-title strong,
+body.workout-mode .workout-screen .daily-log-exercise>summary strong,
+body.workout-mode .workout-screen .workout-builder-heading,
+body.workout-mode .workout-screen .workout-builder-name strong,
+body.workout-mode .workout-screen .workout-builder-result strong,
+body.workout-mode .workout-screen .progress-session strong,
+body.workout-mode .workout-screen .run-history-row strong{font-size:15px!important;line-height:1.35!important;font-weight:750!important}
+body.workout-mode .workout-screen .workout-template-heading .meta,
+body.workout-mode .workout-screen .workout-template-exercise-row small,
+body.workout-mode .workout-screen .exercise-category-copy .meta,
+body.workout-mode .workout-screen .active-exercise-title .meta,
+body.workout-mode .workout-screen .previous-performance span,
+body.workout-mode .workout-screen .previous-performance strong,
+body.workout-mode .workout-screen .logged-set-duration,
+body.workout-mode .workout-screen .active-workout-check,
+body.workout-mode .workout-screen .active-exercise-footer .meta,
+body.workout-mode .workout-screen .daily-workout-summary,
+body.workout-mode .workout-screen .progress-stat span,
+body.workout-mode .workout-screen .progress-stat small,
+body.workout-mode .workout-screen .progress-set-chip{font-size:12px!important;line-height:1.4!important}
+body.workout-mode .workout-screen .progress-stat strong,
+body.workout-mode .workout-screen .stat .v{font-size:24px!important;line-height:1.15!important;font-weight:800!important}
+body.workout-mode .workout-screen .logged-set-row,
+body.workout-mode .workout-screen .logged-set-row strong,
+body.workout-mode .workout-screen .daily-log-exercise .set-row span{font-size:13px!important;line-height:1.4!important}
+body.workout-mode .workout-screen .daily-log-exercise>summary small{font-size:12px!important;line-height:1.4!important}
+body.workout-mode .workout-screen .active-next-set-heading strong{font-size:15px!important}
+body.workout-mode .workout-screen .active-next-set-heading .meta{font-size:12px!important}
+body.workout-mode .workout-screen .active-single-stepper input{font-size:22px!important}
+body.workout-mode .workout-screen .active-single-stepper button{font-size:24px!important}
+body.workout-mode .workout-screen .workout-template-actions .btn,
+body.workout-mode .workout-screen .active-exercise-footer .btn,
+body.workout-mode .workout-screen .daily-log-exercise .actions .btn{font-size:14px!important}
+body.workout-mode .workout-screen .workout-dropdown-card>summary,
+body.workout-mode .workout-screen .workout-template-dropdown>summary,
+body.workout-mode .workout-screen #exerciseLibraryCard>.training-card-summary{font-size:15px!important;line-height:1.35!important;font-weight:750!important}
 </style>
 
 </body></html>

@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=123;
+const APP_VERSION=124;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -89,27 +89,55 @@ function showEntryContextMenu(entryId,x,y){
 function closeEntryContextMenu(){const menu=$('entryContextMenu');if(menu)menu.classList.add('hide')}
 $('duplicateEntryAction').onclick=()=>{const menu=$('entryContextMenu'),id=menu?.dataset.entryId,source=entries().find(item=>String(item.id)===String(id));if(!source)return;const copy={...source,ingredients:Array.isArray(source.ingredients)?source.ingredients.map(i=>({...i})):undefined,id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),loggedAt:Date.now()};const day=entries(),index=day.findIndex(item=>String(item.id)===String(id));day.splice(index+1,0,copy);logs[currentDate]=day;save();closeEntryContextMenu();renderDiary();showToast('Entry duplicated')};
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('#entryContextMenu'))closeEntryContextMenu()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeEntryContextMenu()});
-let currentTab='diary',ledgerMode='nutrition',tabBeforeSettings='diary';
+let currentTab='diary',ledgerMode='nutrition';
 function setTab(tab){
  currentTab=tab;
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
  const nutritionTabs=['diary','library','scanner','weight','history'];
  const workoutTabs=['workout-daily','workouts-exercises','progress','runs'];
- $('nutritionTabs').classList.toggle('hide',ledgerMode!=='nutrition'||tab==='settings');
- $('exerciseTabs').classList.toggle('hide',ledgerMode!=='exercise'||tab==='settings');
+ const settingsActive=ledgerMode==='settings';
+ $('nutritionTabs').classList.toggle('hide',ledgerMode!=='nutrition');
+ $('exerciseTabs').classList.toggle('hide',ledgerMode!=='exercise');
  nutritionTabs.forEach(id=>$(id).classList.toggle('hide',ledgerMode!=='nutrition'||id!==tab));
  workoutTabs.forEach(id=>$(id).classList.toggle('hide',ledgerMode!=='exercise'||id!==tab));
- $('settings').classList.toggle('hide',tab!=='settings');
+ $('settings').classList.toggle('hide',!settingsActive);
  if(tab==='library')renderLibrary();
  if(tab==='workouts-exercises'){renderWorkoutTemplates();syncTrainingLibraryView();}
  if(tab==='progress')renderProgress();
  if(tab==='history')renderHistory();
  if(tab==='weight')renderWeight();
 }
-function setLedgerMode(mode){if(!['nutrition','exercise'].includes(mode)||mode===ledgerMode)return;const wasSettings=currentTab==='settings';if(wasSettings)tabBeforeSettings=mode==='nutrition'?'diary':'workout-daily';ledgerMode=mode;document.body.classList.toggle('workout-mode',mode==='exercise');document.querySelectorAll('[data-ledger]').forEach(b=>{const active=b.dataset.ledger===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});$('appTitle').textContent="MK's Ledger";$('appSubtitle').textContent=mode==='nutrition'?'The food you eat, written down.':'The weight you lift, written down.';if(currentTab!=='settings')setTab(mode==='nutrition'?(['workout-daily','workouts-exercises','progress','runs'].includes(currentTab)?'diary':currentTab):(['diary','library','scanner','weight','history'].includes(currentTab)?'workout-daily':currentTab));else setTab('settings')}
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
-document.querySelectorAll('[data-ledger]').forEach(b=>b.addEventListener('click',()=>setLedgerMode(b.dataset.ledger)));
-const appTitle=$('appTitle');appTitle.addEventListener('click',()=>setTab(ledgerMode==='nutrition'?'diary':'workout-daily'));$('openSettings').onclick=()=>{if(currentTab!=='settings')tabBeforeSettings=currentTab;setTab('settings')};$('closeSettings').onclick=()=>setTab(tabBeforeSettings||'diary');appTitle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTab(ledgerMode==='nutrition'?'diary':'workout-daily')}});
+function setLedgerMode(mode){
+ if(!['nutrition','exercise','settings'].includes(mode)||mode===ledgerMode)return;
+ const previousMode=ledgerMode;
+ ledgerMode=mode;
+ document.body.classList.toggle('workout-mode',mode==='exercise');
+ document.body.classList.toggle('settings-mode',mode==='settings');
+ document.querySelectorAll('[data-ledger]').forEach(button=>{
+  const active=button.dataset.ledger===mode;
+  button.classList.toggle('active',active);
+  button.setAttribute('aria-pressed',String(active));
+ });
+ $('appTitle').textContent="MK's Ledger";
+ $('appSubtitle').textContent=mode==='nutrition'?'The food you eat, written down.':mode==='exercise'?'The weight you lift, written down.':'App preferences and data.';
+ if(mode==='settings'){
+  setTab('settings');
+  return;
+ }
+ let nextTab;
+ if(previousMode==='settings') nextTab=mode==='nutrition'?'diary':'workout-daily';
+ else if(mode==='nutrition') nextTab=['workout-daily','workouts-exercises','progress','runs'].includes(currentTab)?'diary':currentTab;
+ else nextTab=['diary','library','scanner','weight','history'].includes(currentTab)?'workout-daily':currentTab;
+ setTab(nextTab);
+}
+document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click',()=>setTab(button.dataset.tab)));
+document.querySelectorAll('[data-ledger]').forEach(button=>button.addEventListener('click',()=>setLedgerMode(button.dataset.ledger)));
+const appTitle=$('appTitle');
+appTitle.addEventListener('click',()=>{
+ if(ledgerMode==='settings'){setLedgerMode('nutrition');return;}
+ setTab(ledgerMode==='nutrition'?'diary':'workout-daily');
+});
+appTitle.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();if(ledgerMode==='settings')setLedgerMode('nutrition');else setTab(ledgerMode==='nutrition'?'diary':'workout-daily');}});
 // v87: robust two-finger horizontal switching. Track the gesture centroid across
 // touchmove/touchend; touchend.changedTouches commonly contains only one finger.
 let ledgerGesture=null;
