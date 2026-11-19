@@ -94,17 +94,18 @@ function setTab(tab){
  currentTab=tab;
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
  const nutritionTabs=['diary','library','scanner','weight','history'];
- const workoutTabs=['workout-daily','workouts','exercises','runs'];
+ const workoutTabs=['workout-daily','workouts-exercises','runs'];
  $('nutritionTabs').classList.toggle('hide',ledgerMode!=='nutrition'||tab==='settings');
  $('exerciseTabs').classList.toggle('hide',ledgerMode!=='exercise'||tab==='settings');
  nutritionTabs.forEach(id=>$(id).classList.toggle('hide',ledgerMode!=='nutrition'||id!==tab));
  workoutTabs.forEach(id=>$(id).classList.toggle('hide',ledgerMode!=='exercise'||id!==tab));
  $('settings').classList.toggle('hide',tab!=='settings');
  if(tab==='library')renderLibrary();
+ if(tab==='workouts-exercises'){renderWorkoutTemplates();renderExerciseRepository();syncTrainingLibraryView();}
  if(tab==='history')renderHistory();
  if(tab==='weight')renderWeight();
 }
-function setLedgerMode(mode){if(!['nutrition','exercise'].includes(mode)||mode===ledgerMode)return;if(currentTab==='settings')tabBeforeSettings=tabBeforeSettings||'diary';ledgerMode=mode;document.querySelectorAll('[data-ledger]').forEach(b=>{const active=b.dataset.ledger===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});$('appTitle').textContent="MK's Ledger";$('appSubtitle').textContent=mode==='nutrition'?'The food you eat, written down.':'The weight you lift, written down.';if(currentTab!=='settings')setTab(mode==='nutrition'?(['workout-daily','workouts','exercises','runs'].includes(currentTab)?'diary':currentTab):(['diary','library','scanner','weight','history'].includes(currentTab)?'workout-daily':currentTab));else setTab('settings')}
+function setLedgerMode(mode){if(!['nutrition','exercise'].includes(mode)||mode===ledgerMode)return;if(currentTab==='settings')tabBeforeSettings=tabBeforeSettings||'diary';ledgerMode=mode;document.querySelectorAll('[data-ledger]').forEach(b=>{const active=b.dataset.ledger===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});$('appTitle').textContent="MK's Ledger";$('appSubtitle').textContent=mode==='nutrition'?'The food you eat, written down.':'The weight you lift, written down.';if(currentTab!=='settings')setTab(mode==='nutrition'?(['workout-daily','workouts-exercises','runs'].includes(currentTab)?'diary':currentTab):(['diary','library','scanner','weight','history'].includes(currentTab)?'workout-daily':currentTab));else setTab('settings')}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 document.querySelectorAll('[data-ledger]').forEach(b=>b.addEventListener('click',()=>setLedgerMode(b.dataset.ledger)));
 const appTitle=$('appTitle');appTitle.addEventListener('click',()=>setTab(ledgerMode==='nutrition'?'diary':'workout-daily'));$('openSettings').onclick=()=>{if(currentTab!=='settings')tabBeforeSettings=currentTab;setTab('settings')};$('closeSettings').onclick=()=>setTab(tabBeforeSettings||'diary');appTitle.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setTab(ledgerMode==='nutrition'?'diary':'workout-daily')}});
@@ -633,10 +634,19 @@ function renderExerciseRepository(){
  const q=$('exerciseSearch').value.trim().toLowerCase(),cat=$('exerciseCategoryFilter').value||'All categories';
  const list=workoutExercises.filter(x=>(cat==='All categories'||x.category===cat)&&(!q||x.name.toLowerCase().includes(q)||x.category.toLowerCase().includes(q)||String(x.equipment||'').toLowerCase().includes(q))).sort((x,y)=>x.category.localeCompare(y.category)||x.name.localeCompare(y.name));
  $('exerciseCount').textContent=workoutExercises.length+' exercises';
- $('exerciseRepository').innerHTML=list.map(x=>`<article class="workout-item"><strong>${esc(x.name)}</strong><div class="meta">${esc(x.category)} · ${esc(x.equipment||'Other')}${x.notes?' · '+esc(x.notes):''}</div><div class="actions"><button class="btn smallbtn" data-add-daily="${esc(x.id)}">Add to daily log</button><button class="btn ghost smallbtn" data-edit-exercise="${esc(x.id)}">Edit</button>${x.custom?`<button class="btn danger smallbtn" data-delete-exercise="${esc(x.id)}">Delete</button>`:''}</div></article>`).join('')||'<div class="muted tiny">No matching exercises.</div>';
+ $('exerciseRepository').innerHTML=list.map(x=>`<article class="workout-item exercise-library-row"><div class="exercise-name"><strong>${esc(x.name)}</strong><div class="meta">${esc(x.category)} · ${esc(x.equipment||'Other')}</div></div><div class="exercise-actions"><button class="btn ghost smallbtn" data-add-workout="${esc(x.id)}">Add to Workout</button><button class="btn smallbtn" data-add-daily="${esc(x.id)}">Daily log</button><button class="btn ghost smallbtn" data-edit-exercise="${esc(x.id)}">Edit</button><button class="btn danger smallbtn" data-delete-exercise="${esc(x.id)}" ${x.custom?'':'disabled title="Built-in exercise"'}>Delete</button></div></article>`).join('')||'<div class="muted tiny">No matching exercises.</div>';
  $('exerciseRepository').querySelectorAll('[data-add-daily]').forEach(b=>b.onclick=()=>addExerciseToDay(b.dataset.addDaily));
+ $('exerciseRepository').querySelectorAll('[data-add-workout]').forEach(b=>b.onclick=()=>addExerciseToWorkout(b.dataset.addWorkout));
  $('exerciseRepository').querySelectorAll('[data-edit-exercise]').forEach(b=>b.onclick=()=>openExerciseEditor(b.dataset.editExercise));
- $('exerciseRepository').querySelectorAll('[data-delete-exercise]').forEach(b=>b.onclick=()=>{if(!confirm('Delete this custom exercise? Existing workout history will be retained.'))return;workoutExercises=workoutExercises.filter(x=>x.id!==b.dataset.deleteExercise);saveWorkoutData();renderExerciseRepository();});
+ $('exerciseRepository').querySelectorAll('[data-delete-exercise]').forEach(b=>b.onclick=()=>{if(b.disabled||!confirm('Delete this custom exercise? Existing workout history will be retained.'))return;workoutExercises=workoutExercises.filter(x=>x.id!==b.dataset.deleteExercise);saveWorkoutData();renderExerciseRepository();});
+}
+function addExerciseToWorkout(exerciseId){
+ const ex=workoutExerciseById(exerciseId);if(!ex)return;
+ if(!workoutTemplates.length){alert('Create a workout first, then add exercises to it.');$('trainingLibraryView').value='workouts';syncTrainingLibraryView();return;}
+ const options=workoutTemplates.map((w,i)=>`${i+1}. ${w.name}`).join('\n'),choice=prompt('Add '+ex.name+' to which workout?\n'+options,'1');if(choice===null)return;
+ const w=workoutTemplates[Number(choice)-1];if(!w){alert('Please enter a valid workout number.');return;}
+ if(w.exercises.some(x=>x.exerciseId===exerciseId)){alert('That exercise is already in '+w.name+'.');return;}
+ w.exercises.push({exerciseId,sets:3,reps:'8–12'});saveWorkoutData();renderWorkoutTemplates();showToast(ex.name+' added to '+w.name);
 }
 function openExerciseEditor(id=null){
  const x=id?workoutExerciseById(id):null,host=$('exerciseEditor');host.classList.remove('hide');
@@ -644,19 +654,15 @@ function openExerciseEditor(id=null){
  $('cancelExercise').onclick=()=>workoutFormClose('exerciseEditor');
  $('exerciseForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.currentTarget),name=String(f.get('name')).trim();if(!name)return;const duplicate=workoutExercises.find(z=>z.name.toLowerCase()===name.toLowerCase()&&z.id!==id);if(duplicate){alert('An exercise with that name already exists.');return;}if(x)Object.assign(x,{name,category:f.get('category'),equipment:String(f.get('equipment')).trim()||'Other',notes:String(f.get('notes')).trim()});else workoutExercises.push({id:makeId(),name,category:f.get('category'),equipment:String(f.get('equipment')).trim()||'Other',notes:String(f.get('notes')).trim(),custom:true});saveWorkoutData();workoutFormClose('exerciseEditor');renderExerciseRepository();};
 }
+function syncTrainingLibraryView(){const v=$('trainingLibraryView').value||'workouts';$('workoutsPanel').classList.toggle('hide',v!=='workouts');$('exercisesPanel').classList.toggle('hide',v!=='exercises');$('trainingLibraryCount').textContent=v==='workouts'?workoutTemplates.length+' workouts':workoutExercises.length+' exercises';}
+$('trainingLibraryView').onchange=syncTrainingLibraryView;
 function renderWorkoutTemplates(){
  $('workoutTemplateCount').textContent=workoutTemplates.length+' saved';
- $('workoutTemplateList').innerHTML=workoutTemplates.map(w=>`<article class="workout-item"><strong>${esc(w.name)}</strong><div class="meta">${w.exercises.length} exercises · ${w.exercises.map(e=>esc(workoutExerciseById(e.exerciseId)?.name||e.name||'Exercise')).join(' · ')}</div><div class="actions"><button class="btn smallbtn" data-start-template="${esc(w.id)}">Log this workout</button><button class="btn ghost smallbtn" data-edit-template="${esc(w.id)}">Edit</button><button class="btn danger smallbtn" data-delete-template="${esc(w.id)}">Delete</button></div></article>`).join('')||'<div class="muted tiny">No workouts saved yet. Create a template to get started.</div>';
+ $('workoutTemplateList').innerHTML=workoutTemplates.map(w=>`<article class="workout-item workout-template-card"><details><summary><span><strong>${esc(w.name)}</strong><span class="meta">${w.exercises.length} exercises</span></span><span>▾</span></summary><div class="meta" style="margin-top:10px">${w.exercises.map((e,i)=>`<div class="row between" style="padding:5px 0;border-top:1px solid var(--line)"><span>${i+1}. ${esc(workoutExerciseById(e.exerciseId)?.name||e.name||'Exercise')} · ${e.sets} × ${esc(e.reps)}</span><span class="workout-order-actions"><button class="btn ghost smallbtn" data-move-workout="${esc(w.id)}" data-index="${i}" data-dir="-1" ${i===0?'disabled':''}>↑</button><button class="btn ghost smallbtn" data-move-workout="${esc(w.id)}" data-index="${i}" data-dir="1" ${i===w.exercises.length-1?'disabled':''}>↓</button></span></div>`).join('')}</div><div class="actions"><button class="btn smallbtn" data-start-template="${esc(w.id)}">Log this workout</button><button class="btn ghost smallbtn" data-edit-template="${esc(w.id)}">Edit</button><button class="btn danger smallbtn" data-delete-template="${esc(w.id)}">Delete</button></div></details></article>`).join('')||'<div class="muted tiny">No workouts saved yet. Create a template to get started.</div>';
  $('workoutTemplateList').querySelectorAll('[data-start-template]').forEach(b=>b.onclick=()=>startWorkoutTemplate(b.dataset.startTemplate));
  $('workoutTemplateList').querySelectorAll('[data-edit-template]').forEach(b=>b.onclick=()=>openWorkoutEditor(b.dataset.editTemplate));
- $('workoutTemplateList').querySelectorAll('[data-delete-template]').forEach(b=>b.onclick=()=>{if(!confirm('Delete this workout template?'))return;workoutTemplates=workoutTemplates.filter(w=>w.id!==b.dataset.deleteTemplate);saveWorkoutData();renderWorkoutTemplates();});
-}
-function openWorkoutEditor(id=null){
- const w=id?workoutTemplates.find(x=>x.id===id):null,host=$('workoutEditor');host.classList.remove('hide');
- const selected=w?.exercises||[];
- host.innerHTML=`<h3>${w?'Edit workout':'Create workout'}</h3><form id="workoutForm"><label>Workout name<input name="name" required maxlength="60" value="${esc(w?.name||'')}" placeholder="e.g. Push 1"></label><div class="tiny muted">Select exercises and set your planned sets and rep targets.</div><div id="workoutExerciseChoices">${workoutExercises.filter(x=>!x.id.startsWith('seed-')||true).sort((a,b)=>a.category.localeCompare(b.category)||a.name.localeCompare(b.name)).map(x=>{const v=selected.find(e=>e.exerciseId===x.id);return `<div class="exercise-template-row"><label style="display:flex;align-items:center;gap:7px;margin:0;color:var(--text)"><input type="checkbox" name="exercise" value="${esc(x.id)}" ${v?'checked':''}>${esc(x.name)}</label><input aria-label="Sets for ${esc(x.name)}" type="number" min="1" max="20" name="sets-${esc(x.id)}" value="${v?.sets||3}"><input aria-label="Reps for ${esc(x.name)}" type="text" name="reps-${esc(x.id)}" value="${esc(v?.reps||'8–12')}" placeholder="8–12"></div>`}).join('')}</div><div class="actions"><button class="btn" type="submit">Save workout</button><button class="btn ghost" type="button" id="cancelWorkout">Cancel</button></div></form>`;
- $('cancelWorkout').onclick=()=>workoutFormClose('workoutEditor');
- $('workoutForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.currentTarget),name=String(f.get('name')).trim(),ids=f.getAll('exercise');if(!ids.length){alert('Select at least one exercise.');return;}const exercises=ids.map(exerciseId=>({exerciseId,sets:Math.max(1,Math.min(20,Number(f.get('sets-'+exerciseId))||3)),reps:String(f.get('reps-'+exerciseId)||'8–12').trim()}));if(w)Object.assign(w,{name,exercises});else workoutTemplates.push({id:makeId(),name,exercises,createdAt:Date.now()});saveWorkoutData();workoutFormClose('workoutEditor');renderWorkoutTemplates();};
+ $('workoutTemplateList').querySelectorAll('[data-delete-template]').forEach(b=>b.onclick=()=>{if(!confirm('Delete this workout template?'))return;workoutTemplates=workoutTemplates.filter(w=>w.id!==b.dataset.deleteTemplate);saveWorkoutData();renderWorkoutTemplates();syncTrainingLibraryView();});
+ $('workoutTemplateList').querySelectorAll('[data-move-workout]').forEach(b=>b.onclick=()=>{const w=workoutTemplates.find(x=>x.id===b.dataset.moveWorkout),i=Number(b.dataset.index),j=i+Number(b.dataset.dir);if(!w||j<0||j>=w.exercises.length)return;[w.exercises[i],w.exercises[j]]=[w.exercises[j],w.exercises[i]];saveWorkoutData();renderWorkoutTemplates();});
 }
 function addExerciseToDay(exerciseId,planned=null){
  const ex=workoutExerciseById(exerciseId);if(!ex)return;
@@ -697,12 +703,12 @@ $('exerciseSearch').oninput=renderExerciseRepository;
 $('exerciseCategoryFilter').innerHTML='<option>All categories</option>'+workoutCategories.map(c=>`<option>${esc(c)}</option>`).join('');
 $('exerciseCategoryFilter').onchange=renderExerciseRepository;
 $('createWorkout').onclick=()=>openWorkoutEditor();
-$('dailyAddExercise').onclick=()=>{setTab('exercises');};
-$('dailyStartWorkout').onclick=()=>{setTab('workouts');};
+$('dailyAddExercise').onclick=()=>{setTab('workouts-exercises');$('trainingLibraryView').value='exercises';syncTrainingLibraryView();};
+$('dailyStartWorkout').onclick=()=>{setTab('workouts-exercises');$('trainingLibraryView').value='workouts';syncTrainingLibraryView();};
 $('createRun').onclick=openRunEditor;
 $('workoutLogDate').value=today();
 $('workoutLogDate').onchange=renderDailyWorkout;
-renderExerciseRepository();renderWorkoutTemplates();renderDailyWorkout();renderRuns();
+renderExerciseRepository();renderWorkoutTemplates();renderDailyWorkout();renderRuns();syncTrainingLibraryView();
 
 renderDiary();
 function applyTheme(theme){if(!['orange','blue','yellow','red','monochrome'].includes(theme))theme='orange';document.documentElement.dataset.theme=theme;localStorage.setItem('macroLedgerTheme',theme);const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content='#080808';document.querySelectorAll('[data-theme-choice]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.themeChoice===theme)));const about=$('aboutVersion');if(about)about.textContent='v'+APP_VERSION;}

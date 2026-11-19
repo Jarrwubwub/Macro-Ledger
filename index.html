@@ -227,6 +227,17 @@ body > header { padding-top: 38px !important; }
 .set-row span{font-size:12px;color:var(--muted)}
 .workout-screen .toolbar{align-items:center}
 @media(max-width:420px){.editor-grid{grid-template-columns:1fr 1fr}.set-row{grid-template-columns:30px repeat(3,minmax(0,1fr));gap:4px}}
+
+/* v109 combined training library and compact exercise rows */
+.exercise-library-row{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;min-width:0}
+.exercise-library-row .exercise-name{flex:1 1 auto;min-width:55px}
+.exercise-library-row .exercise-actions{display:flex;align-items:center;gap:3px;flex:0 0 auto;flex-wrap:nowrap}
+.exercise-library-row .exercise-actions .btn{padding:6px 5px;font-size:10px;white-space:nowrap}
+.exercise-library-row .exercise-name strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exercise-library-row .meta{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workout-template-card details>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.workout-template-card details>summary::-webkit-details-marker{display:none}
+.workout-order-actions{display:flex;gap:5px}
 </style>
 
 <style>
@@ -320,7 +331,7 @@ body > header { padding-top: 38px !important; }
 <button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Scanner</button><button class="tab" data-tab="weight">Weight</button>
 </div>
 <div class="tabs exercise-tabs hide" id="exerciseTabs" aria-label="Workout Tracker navigation">
-<button class="tab active" data-tab="workout-daily">Daily log</button><button class="tab" data-tab="workouts">Workouts</button><button class="tab" data-tab="exercises">Exercises</button><button class="tab" data-tab="runs">Run</button>
+<button class="tab active" data-tab="workout-daily">Daily log</button><button class="tab" data-tab="workouts-exercises">Workouts &amp; Exercises</button><button class="tab" data-tab="runs">Run</button>
 </div></header>
 <main>
 <section id="diary" class="section">
@@ -466,22 +477,11 @@ body > header { padding-top: 38px !important; }
  <div id="dailyWorkoutSummary" class="notice">No training recorded for this date.</div>
  <div id="dailyWorkoutEntries" class="stack-list"></div>
 </div></section>
-<section id="workouts" class="section hide workout-screen" aria-label="Saved Workouts">
-<div class="card section">
- <div class="row between"><h2 style="margin:0">Workouts</h2><span class="pill" id="workoutTemplateCount">0 saved</span></div>
- <p class="muted">Build reusable workout templates from your exercise repository.</p>
- <div class="toolbar"><button class="btn" id="createWorkout">＋ Create workout</button></div>
- <div id="workoutEditor" class="editor-panel hide"></div>
- <div id="workoutTemplateList" class="stack-list"></div>
-</div></section>
-<section id="exercises" class="section hide workout-screen" aria-label="Exercise Repository">
-<div class="card section">
- <div class="row between"><h2 style="margin:0">Exercises</h2><span class="pill" id="exerciseCount">0 exercises</span></div>
- <p class="muted">Browse the exercise repository or add your own movements.</p>
- <div class="toolbar"><input id="exerciseSearch" type="search" placeholder="Search exercises…" aria-label="Search exercises"><button class="btn" id="createExercise">＋ Add exercise</button></div>
- <div id="exerciseEditor" class="editor-panel hide"></div>
- <div class="row wrap"><select id="exerciseCategoryFilter" aria-label="Filter exercise category"><option>All categories</option></select></div>
- <div id="exerciseRepository" class="stack-list"></div>
+<section id="workouts-exercises" class="section hide workout-screen" aria-label="Workouts and Exercises"><div class="card section">
+<div class="row between"><h2 style="margin:0">Training library</h2><span class="pill" id="trainingLibraryCount">Workouts &amp; exercises</span></div>
+<label style="margin-top:10px">View<select id="trainingLibraryView"><option value="workouts">Workouts</option><option value="exercises">Exercises</option></select></label>
+<div id="workoutsPanel"><div class="row between" style="margin-top:12px"><h3 style="margin:0">Workouts</h3><button class="btn smallbtn" id="createWorkout">＋ Create workout</button></div><div id="workoutEditor" class="editor-panel hide"></div><div id="workoutTemplateList" class="stack-list"></div></div>
+<div id="exercisesPanel" class="hide"><div class="row between" style="margin-top:12px"><h3 style="margin:0">Exercises</h3><button class="btn smallbtn" id="createExercise">＋ Add exercise</button></div><p class="muted">Browse the exercise repository or add your own movements.</p><div class="toolbar"><input id="exerciseSearch" type="search" placeholder="Search exercises…" aria-label="Search exercises"></div><select id="exerciseCategoryFilter" aria-label="Filter exercise category"><option>All categories</option></select><div id="exerciseEditor" class="editor-panel hide"></div><div id="exerciseRepository" class="stack-list"></div></div>
 </div></section>
 <section id="runs" class="section hide workout-screen" aria-label="Run Tracker">
 <div class="card section">
