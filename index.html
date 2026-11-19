@@ -592,7 +592,7 @@ body > header { padding-top: 38px !important; }
 </style>
 
 
-<style id="mobile-first-workout-v121">
+<style id="mobile-first-workout-v122">
 /* Mobile-first Workout Tracker visual system. Nutrition remains untouched. */
 body.workout-mode{
  --bg:#101720;--panel:#17222e;--ink:#edf3f9;--muted:#9eafc0;--line:#2d4052;
@@ -754,7 +754,7 @@ body.workout-mode .empty-state span{font-size:11px}
 </style>
 
 
-<style id="v121-workout-navigation-library-cleanup">
+<style id="v122-workout-navigation-library-cleanup">
 /* Workout navigation follows the same header-tab pattern as Nutrition. */
 body.workout-mode #exerciseTabs:not(.hide){
  position:static!important;inset:auto!important;z-index:5!important;width:auto!important;
@@ -960,6 +960,7 @@ body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding
  <div id="dailyWorkoutEntries" class="stack-list"></div>
 </div></section>
 <section id="workouts-exercises" class="section hide workout-screen" aria-label="Workouts">
+ <div class="card section workout-section-card">
  <div class="workout-page-heading"><div><h2>Workouts</h2><div class="meta"><span id="workoutTemplateCount">0 saved</span> · Your saved training plans</div></div></div>
  <button class="btn primary full" id="createWorkout">＋ Create workout</button>
  <button class="btn ghost full hide" id="resumeWorkoutDraft">Continue saved draft</button>
@@ -975,6 +976,7 @@ body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding
    <div id="exerciseRepository"></div>
   </div>
  </details>
+ </div>
 </section>
 <section id="progress" class="section hide workout-screen" aria-label="Training Progress">
 <div class="card section">
@@ -989,7 +991,7 @@ body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding
  <p class="muted">Keep a separate record of your running sessions.</p>
  <button class="btn" id="createRun">＋ Log a run</button>
  <div id="runEditor" class="editor-panel hide"></div>
- <div id="runHistory" class="stack-list"></div>
+ <details class="workout-dropdown-card run-history-dropdown" open><summary><span>Run history</span><span class="meta" id="runHistorySummary">Latest runs</span></summary><div id="runHistory" class="stack-list"></div></details>
 </div></section>
 <section id="settings" class="section hide">
 <div class="card section"><div class="row between"><h2 style="margin:0">Settings</h2><button class="btn ghost smallbtn" id="closeSettings" type="button">Done</button></div>
@@ -1000,9 +1002,9 @@ body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding
 <button type="button" class="theme-choice" data-theme-choice="red" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Red</strong><small>Black, charcoal and red</small></button>
 <button type="button" class="theme-choice" data-theme-choice="monochrome" aria-pressed="false"><span class="swatches"><i></i><i></i><i></i></span><strong>Monochrome</strong><small>Black, charcoal, white and grey</small></button>
 </div></details>
-<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v121</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
+<details class="target-settings settings-section" id="updatesSettings"><summary>Updates</summary><div class="app-update-panel"><div class="row between"><strong>App updates</strong><span class="pill" id="installedVersion">v122</span></div><p class="tiny muted">Check for a newer version and install it without uninstalling the app. Your data stays on this device.</p><button class="btn secondary" id="checkAppUpdate" type="button">Check &amp; install update</button><button class="btn ghost smallbtn hide" id="downloadPreUpdateBackup" type="button">Download pre-update safety copy</button><div class="tiny" id="appUpdateStatus" role="status" aria-live="polite">Updates are checked when you tap the button.</div></div></details>
 <details class="target-settings settings-section" id="dataSettings"><summary>Data &amp; backups</summary><p class="tiny muted">Export or merge your data. Imports are non-destructive and retain existing records.</p><div class="toolbar"><button class="btn ghost" id="exportCSV">Export CSV</button><button class="btn ghost" id="exportTXT">Export .txt</button><button class="btn ghost" id="exportPDF">Export PDF</button><button class="btn" id="exportJSON">Download JSON backup</button></div><div id="backupStatus" class="backup-status" role="status" aria-live="polite">Checking backup status…</div><div class="field"><label>Import and merge a JSON backup</label><input id="importJSON" type="file" accept="application/json"></div></details>
-<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v121</span></p></details>
+<details class="target-settings settings-section" id="aboutSettings"><summary>About</summary><p><strong>MK's Ledger</strong></p><p class="tiny muted">A personal food library and daily macro tracker.</p><p class="tiny muted">Installed version: <span id="aboutVersion">v122</span></p></details>
 </div></section>
 <section id="history" class="section hide">
 <div class="card section">
