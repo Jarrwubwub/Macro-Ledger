@@ -238,6 +238,25 @@ body > header { padding-top: 38px !important; }
 .workout-template-card details>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .workout-template-card details>summary::-webkit-details-marker{display:none}
 .workout-order-actions{display:flex;gap:5px}
+
+/* v110 expandable Workouts and Exercises cards */
+.training-library-card{padding:0!important;overflow:hidden}
+.training-card-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 14px;cursor:pointer;list-style:none;font-weight:800}
+.training-card-summary::-webkit-details-marker{display:none}
+.training-card-summary:after{content:"＋";color:var(--accent);font-size:18px}
+.training-library-card details[open]>.training-card-summary:after{content:"−"}
+.training-card-content{padding:0 13px 14px}
+#exerciseRepository .exercise-category-group{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface2)}
+#exerciseRepository .exercise-category-group summary{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px;cursor:pointer;font-weight:750;list-style:none}
+#exerciseRepository .exercise-category-group summary::-webkit-details-marker{display:none}
+#exerciseRepository .exercise-category-list{padding:0 10px 10px;display:grid;gap:7px}
+#exerciseRepository .exercise-category-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;border-top:1px solid var(--line)}
+#exerciseRepository .exercise-category-item .meta{font-size:11px;color:var(--muted)}
+#exerciseRepository .exercise-category-item .btn{flex:0 0 auto}
+#workoutExerciseChoices .workout-category-group{border:1px solid var(--line);border-radius:10px;margin-top:8px;overflow:hidden}
+#workoutExerciseChoices .workout-category-group summary{padding:10px 12px;cursor:pointer;font-weight:750;list-style:none;display:flex;justify-content:space-between}
+#workoutExerciseChoices .workout-category-group summary::-webkit-details-marker{display:none}
+#workoutExerciseChoices .workout-category-list{padding:0 10px 8px}
 </style>
 
 <style>
@@ -477,12 +496,29 @@ body > header { padding-top: 38px !important; }
  <div id="dailyWorkoutSummary" class="notice">No training recorded for this date.</div>
  <div id="dailyWorkoutEntries" class="stack-list"></div>
 </div></section>
-<section id="workouts-exercises" class="section hide workout-screen" aria-label="Workouts and Exercises"><div class="card section">
-<div class="row between"><h2 style="margin:0">Training library</h2><span class="pill" id="trainingLibraryCount">Workouts &amp; exercises</span></div>
-<label style="margin-top:10px">View<select id="trainingLibraryView"><option value="workouts">Workouts</option><option value="exercises">Exercises</option></select></label>
-<div id="workoutsPanel"><div class="row between" style="margin-top:12px"><h3 style="margin:0">Workouts</h3><button class="btn smallbtn" id="createWorkout">＋ Create workout</button></div><div id="workoutEditor" class="editor-panel hide"></div><div id="workoutTemplateList" class="stack-list"></div></div>
-<div id="exercisesPanel" class="hide"><div class="row between" style="margin-top:12px"><h3 style="margin:0">Exercises</h3><button class="btn smallbtn" id="createExercise">＋ Add exercise</button></div><p class="muted">Browse the exercise repository or add your own movements.</p><div class="toolbar"><input id="exerciseSearch" type="search" placeholder="Search exercises…" aria-label="Search exercises"></div><select id="exerciseCategoryFilter" aria-label="Filter exercise category"><option>All categories</option></select><div id="exerciseEditor" class="editor-panel hide"></div><div id="exerciseRepository" class="stack-list"></div></div>
-</div></section>
+<section id="workouts-exercises" class="section hide workout-screen" aria-label="Workouts and Exercises">
+<div class="card section training-library-card">
+ <details id="workoutsCard" open>
+  <summary class="training-card-summary"><span>Workouts</span><span id="workoutTemplateCount" class="pill">0 saved</span></summary>
+  <div class="training-card-content">
+   <button class="btn" id="createWorkout">＋ Create workout</button>
+   <div id="workoutEditor" class="editor-panel hide"></div>
+   <div id="workoutTemplateList" class="stack-list"></div>
+  </div>
+ </details>
+</div>
+<div class="card section training-library-card">
+ <details id="exercisesCard">
+  <summary class="training-card-summary"><span>Exercises</span><span id="exerciseCount" class="pill">0 exercises</span></summary>
+  <div class="training-card-content">
+   <div class="toolbar"><input id="exerciseSearch" type="search" placeholder="Search exercises…" aria-label="Search exercises"><button class="btn" id="createExercise">＋ Add exercise</button></div>
+   <select id="exerciseCategoryFilter" aria-label="Filter exercise category"><option>All categories</option></select>
+   <div id="exerciseEditor" class="editor-panel hide"></div>
+   <div id="exerciseRepository" class="stack-list"></div>
+  </div>
+ </details>
+</div>
+</section>
 <section id="runs" class="section hide workout-screen" aria-label="Run Tracker">
 <div class="card section">
  <div class="row between"><h2 style="margin:0">Run</h2><span class="pill" id="runCount">0 runs</span></div>

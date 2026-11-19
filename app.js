@@ -631,18 +631,16 @@ const workoutCategories=['Chest','Back','Shoulders','Arms','Legs & Glutes','Core
 const workoutExerciseById=id=>workoutExercises.find(x=>x.id===id);
 function workoutFormClose(id){$(id).classList.add('hide');$(id).innerHTML='';}
 function renderExerciseRepository(){
- const q=$('exerciseSearch').value.trim().toLowerCase(),cat=$('exerciseCategoryFilter').value||'All categories';
- const list=workoutExercises.filter(x=>(cat==='All categories'||x.category===cat)&&(!q||x.name.toLowerCase().includes(q)||x.category.toLowerCase().includes(q)||String(x.equipment||'').toLowerCase().includes(q))).sort((x,y)=>x.category.localeCompare(y.category)||x.name.localeCompare(y.name));
+ const q=$('exerciseSearch').value.trim().toLowerCase();
+ const filtered=workoutExercises.filter(x=>!q||x.name.toLowerCase().includes(q)||x.category.toLowerCase().includes(q)||String(x.equipment||'').toLowerCase().includes(q));
  $('exerciseCount').textContent=workoutExercises.length+' exercises';
- $('exerciseRepository').innerHTML=list.map(x=>`<article class="workout-item exercise-library-row"><div class="exercise-name"><strong>${esc(x.name)}</strong><div class="meta">${esc(x.category)} · ${esc(x.equipment||'Other')}</div></div><div class="exercise-actions"><button class="btn ghost smallbtn" data-add-workout="${esc(x.id)}">Add to Workout</button><button class="btn smallbtn" data-add-daily="${esc(x.id)}">Daily log</button><button class="btn ghost smallbtn" data-edit-exercise="${esc(x.id)}">Edit</button><button class="btn danger smallbtn" data-delete-exercise="${esc(x.id)}" ${x.custom?'':'disabled title="Built-in exercise"'}>Delete</button></div></article>`).join('')||'<div class="muted tiny">No matching exercises.</div>';
- $('exerciseRepository').querySelectorAll('[data-add-daily]').forEach(b=>b.onclick=()=>addExerciseToDay(b.dataset.addDaily));
+ const cats=workoutCategories.filter(c=>filtered.some(x=>x.category===c));
+ $('exerciseRepository').innerHTML=cats.map(c=>{const items=filtered.filter(x=>x.category===c).sort((x,y)=>x.name.localeCompare(y.name));return `<details class="exercise-category-group"><summary><span>${esc(c)}</span><span class="meta">${items.length} exercises　⌄</span></summary><div class="exercise-category-list">${items.map(x=>`<div class="exercise-category-item"><div style="min-width:0"><strong>${esc(x.name)}</strong><div class="meta">${esc(x.equipment||'Other')}</div></div><button class="btn smallbtn" data-add-workout="${esc(x.id)}">Add</button></div>`).join('')}</div></details>`}).join('')||'<div class="muted tiny">No matching exercises.</div>';
  $('exerciseRepository').querySelectorAll('[data-add-workout]').forEach(b=>b.onclick=()=>addExerciseToWorkout(b.dataset.addWorkout));
- $('exerciseRepository').querySelectorAll('[data-edit-exercise]').forEach(b=>b.onclick=()=>openExerciseEditor(b.dataset.editExercise));
- $('exerciseRepository').querySelectorAll('[data-delete-exercise]').forEach(b=>b.onclick=()=>{if(b.disabled||!confirm('Delete this custom exercise? Existing workout history will be retained.'))return;workoutExercises=workoutExercises.filter(x=>x.id!==b.dataset.deleteExercise);saveWorkoutData();renderExerciseRepository();});
 }
 function addExerciseToWorkout(exerciseId){
  const ex=workoutExerciseById(exerciseId);if(!ex)return;
- if(!workoutTemplates.length){alert('Create a workout first, then add exercises to it.');$('trainingLibraryView').value='workouts';syncTrainingLibraryView();return;}
+ if(!workoutTemplates.length){alert('Create a workout first, then add exercises to it.');$('workoutsCard').open=true;openWorkoutEditor();return;}
  const options=workoutTemplates.map((w,i)=>`${i+1}. ${w.name}`).join('\n'),choice=prompt('Add '+ex.name+' to which workout?\n'+options,'1');if(choice===null)return;
  const w=workoutTemplates[Number(choice)-1];if(!w){alert('Please enter a valid workout number.');return;}
  if(w.exercises.some(x=>x.exerciseId===exerciseId)){alert('That exercise is already in '+w.name+'.');return;}
@@ -654,8 +652,14 @@ function openExerciseEditor(id=null){
  $('cancelExercise').onclick=()=>workoutFormClose('exerciseEditor');
  $('exerciseForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.currentTarget),name=String(f.get('name')).trim();if(!name)return;const duplicate=workoutExercises.find(z=>z.name.toLowerCase()===name.toLowerCase()&&z.id!==id);if(duplicate){alert('An exercise with that name already exists.');return;}if(x)Object.assign(x,{name,category:f.get('category'),equipment:String(f.get('equipment')).trim()||'Other',notes:String(f.get('notes')).trim()});else workoutExercises.push({id:makeId(),name,category:f.get('category'),equipment:String(f.get('equipment')).trim()||'Other',notes:String(f.get('notes')).trim(),custom:true});saveWorkoutData();workoutFormClose('exerciseEditor');renderExerciseRepository();};
 }
-function syncTrainingLibraryView(){const v=$('trainingLibraryView').value||'workouts';$('workoutsPanel').classList.toggle('hide',v!=='workouts');$('exercisesPanel').classList.toggle('hide',v!=='exercises');$('trainingLibraryCount').textContent=v==='workouts'?workoutTemplates.length+' workouts':workoutExercises.length+' exercises';}
-$('trainingLibraryView').onchange=syncTrainingLibraryView;
+function syncTrainingLibraryView(){$('workoutTemplateCount').textContent=workoutTemplates.length+' saved';$('exerciseCount').textContent=workoutExercises.length+' exercises';}
+function openWorkoutEditor(id=null){
+ const w=id?workoutTemplates.find(x=>x.id===id):null,host=$('workoutEditor');host.classList.remove('hide');
+ const selected=w?.exercises||[];
+ host.innerHTML=`<h3>${w?'Edit workout':'Create workout'}</h3><form id="workoutForm"><label>Workout name<input name="name" required maxlength="60" value="${esc(w?.name||'')}" placeholder="e.g. Push 1"></label><p class="tiny muted">Choose exercises from a category. Set planned sets and rep targets for each selection.</p><div id="workoutExerciseChoices">${workoutCategories.map(c=>{const items=workoutExercises.filter(x=>x.category===c).sort((a,b)=>a.name.localeCompare(b.name));return `<details class="workout-category-group"><summary><span>${esc(c)}</span><span>${items.length} exercises　⌄</span></summary><div class="workout-category-list">${items.map(x=>{const v=selected.find(e=>e.exerciseId===x.id);return `<div class="exercise-template-row"><label style="display:flex;align-items:center;gap:7px;margin:0;color:var(--text)"><input type="checkbox" name="exercise" value="${esc(x.id)}" ${v?'checked':''}>${esc(x.name)}</label><input aria-label="Sets for ${esc(x.name)}" type="number" min="1" max="20" name="sets-${esc(x.id)}" value="${v?.sets||3}"><input aria-label="Reps for ${esc(x.name)}" type="text" name="reps-${esc(x.id)}" value="${esc(v?.reps||'8–12')}" placeholder="8–12"></div>`}).join('')}</div></details>`}).join('')}</div><div class="actions"><button class="btn" type="submit">Save workout</button><button class="btn ghost" type="button" id="cancelWorkout">Cancel</button></div></form>`;
+ $('cancelWorkout').onclick=()=>workoutFormClose('workoutEditor');
+ $('workoutForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.currentTarget),name=String(f.get('name')).trim(),ids=f.getAll('exercise');if(!ids.length){alert('Select at least one exercise.');return;}const exercises=ids.map(exerciseId=>({exerciseId,sets:Math.max(1,Math.min(20,Number(f.get('sets-'+exerciseId))||3)),reps:String(f.get('reps-'+exerciseId)||'8–12').trim()}));if(w)Object.assign(w,{name,exercises});else workoutTemplates.push({id:makeId(),name,exercises,createdAt:Date.now()});saveWorkoutData();workoutFormClose('workoutEditor');renderWorkoutTemplates();};
+}
 function renderWorkoutTemplates(){
  $('workoutTemplateCount').textContent=workoutTemplates.length+' saved';
  $('workoutTemplateList').innerHTML=workoutTemplates.map(w=>`<article class="workout-item workout-template-card"><details><summary><span><strong>${esc(w.name)}</strong><span class="meta">${w.exercises.length} exercises</span></span><span>▾</span></summary><div class="meta" style="margin-top:10px">${w.exercises.map((e,i)=>`<div class="row between" style="padding:5px 0;border-top:1px solid var(--line)"><span>${i+1}. ${esc(workoutExerciseById(e.exerciseId)?.name||e.name||'Exercise')} · ${e.sets} × ${esc(e.reps)}</span><span class="workout-order-actions"><button class="btn ghost smallbtn" data-move-workout="${esc(w.id)}" data-index="${i}" data-dir="-1" ${i===0?'disabled':''}>↑</button><button class="btn ghost smallbtn" data-move-workout="${esc(w.id)}" data-index="${i}" data-dir="1" ${i===w.exercises.length-1?'disabled':''}>↓</button></span></div>`).join('')}</div><div class="actions"><button class="btn smallbtn" data-start-template="${esc(w.id)}">Log this workout</button><button class="btn ghost smallbtn" data-edit-template="${esc(w.id)}">Edit</button><button class="btn danger smallbtn" data-delete-template="${esc(w.id)}">Delete</button></div></details></article>`).join('')||'<div class="muted tiny">No workouts saved yet. Create a template to get started.</div>';
@@ -698,13 +702,13 @@ function renderRuns(){
  $('runHistory').innerHTML=[...runLogs].sort((a,b)=>b.date.localeCompare(a.date)).map(r=>{const pace=r.seconds/r.distance,mins=Math.floor(pace/60),secs=Math.round(pace%60);return `<article class="workout-item"><strong>${r.distance.toFixed(2)} km · ${esc(r.duration)}</strong><div class="meta">${esc(r.date)} · ${esc(r.type)} · Pace ${mins}:${String(secs).padStart(2,'0')} /km${r.notes?' · '+esc(r.notes):''}</div><div class="actions"><button class="btn danger smallbtn" data-delete-run="${esc(r.id)}">Delete</button></div></article>`}).join('')||'<div class="muted tiny">No runs recorded yet.</div>';
  $('runHistory').querySelectorAll('[data-delete-run]').forEach(b=>b.onclick=()=>{if(!confirm('Delete this run record?'))return;runLogs=runLogs.filter(x=>x.id!==b.dataset.deleteRun);saveWorkoutData();renderRuns();});
 }
-$('createExercise').onclick=()=>openExerciseEditor();
+$('createExercise').onclick=()=>{$('exercisesCard').open=true;openExerciseEditor();};
 $('exerciseSearch').oninput=renderExerciseRepository;
 $('exerciseCategoryFilter').innerHTML='<option>All categories</option>'+workoutCategories.map(c=>`<option>${esc(c)}</option>`).join('');
 $('exerciseCategoryFilter').onchange=renderExerciseRepository;
-$('createWorkout').onclick=()=>openWorkoutEditor();
-$('dailyAddExercise').onclick=()=>{setTab('workouts-exercises');$('trainingLibraryView').value='exercises';syncTrainingLibraryView();};
-$('dailyStartWorkout').onclick=()=>{setTab('workouts-exercises');$('trainingLibraryView').value='workouts';syncTrainingLibraryView();};
+$('createWorkout').onclick=()=>{$('workoutsCard').open=true;openWorkoutEditor();};
+$('dailyAddExercise').onclick=()=>{setTab('workouts-exercises');$('exercisesCard').open=true;};
+$('dailyStartWorkout').onclick=()=>{setTab('workouts-exercises');$('workoutsCard').open=true;};
 $('createRun').onclick=openRunEditor;
 $('workoutLogDate').value=today();
 $('workoutLogDate').onchange=renderDailyWorkout;
