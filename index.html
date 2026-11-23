@@ -1993,5 +1993,36 @@ body.workout-mode #runHistory .workout-item .actions{display:flex;flex-wrap:wrap
  body.workout-mode .workout-screen .active-single-stepper{grid-template-columns:48px minmax(0,1fr) 48px!important;gap:6px!important}
  body.workout-mode .workout-screen .workout-builder-targets{grid-template-columns:minmax(0,1fr)!important}
 }
+
+
+/* v129: active workout in-session exercise addition and compact strength logging. */
+body.workout-mode .active-add-exercise-toggle{width:100%;min-height:46px;margin-top:4px}
+body.workout-mode .active-add-exercise-panel{display:grid;gap:10px;padding:12px;border:1px solid #354b60;border-radius:13px;background:#151f2a;min-width:0;box-sizing:border-box}
+body.workout-mode .active-add-exercise-panel.hide{display:none!important}
+body.workout-mode .active-add-exercise-search-label{display:grid;gap:6px;min-width:0}
+body.workout-mode .active-add-exercise-search-label input{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+body.workout-mode .active-add-exercise-results{display:grid;gap:6px;max-height:300px;overflow-y:auto;min-width:0}
+body.workout-mode .active-add-exercise-result{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid #303b47;min-width:0}
+body.workout-mode .active-add-exercise-result:last-child{border-bottom:0}
+body.workout-mode .active-add-exercise-result>span{display:grid;gap:2px;min-width:0;overflow-wrap:anywhere}
+body.workout-mode .active-add-exercise-result small{color:#9eafc0}
+body.workout-mode .active-add-exercise-result .btn{min-width:62px;max-width:100%;white-space:nowrap}
+body.workout-mode .active-exercise-toggle{width:100%;min-width:0}
+body.workout-mode .active-exercise-title{min-width:0;overflow-wrap:anywhere}
+body.workout-mode .active-exercise-details{min-width:0}
+body.workout-mode .logged-set-row{grid-template-columns:32px minmax(0,1fr) auto;gap:8px;min-width:0}
+body.workout-mode .logged-set-row>strong{min-width:0;overflow-wrap:anywhere}
+body.workout-mode .logged-set-actions{display:flex;gap:5px;justify-content:flex-end}
+body.workout-mode .active-exercise-footer{display:flex;justify-content:flex-start;min-width:0}
+body.workout-mode .active-exercise-footer>.btn{flex:0 1 auto}
+body.workout-mode .active-next-set-heading{justify-content:flex-start}
+body.workout-mode .daily-log-exercise .set-row{grid-template-columns:52px minmax(0,1fr) minmax(0,1fr)!important;min-width:0}
+body.workout-mode .daily-log-exercise .set-row>*{min-width:0;max-width:100%;box-sizing:border-box}
+@media(max-width:380px){
+ body.workout-mode .active-add-exercise-result{grid-template-columns:minmax(0,1fr) auto;gap:6px}
+ body.workout-mode .active-add-exercise-result .btn{padding-left:8px;padding-right:8px;min-width:56px}
+ body.workout-mode .logged-set-row{grid-template-columns:25px minmax(0,1fr) auto;gap:5px}
+ body.workout-mode .daily-log-exercise .set-row{grid-template-columns:42px minmax(0,1fr) minmax(0,1fr)!important;gap:5px}
+}
 </style>
 </body></html>
