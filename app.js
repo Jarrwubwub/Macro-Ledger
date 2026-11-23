@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=126;
+const APP_VERSION=128;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -435,8 +435,9 @@ function renderWeeklyReports(){
   }).join('');
   const macroDayLabels=dayRows.map((row,index)=>`<text x="${chartX(index)}" y="119" text-anchor="middle" class="weekly-chart-day">${row.day}</text>`).join('');
   const averageStat=(value,unit,label)=>`<div class="weekly-report-stat"><b>${unit==='kcal'?Math.round(value).toLocaleString():fmt(value)} ${unit}</b><span>${label}</span></div>`;
-  return `<article class="weekly-report">
-   <div class="weekly-report-head"><div class="weekly-report-title">${esc(label)}${isCurrent?' · Current week':''}</div><div class="weekly-report-days">${count} of 7 days logged</div></div>
+  return `<details class="weekly-report"${isCurrent?' open':''}>
+   <summary class="weekly-report-head"><span class="weekly-report-title">${esc(label)}${isCurrent?' · Current week':''}</span><span class="weekly-report-days">${count} of 7 days logged</span></summary>
+   <div class="weekly-report-content">
    <div class="weekly-report-section-title">Daily averages <span>logged days only</span></div>
    <div class="weekly-report-grid">
     ${averageStat(avg.kcal,'kcal','Calories / day')}
@@ -457,7 +458,8 @@ function renderWeeklyReports(){
     <div class="weekly-report-chart-legend"><span><i style="background:#4f9ee8"></i>Protein</span><span><i style="background:#e5a04b"></i>Carbs</span><span><i style="background:#55b69a"></i>Fat</span></div>
    </div>
    <div class="weekly-report-foot">Weekly totals: ${Math.round(sum.kcal).toLocaleString()} kcal · P ${fmt(sum.protein)} g · C ${fmt(sum.carbs)} g · F ${fmt(sum.fat)} g${weightAvg===null?'':` · Average weigh-in ${fmt(weightAvg)} kg (${weights.length} ${weights.length===1?'entry':'entries'})`}</div>
-  </article>`;
+   </div>
+  </details>`;
  }).join('');
 }
 function renderHistory(){
@@ -794,7 +796,7 @@ function openWorkoutEditor(id=null,resume=false){
 function renderWorkoutTemplates(){
  $('workoutTemplateCount').textContent=workoutTemplates.length+' saved';
  renderExerciseRepository();
- $('workoutTemplateList').innerHTML=workoutTemplates.map(w=>{const plannedSets=w.exercises.reduce((n,e)=>n+(Number(e.sets)||0),0),last=Object.entries(workoutLogs).filter(([date,items])=>(items||[]).some(x=>x.workoutName===w.name)).map(([date])=>date).sort().pop(),active=activeWorkoutSession?.templateId===w.id;return `<article class="workout-item workout-template-card"><details class="workout-template-dropdown"><summary class="workout-template-summary"><span class="workout-template-heading"><strong>${esc(w.name)}</strong><span class="meta">${w.exercises.length} exercises · ${plannedSets} planned sets</span><span class="meta">${last?'Last trained '+esc(last):'Not yet logged'}</span></span><span class="workout-dropdown-indicator" aria-hidden="true"></span></summary><div class="workout-template-exercises">${w.exercises.map((e,i)=>`<div class="workout-template-exercise-row"><span>${i+1}. ${esc(workoutExerciseById(e.exerciseId)?.name||e.name||'Exercise')}</span><small>${Number(e.sets)||0} × ${esc(e.reps||'—')}</small></div>`).join('')}</div></details><div class="workout-template-actions"><button class="btn primary" data-start-template="${esc(w.id)}" ${active?'disabled':''}>${active?'In progress':'Start workout'}</button><button class="btn ghost" data-edit-template="${esc(w.id)}">Edit</button><button class="btn danger ghost template-delete" data-delete-template="${esc(w.id)}" aria-label="Delete ${esc(w.name)}">Delete</button></div></article>`}).join('')||'<div class="empty-state"><strong>No workouts saved yet</strong><span>Create a workout to get started.</span></div>';
+ $('workoutTemplateList').innerHTML=workoutTemplates.map(w=>{const plannedSets=w.exercises.reduce((n,e)=>n+(Number(e.sets)||0),0),last=Object.entries(workoutLogs).filter(([date,items])=>(items||[]).some(x=>x.workoutName===w.name)).map(([date])=>date).sort().pop(),active=activeWorkoutSession?.templateId===w.id;return `<article class="workout-item workout-template-card"><details class="workout-template-dropdown"><summary class="workout-template-summary"><span class="workout-template-heading"><strong>${esc(w.name)}</strong><span class="meta">${w.exercises.length} exercises · ${plannedSets} planned sets</span><span class="meta">${last?'Last trained '+esc(last):'Not yet logged'}</span></span><span class="workout-dropdown-indicator" aria-hidden="true"></span></summary><div class="workout-template-exercises">${w.exercises.map((e,i)=>`<div class="workout-template-exercise-row"><span>${i+1}. ${esc(workoutExerciseById(e.exerciseId)?.name||e.name||'Exercise')}</span><small>${Number(e.sets)||0} × ${esc(e.reps||'—')}</small></div>`).join('')}</div></details><div class="workout-template-actions"><button class="btn primary" data-start-template="${esc(w.id)}" ${active?'disabled':''}>${active?'Active':'Start'}</button><button class="btn ghost" data-edit-template="${esc(w.id)}">Edit</button><button class="btn danger ghost template-delete" data-delete-template="${esc(w.id)}" aria-label="Delete ${esc(w.name)}">Delete</button></div></article>`}).join('')||'<div class="empty-state"><strong>No workouts saved yet</strong><span>Create a workout to get started.</span></div>';
  $('workoutTemplateList').querySelectorAll('[data-start-template]').forEach(b=>b.onclick=()=>startWorkoutTemplate(b.dataset.startTemplate));
  $('workoutTemplateList').querySelectorAll('[data-edit-template]').forEach(b=>b.onclick=()=>openWorkoutEditor(b.dataset.editTemplate));
  $('workoutTemplateList').querySelectorAll('[data-delete-template]').forEach(b=>b.onclick=()=>{if(!confirm('Delete this workout template?'))return;workoutTemplates=workoutTemplates.filter(w=>w.id!==b.dataset.deleteTemplate);saveWorkoutData();renderWorkoutTemplates();syncTrainingLibraryView();});
