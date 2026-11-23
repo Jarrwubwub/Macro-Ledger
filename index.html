@@ -79,8 +79,8 @@ dialog{background:var(--panel);color:var(--ink);border:1px solid var(--line);bor
 .target-settings{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--surface2)}
 .target-settings summary{font-size:13px;font-weight:750;cursor:pointer;list-style:none}
 .target-settings summary::-webkit-details-marker{display:none}
-.target-settings summary:after{content:'＋';float:right;color:var(--muted)}
-.target-settings[open] summary:after{content:'−'}
+.target-settings summary:after{content:"＋";float:right;color:var(--muted)}
+.target-settings[open] summary:after{content:"−"}
 .target-input-grid{margin:10px 0}
 .target-input-grid input{min-height:42px}
 .weekly-reports{display:grid;gap:10px}.weekly-report{border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:12px;display:grid;gap:8px}.weekly-report-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.weekly-report-title{font-weight:750;font-size:13px}.weekly-report-days{font-size:11px;color:var(--muted)}.weekly-report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.weekly-report-stat{background:var(--surface3);border-radius:9px;padding:8px}.weekly-report-stat b{display:block;font-size:15px;font-variant-numeric:tabular-nums}.weekly-report-stat span{font-size:10px;color:var(--muted)}.weekly-report-foot{font-size:11px;color:var(--muted)}.backup-status{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:12px;color:var(--muted);margin:10px 0}.backup-status.needs-backup{border-color:#9b713e;color:var(--ink)}
@@ -600,10 +600,10 @@ body.workout-mode{
  --surface:#17222e;--surface2:#1d2b39;--surface3:#27384a;--input:#111c28;--progress:#3289df;--text:#edf3f9;
  background:var(--bg)!important;color:var(--ink)!important;padding-bottom:calc(78px + env(safe-area-inset-bottom))!important;
 }
-body.workout-mode header{background:var(--header)!important;border-bottom:1px solid #263646}
-body.workout-mode header .top{max-width:760px;margin:0 auto;min-height:54px;align-items:center}
-body.workout-mode header h1{font-size:20px;letter-spacing:-.45px}
-body.workout-mode header .sub{font-size:11px;color:#9eafc0}
+
+
+
+
 body.workout-mode main{max-width:620px;padding:14px 13px calc(22px + env(safe-area-inset-bottom));gap:12px}
 body.workout-mode .workout-screen{display:grid;gap:13px;align-content:start;color:var(--ink)}
 body.workout-mode .workout-screen>.card{padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;gap:13px}
@@ -724,11 +724,11 @@ body.workout-mode .progress-session{padding:12px!important;border:1px solid #2d4
 body.workout-mode .progress-set-chip{font-size:10px}
 body.workout-mode .progress-history-heading{margin:16px 0 8px}
 body.workout-mode .workout-screen .notice{border:1px solid #304356;background:#17222e;color:#b5c5d4;border-radius:12px;padding:12px}
-body.workout-mode #exerciseTabs{gap:0}
-body.workout-mode #exerciseTabs .nav-glyph{font-size:17px;line-height:1.1}
-body.workout-mode #exerciseTabs .tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:48px;padding:7px 4px;border:0;border-radius:0;background:transparent;color:#8fa2b5;font-size:10px;line-height:1.1;white-space:normal}
-body.workout-mode #exerciseTabs .tab.active{background:transparent;color:#83bdF5;border-top:2px solid #3289df;font-weight:800}
-body.workout-mode #exerciseTabs .tab.active .nav-glyph{color:#83bdf5}
+
+
+
+
+
 body.workout-mode .empty-state{display:grid;gap:5px;padding:22px 14px;text-align:center;border:1px dashed #3b5064;border-radius:14px;color:#a7b7c7}
 body.workout-mode .empty-state strong{font-size:14px;color:#e6eff7}
 body.workout-mode .empty-state span{font-size:11px}
@@ -748,30 +748,20 @@ body.workout-mode .empty-state span{font-size:11px}
  body.workout-mode .workout-template-actions .template-delete{grid-column:1/-1}
 }
 @media(min-width:701px){
- body.workout-mode #exerciseTabs:not(.hide){position:static;top:auto;display:flex;justify-content:space-between;gap:8px;padding:7px 0 0;background:transparent;z-index:5}
- body.workout-mode #exerciseTabs .tab{flex:1;text-align:center;min-height:42px;border-radius:12px}
+ 
+ 
 }
 </style>
 
 
 <style id="v122-workout-navigation-library-cleanup">
 /* Workout navigation follows the same header-tab pattern as Nutrition. */
-body.workout-mode #exerciseTabs:not(.hide){
- position:static!important;inset:auto!important;z-index:5!important;width:auto!important;
- display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
- gap:8px!important;margin:5px auto 0!important;padding:7px 0 0!important;
- background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;
-}
-body.workout-mode #exerciseTabs .tab{
- display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;
- min-width:0!important;min-height:44px!important;padding:10px 8px!important;border:1px solid #34465d!important;
- border-radius:12px!important;background:#1a2530!important;color:#aab8ca!important;
- font-size:13px!important;font-weight:650!important;line-height:1.2!important;white-space:normal!important;
-}
-body.workout-mode #exerciseTabs .tab.active{background:#2878e0!important;border-color:#2878e0!important;color:#fff!important;border-top:1px solid #2878e0!important}
-body.workout-mode #exerciseTabs .nav-glyph{display:none!important}
+
+
+
+
 body.workout-mode{padding-bottom:calc(24px + env(safe-area-inset-bottom))!important}
-@media(min-width:601px){body.workout-mode #exerciseTabs:not(.hide){display:flex!important;gap:8px!important;padding:7px 0 0!important}body.workout-mode #exerciseTabs .tab{flex:1 1 0!important}}
+@media(min-width:601px){}
 /* Active exercises remain visually legible when marked complete; no strikethrough or dimming. */
 body.workout-mode #workout-daily .active-workout-exercise.is-complete,
 body.workout-mode #workout-daily .active-workout-exercise.is-complete strong,
@@ -811,26 +801,20 @@ body.workout-mode #exerciseLibraryCard .empty-state{display:grid;gap:4px;padding
 <style id="v125-shared-header-icons-and-weekly-reports">
 /* Workout uses the exact same top-icon button and glyph dimensions as Nutrition.
    Only icon colours differ by app section. */
-body.workout-mode header .ledger-icon-button,
-body.workout-mode header .settings-gear{
- width:44px!important;height:40px!important;min-width:44px!important;min-height:40px!important;flex:0 0 44px!important;
- padding:0!important;margin:0!important;display:grid!important;place-items:center!important;
-}
-body.workout-mode header .ledger-icon-button svg{width:31px!important;height:31px!important;display:block!important}
-body.workout-mode header .settings-gear{font-size:30px!important;line-height:1!important}
+
+
+
 /* The dumbbell artwork uses a tighter 32-unit viewBox than the pig's 40-unit viewBox.
    Slightly scale only the drawing so its visible dimensions match the Nutrition icon. */
-body.workout-mode header .ledger-icon-button[data-ledger="exercise"] svg{transform:scale(1.13)!important;transform-origin:center!important}
+
 @media(max-width:600px){
- body.workout-mode header .ledger-icon-button,
- body.workout-mode header .settings-gear{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;flex-basis:40px!important}
- body.workout-mode header .ledger-icon-button svg{width:30px!important;height:30px!important}
- body.workout-mode header .settings-gear{font-size:29px!important}
+ 
+ 
+ 
 }
 @media(max-width:360px){
- body.workout-mode header .ledger-icon-button,
- body.workout-mode header .settings-gear{width:36px!important;height:38px!important;min-width:36px!important;min-height:38px!important;flex-basis:36px!important}
- body.workout-mode header .ledger-icon-button svg{width:28px!important;height:28px!important}
+ 
+ 
 }
 /* Weekly macro report cards: averages plus two compact, responsive SVG charts. */
 .weekly-report{gap:11px!important;padding:13px!important}
@@ -850,13 +834,18 @@ body.workout-mode header .ledger-icon-button[data-ledger="exercise"] svg{transfo
 @media(max-width:380px){.weekly-report{padding:10px!important}.weekly-report-chart-card{padding:8px}.weekly-report-grid{gap:6px}.weekly-report-stat{padding:7px}.weekly-report-stat b{font-size:14px}}
 </style>
 
+
+<style id="v126-workout-header-accent-only">
+/* Workout keeps its dark header; all dimensions and typography inherit the same shared rules as Nutrition. */
+body.workout-mode header{background:#050505!important;border-bottom:0!important;box-shadow:0 5px 14px #0005!important}
+</style>
 </head>
 <body>
 <header><div class="top"><div><h1 id="appTitle" role="button" tabindex="0" aria-label="Return to current ledger">MK's Ledger</h1><div class="sub" id="appSubtitle">The food you eat, written down.</div></div><div class="header-actions" role="group" aria-label="Ledger navigation"><button type="button" class="ledger-icon-button active" data-ledger="nutrition" aria-pressed="true" aria-label="Nutrition" title="Nutrition"><svg class="outline-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M8.1 19.2c0-6.1 5.5-10.8 12.6-10.8 3.1 0 5.9.9 8.1 2.5l3.6-3.5c.8-.8 2.2-.2 2.2.9v7.2c2.1 1.3 3.4 3.4 3.4 5.8v2.1c0 3.1-2.5 5.6-5.6 5.6h-1.2l-1.4 5.2h-4.2l-1.1-5.2H16l-1.1 5.2h-4.2l-1.1-6.4c-2.2-2-3.5-4.9-3.5-8.6Z" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.4 18.9c-3.3-.2-4.7-2.4-4.2-4.5.4-1.7 2.1-2.6 3.5-1.9 1.2.6 1.4 2 .6 2.8" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><circle cx="29.3" cy="18.5" r="1.25" fill="currentColor"/></svg></button><button type="button" class="ledger-icon-button" data-ledger="exercise" aria-pressed="false" aria-label="Exercise" title="Exercise"><svg class="outline-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M3.5 12v8m3-11v14m0-11h4v8h-4m4-4h11m0-4h4v8h-4m4-11v14m3-11v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="openSettings" class="settings-gear" data-ledger="settings" type="button" aria-pressed="false" aria-label="Settings" title="Settings">⚙</button></div></div><div class="tabs nutrition-tabs" id="nutritionTabs">
 <button class="tab active" data-tab="diary">Daily log</button><button class="tab" data-tab="library">Library</button><button class="tab" data-tab="scanner">Scanner</button><button class="tab" data-tab="weight">Weight</button>
 </div>
 <div class="tabs exercise-tabs hide" id="exerciseTabs" aria-label="Workout Tracker navigation">
-<button class="tab active" data-tab="workout-daily"><span class="nav-glyph" aria-hidden="true">▤</span><span>Daily Log</span></button><button class="tab" data-tab="workouts-exercises"><span class="nav-glyph" aria-hidden="true">◆</span><span>Workouts</span></button><button class="tab" data-tab="progress"><span class="nav-glyph" aria-hidden="true">↗</span><span>Progress</span></button><button class="tab" data-tab="runs"><span class="nav-glyph" aria-hidden="true">⌁</span><span>Run</span></button>
+<button class="tab active" data-tab="workout-daily"><span>Daily Log</span></button><button class="tab" data-tab="workouts-exercises"><span>Workouts</span></button><button class="tab" data-tab="progress"><span>Progress</span></button><button class="tab" data-tab="runs"><span>Run</span></button>
 </div></header>
 <main>
 <section id="diary" class="section">
@@ -1131,8 +1120,8 @@ body{background:var(--bg);color:var(--ink)}.tab{background:var(--surface2);color
 .target-settings{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--surface2)}
 .target-settings summary{font-size:13px;font-weight:750;cursor:pointer;list-style:none}
 .target-settings summary::-webkit-details-marker{display:none}
-.target-settings summary:after{content:'＋';float:right;color:var(--muted)}
-.target-settings[open] summary:after{content:'−'}
+.target-settings summary:after{content:"＋";float:right;color:var(--muted)}
+.target-settings[open] summary:after{content:"−"}
 .target-input-grid{margin:10px 0}
 .target-input-grid input{min-height:42px}
 .weekly-reports{display:grid;gap:10px}.weekly-report{border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:12px;display:grid;gap:8px}.weekly-report-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.weekly-report-title{font-weight:750;font-size:13px}.weekly-report-days{font-size:11px;color:var(--muted)}.weekly-report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.weekly-report-stat{background:var(--surface3);border-radius:9px;padding:8px}.weekly-report-stat b{display:block;font-size:15px;font-variant-numeric:tabular-nums}.weekly-report-stat span{font-size:10px;color:var(--muted)}.weekly-report-foot{font-size:11px;color:var(--muted)}.backup-status{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px 12px;font-size:12px;color:var(--muted);margin:10px 0}.backup-status.needs-backup{border-color:#9b713e;color:var(--ink)}
@@ -1360,7 +1349,6 @@ body > header .tabs {
 
 <style id="diary-entry-spacing-v103">
 /* Single source of truth: 19px gap below Add food on mobile and desktop. */
-body 
 </style>
 
 <style id="diary-entry-spacing-v104">#diary #diaryEntries{margin-top:19px!important}</style>
@@ -1374,25 +1362,25 @@ body.workout-mode{
  background:#080808!important;color:#f2f2f2!important;padding-bottom:24px!important;
 }
 /* Match the Macro Ledger header proportions; only the active accent differs. */
-body.workout-mode header{background:#050505!important;border-bottom:0!important;box-shadow:0 5px 14px #0005!important}
-body.workout-mode header .top{max-width:760px!important;margin:0 auto!important;min-height:48px!important;align-items:flex-end!important;gap:14px!important}
-body.workout-mode header .top h1{font-size:22px!important;line-height:1.2!important;letter-spacing:-.5px!important}
-body.workout-mode header .top .sub{font-size:12px!important;line-height:1.35!important;margin-top:3px!important;color:#d0d0d0!important}
+
+
+
+
 @media(max-width:600px){
- body.workout-mode header{padding:7px 12px 9px!important}
- body.workout-mode header .top{min-height:46px!important;gap:8px!important}
- body.workout-mode header .header-actions{gap:7px!important}
- body.workout-mode header .ledger-icon-button,body.workout-mode header .settings-gear{width:40px!important;height:40px!important;min-width:40px!important;flex-basis:40px!important}
- body.workout-mode header .ledger-icon-button svg{width:30px!important;height:30px!important}
- body.workout-mode header .settings-gear{font-size:29px!important}
+ 
+ 
+ 
+ 
+ 
+ 
 }
-@media(max-width:360px){body.workout-mode header .top{gap:5px!important}body.workout-mode header h1{font-size:20px!important}body.workout-mode header .header-actions{gap:4px!important}body.workout-mode header .ledger-icon-button,body.workout-mode header .settings-gear{width:36px!important;height:38px!important;min-width:36px!important;flex-basis:36px!important}}
+@media(max-width:360px){}
 /* Same navigation dimensions, spacing and breakpoints as the Nutrition tabs. */
-body.workout-mode header #exerciseTabs:not(.hide){position:static!important;top:auto!important;inset:auto!important;z-index:auto!important;max-width:760px!important;width:auto!important;margin:23px auto 0!important;padding:7px 0 0!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;overflow:visible!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important}
-body.workout-mode header #exerciseTabs .tab{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;min-height:44px!important;padding:10px 8px!important;text-align:center!important;white-space:normal!important;line-height:1.2!important;border:1px solid #383838!important;border-radius:12px!important;background:#202020!important;color:#c4c4c4!important;font-size:13px!important;font-weight:650!important}
-body.workout-mode header #exerciseTabs .tab.active{background:#2878e0!important;border-color:#2878e0!important;color:#fff!important;box-shadow:none!important}
-body.workout-mode header #exerciseTabs .nav-glyph{display:none!important}
-@media(min-width:601px){body.workout-mode header #exerciseTabs:not(.hide){display:flex!important;gap:8px!important;padding:7px 0 0!important}body.workout-mode header #exerciseTabs .tab{flex:1 1 0!important}}
+
+
+
+
+@media(min-width:601px){}
 /* Main content uses the same max width and spacing as Nutrition. */
 body.workout-mode main{max-width:760px!important;padding:15px!important;gap:14px!important}
 body.workout-mode .workout-screen{gap:12px!important;color:#f2f2f2!important}
@@ -1474,9 +1462,9 @@ body.workout-mode .workout-screen details.workout-template-dropdown>summary::-we
 body.workout-mode .workout-screen details.workout-dropdown-card[open]>summary,
 body.workout-mode .workout-screen details.workout-template-dropdown[open]>summary{border-bottom:1px solid #383838!important}
 body.workout-mode .workout-screen .workout-dropdown-card>summary:after,
-body.workout-mode .workout-screen .workout-template-dropdown>summary:after{content:'＋';color:#bdbdbd;font-size:17px;line-height:1;flex:0 0 auto}
+body.workout-mode .workout-screen .workout-template-dropdown>summary:after{content:"＋";color:#bdbdbd;font-size:17px;line-height:1;flex:0 0 auto}
 body.workout-mode .workout-screen .workout-dropdown-card[open]>summary:after,
-body.workout-mode .workout-screen .workout-template-dropdown[open]>summary:after{content:'−'}
+body.workout-mode .workout-screen .workout-template-dropdown[open]>summary:after{content:"−"}
 body.workout-mode .workout-screen .workout-dropdown-card>.stack-list,
 body.workout-mode .workout-screen .workout-dropdown-card>.progress-filter-grid,
 body.workout-mode .workout-screen .workout-template-exercises{padding:11px 13px!important}
@@ -1534,76 +1522,18 @@ body.workout-mode .workout-screen .run-history-dropdown{margin-top:6px!important
 /* v123: exact shared Macro / Workout dimensions. The Workout ledger changes
    only its palette accents and content; its header, tabs and card geometry
    deliberately use the same measurements as the Macro ledger. */
-body.workout-mode > header {
-  padding-top: 38px !important; /* Macro Ledger's existing safe-area clearance */
-}
-body.workout-mode header {
-  border-bottom: 0 !important;
-}
-body.workout-mode header .top {
-  max-width: 760px !important;
-  margin: 0 auto !important;
-  min-height: 48px !important;
-  align-items: flex-end !important;
-  gap: 14px !important;
-}
-body.workout-mode header .top h1 {
-  font-size: 22px !important;
-  line-height: 1.2 !important;
-  letter-spacing: -.5px !important;
-}
-body.workout-mode header .top .sub {
-  font-size: 12px !important;
-  line-height: 1.35 !important;
-  margin-top: 3px !important;
-}
+
+
+
+
+
 
 /* The same two-column mobile / horizontal desktop navigation geometry as
    .nutrition-tabs. Text inherits the app's normal 15px size (13px <380px). */
-body.workout-mode header #exerciseTabs:not(.hide) {
-  position: static !important;
-  top: auto !important;
-  inset: auto !important;
-  z-index: auto !important;
-  max-width: 760px !important;
-  width: auto !important;
-  margin: 23px auto 0 !important;
-  padding: 7px 0 0 !important;
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 8px !important;
-  overflow: visible !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-}
-body.workout-mode header #exerciseTabs .tab {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 44px !important;
-  padding: 10px 8px !important;
-  text-align: center !important;
-  white-space: normal !important;
-  line-height: 1.2 !important;
-  border: 1px solid var(--line) !important;
-  border-radius: 12px !important;
-  background: var(--surface2) !important;
-  color: var(--muted) !important;
-  font-size: inherit !important;
-  font-weight: 650 !important;
-}
-body.workout-mode header #exerciseTabs .tab.active {
-  background: #2878e0 !important;
-  border-color: #2878e0 !important;
-  color: #fff !important;
-  box-shadow: none !important;
-}
-body.workout-mode header #exerciseTabs .nav-glyph { display: none !important; }
+
+
+
+
 
 /* Same outer content width, inset and rhythm as Macro's main container. */
 body.workout-mode main {
@@ -1635,73 +1565,32 @@ body.workout-mode .workout-screen .workout-page-heading h2 {
 }
 
 @media (max-width: 600px) {
-  body.workout-mode > header {
-    padding-top: 38px !important;
-    padding-right: 12px !important;
-    padding-bottom: 9px !important;
-    padding-left: 12px !important;
-  }
-  body.workout-mode header .top {
-    min-height: 46px !important;
-    gap: 8px !important;
-  }
-  body.workout-mode header .header-actions { gap: 7px !important; }
-  body.workout-mode header .ledger-icon-button,
-  body.workout-mode header .settings-gear {
-    width: 40px !important;
-    height: 40px !important;
-    min-width: 40px !important;
-    flex-basis: 40px !important;
-  }
-  body.workout-mode header .ledger-icon-button svg {
-    width: 30px !important;
-    height: 30px !important;
-  }
-  body.workout-mode header .settings-gear { font-size: 29px !important; }
-  body.workout-mode header #exerciseTabs:not(.hide) {
-    margin-top: 23px !important;
-    padding: 6px 0 0 !important;
-  }
+  
+  
+  
+  
+  
+  
+  
   body.workout-mode .workout-screen > .card,
   body.workout-mode .workouts-exercises > .workout-section-card {
     padding: 15px !important;
   }
 }
 @media (max-width: 380px) {
-  body.workout-mode header #exerciseTabs:not(.hide) { gap: 6px !important; }
-  body.workout-mode header #exerciseTabs .tab {
-    padding: 8px 9px !important;
-    font-size: 13px !important;
-  }
+  
+  
 }
 @media (max-width: 360px) {
-  body.workout-mode header .top { gap: 5px !important; }
-  body.workout-mode header .top h1 { font-size: 20px !important; }
-  body.workout-mode header .header-actions { gap: 4px !important; }
-  body.workout-mode header .ledger-icon-button,
-  body.workout-mode header .settings-gear {
-    width: 36px !important;
-    height: 38px !important;
-    min-width: 36px !important;
-    flex-basis: 36px !important;
-  }
-  body.workout-mode header .ledger-icon-button svg {
-    width: 28px !important;
-    height: 28px !important;
-  }
+  
+  
+  
+  
+  
 }
 @media (min-width: 601px) {
-  body.workout-mode header #exerciseTabs:not(.hide) {
-    display: flex !important;
-    gap: 7px !important;
-    padding: 7px 0 0 !important;
-  }
-  body.workout-mode header #exerciseTabs .tab {
-    flex: 1 1 auto !important;
-    border-radius: 999px !important;
-    padding: 9px 14px !important;
-    white-space: nowrap !important;
-  }
+  
+  
 }
 </style>
 
@@ -1724,29 +1613,17 @@ body.settings-mode .settings-section>summary{font-size:13px!important;font-weigh
 
 /* Match the Workout navigation buttons to the existing Macro .tabs/.tab sizing.
    Desktop uses the same pill row; phones use the same two-column 44px grid. */
-body.workout-mode header #exerciseTabs:not(.hide){
- position:static!important;top:auto!important;inset:auto!important;z-index:auto!important;
- display:flex!important;flex-wrap:wrap!important;justify-content:space-between!important;gap:7px!important;
- width:auto!important;max-width:760px!important;margin:5px auto 0!important;padding:6px 0 0!important;
- overflow:visible!important;background:transparent!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;
-}
-body.workout-mode header #exerciseTabs .tab{
- display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;
- flex:1 1 auto!important;width:auto!important;min-width:0!important;min-height:0!important;
- padding:9px 14px!important;border:1px solid var(--line)!important;border-radius:999px!important;
- background:var(--surface2)!important;color:var(--muted)!important;
- font-family:"Manrope",system-ui,sans-serif!important;font-size:15px!important;font-weight:650!important;line-height:1.45!important;
- text-align:center!important;white-space:nowrap!important;
-}
-body.workout-mode header #exerciseTabs .tab.active{background:#2878e0!important;border-color:#2878e0!important;color:#fff!important;box-shadow:none!important}
-body.workout-mode header #exerciseTabs .nav-glyph{display:none!important}
+
+
+
+
 @media(max-width:600px){
- body.workout-mode header #exerciseTabs:not(.hide){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;overflow:visible!important;padding:6px 0 0!important;margin:5px auto 0!important}
- body.workout-mode header #exerciseTabs .tab{width:100%!important;min-width:0!important;min-height:44px!important;padding:10px 8px!important;border-radius:12px!important;white-space:normal!important;line-height:1.2!important;font-size:15px!important}
+ 
+ 
 }
 @media(max-width:360px){
- body.workout-mode header #exerciseTabs:not(.hide){gap:6px!important}
- body.workout-mode header #exerciseTabs .tab{padding:8px 9px!important;font-size:13px!important}
+ 
+ 
 }
 
 /* Use the same typography scale as Macro Ledger's global system:
