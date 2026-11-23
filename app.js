@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=129;
+const APP_VERSION=130;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -977,16 +977,84 @@ function finishActiveWorkout(){
 }
 function renderDailyWorkout(){
  renderActiveWorkout();
- const selectedDate=workoutDate(),dateObject=new Date(selectedDate+'T12:00:00');$('workoutDailyDateLabel').textContent=selectedDate===today()?'Today':dateObject.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ const selectedDate=workoutDate(),dateObject=new Date(selectedDate+'T12:00:00');
+ $('workoutDailyDateLabel').textContent=selectedDate===today()?'Today':dateObject.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
  const day=workoutLogs[selectedDate]||[],totalSets=day.reduce((n,x)=>n+(Array.isArray(x.sets)?x.sets.length:0),0);
  $('dailyWorkoutSummary').textContent=day.length?`${day.length} exercises · ${totalSets} sets recorded/planned`:'No training recorded for this date.';
- $('dailyWorkoutEntries').innerHTML=day.map(ex=>`<details class="workout-item daily-log-exercise workout-dropdown-card" data-log-ex="${esc(ex.id)}" open><summary class="daily-log-exercise-summary"><span><strong>${esc(ex.name)}</strong><small>${esc(ex.category||'Exercise')} · ${ex.sets.length} sets${ex.workoutName?` · ${esc(ex.workoutName)}`:''}</small></span><span class="workout-dropdown-indicator" aria-hidden="true"></span></summary><div class="daily-log-exercise-content"><div class="meta">${ex.completed!==undefined?(ex.completed?'Completed':'Not completed'):''}</div>${ex.sets.map((s,i)=>`<div class="set-row"><span>Set ${i+1}</span><input type="number" min="0" step="1" placeholder="Reps" aria-label="Set ${i+1} reps" data-setfield="reps" data-index="${i}" value="${esc(s.reps)}"><input type="number" min="0" step="0.5" placeholder="kg" aria-label="Set ${i+1} weight in kg" data-setfield="weight" data-index="${i}" value="${esc(s.weight)}"></div>`).join('')}<div class="actions"><button class="btn ghost smallbtn" data-add-set="${esc(ex.id)}">＋ Add set</button><button class="btn ghost smallbtn" data-delete-set="${esc(ex.id)}">Remove last set</button><button class="btn danger ghost smallbtn" data-remove-log="${esc(ex.id)}">Remove exercise</button></div></div></details>`).join('')||'<div class="muted tiny">Your logged exercises will appear here.</div>';
- $('dailyWorkoutEntries').querySelectorAll('[data-setfield]').forEach(input=>input.onchange=()=>{const ex=day.find(x=>x.id===input.closest('[data-log-ex]').dataset.logEx);if(!ex)return;ex.sets[Number(input.dataset.index)][input.dataset.setfield]=input.value;saveWorkoutData();renderDailyWorkout();});
- $('dailyWorkoutEntries').querySelectorAll('[data-remove-log]').forEach(b=>b.onclick=()=>{workoutLogs[workoutDate()]=day.filter(x=>x.id!==b.dataset.removeLog);saveWorkoutData();renderDailyWorkout();});
- $('dailyWorkoutEntries').querySelectorAll('[data-add-set]').forEach(b=>b.onclick=()=>{const ex=day.find(x=>x.id===b.dataset.addSet);if(ex){ex.sets.push({reps:'',weight:'',duration:'',notes:''});saveWorkoutData();renderDailyWorkout();}});
- $('dailyWorkoutEntries').querySelectorAll('[data-delete-set]').forEach(b=>b.onclick=()=>{const ex=day.find(x=>x.id===b.dataset.deleteSet);if(ex&&ex.sets.length>1){ex.sets.pop();saveWorkoutData();renderDailyWorkout();}});
-}
 
+ // Keep exercises grouped by their finished workout session. Legacy records without
+ // a sessionId are grouped by workout name; individual one-off entries stay separate.
+ const groups=[],groupLookup=new Map();
+ day.forEach(ex=>{
+  const hasSession=!!(ex.sessionId||ex.workoutName);
+  const key=ex.sessionId?`session:${ex.sessionId}`:ex.workoutName?`workout:${ex.workoutName}`:`exercise:${ex.id}`;
+  let group=groupLookup.get(key);
+  if(!group){
+   group={key,name:ex.workoutName||ex.name||'Workout',sessionId:ex.sessionId||null,workoutName:ex.workoutName||null,canAdd:hasSession,items:[]};
+   groupLookup.set(key,group);groups.push(group);
+  }
+  group.items.push(ex);
+ });
+
+ const renderExercise=(ex)=>`<details class="workout-item daily-log-exercise workout-dropdown-card" data-log-ex="${esc(ex.id)}" open>
+  <summary class="daily-log-exercise-summary"><span><strong>${esc(ex.name)}</strong><small>${esc(ex.category||'Exercise')} · ${Array.isArray(ex.sets)?ex.sets.length:0} sets</small></span><span class="workout-dropdown-indicator" aria-hidden="true"></span></summary>
+  <div class="daily-log-exercise-content"><div class="meta">${ex.completed!==undefined?(ex.completed?'Completed':'Not completed'):''}</div>
+   ${(Array.isArray(ex.sets)?ex.sets:[]).map((set,i)=>`<div class="set-row"><span>Set ${i+1}</span><input type="number" min="0" step="1" placeholder="Reps" aria-label="Set ${i+1} reps" data-setfield="reps" data-index="${i}" value="${esc(set.reps)}"><input type="number" min="0" step="0.5" placeholder="kg" aria-label="Set ${i+1} weight in kg" data-setfield="weight" data-index="${i}" value="${esc(set.weight)}"></div>`).join('')}
+   <div class="actions"><button class="btn ghost smallbtn" data-add-set="${esc(ex.id)}">＋ Add set</button><button class="btn ghost smallbtn" data-delete-set="${esc(ex.id)}">Remove last set</button><button class="btn danger ghost smallbtn" data-remove-log="${esc(ex.id)}">Remove exercise</button></div>
+  </div>
+ </details>`;
+
+ $('dailyWorkoutEntries').innerHTML=groups.map(group=>`<section class="daily-finished-session" data-finished-session="${esc(group.key)}">
+  ${group.canAdd?`<div class="daily-finished-session-heading"><span><strong>${esc(group.name)}</strong><small>${group.items.length} ${group.items.length===1?'exercise':'exercises'} · Finished workout</small></span></div>`:''}
+  <div class="daily-finished-session-exercises">${group.items.map(renderExercise).join('')}</div>
+  ${group.canAdd?`<details class="finished-workout-add-picker" data-finished-picker="${esc(group.key)}"><summary class="btn ghost full">＋ Add exercise</summary><div class="finished-workout-picker-content"><input type="search" class="finished-workout-picker-search" placeholder="Search exercise library…" aria-label="Search exercise library" data-finished-search="${esc(group.key)}"><div class="finished-workout-picker-results" data-finished-results="${esc(group.key)}"><span class="muted tiny">Choose an exercise to add to this workout.</span></div></div></details>`:''}
+ </section>`).join('')||'<div class="muted tiny">Your logged exercises will appear here.</div>';
+
+ // Bind the exercise-level controls first.
+ $('dailyWorkoutEntries').querySelectorAll('[data-setfield]').forEach(input=>input.onchange=()=>{
+  const ex=day.find(x=>x.id===input.closest('[data-log-ex]').dataset.logEx);if(!ex)return;
+  ex.sets[Number(input.dataset.index)][input.dataset.setfield]=input.value;saveWorkoutData();renderDailyWorkout();
+ });
+ $('dailyWorkoutEntries').querySelectorAll('[data-remove-log]').forEach(button=>button.onclick=()=>{
+  workoutLogs[workoutDate()]=day.filter(x=>x.id!==button.dataset.removeLog);saveWorkoutData();renderDailyWorkout();
+ });
+ $('dailyWorkoutEntries').querySelectorAll('[data-add-set]').forEach(button=>button.onclick=()=>{
+  const ex=day.find(x=>x.id===button.dataset.addSet);if(ex){if(!Array.isArray(ex.sets))ex.sets=[];ex.sets.push({reps:'',weight:'',duration:'',notes:''});saveWorkoutData();renderDailyWorkout();}
+ });
+ $('dailyWorkoutEntries').querySelectorAll('[data-delete-set]').forEach(button=>button.onclick=()=>{
+  const ex=day.find(x=>x.id===button.dataset.deleteSet);if(ex&&Array.isArray(ex.sets)&&ex.sets.length>0){ex.sets.pop();saveWorkoutData();renderDailyWorkout();}
+ });
+
+ // A finished session can be extended without changing its saved template or
+ // creating a new active workout. The new exercise is attached to this date/session.
+ $('dailyWorkoutEntries').querySelectorAll('[data-finished-search]').forEach(input=>{
+  const key=input.dataset.finishedSearch,group=groupLookup.get(key),results=$('dailyWorkoutEntries').querySelector(`[data-finished-results="${CSS.escape(key)}"]`);
+  if(!group||!results)return;
+  const renderResults=()=>{
+   const query=String(input.value||'').trim().toLocaleLowerCase();
+   const inGroup=new Set(group.items.map(item=>String(item.exerciseId)));
+   const matches=workoutExercises.filter(ex=>!ex.archived&&!inGroup.has(String(ex.id))&&(!query||String(ex.name||'').toLocaleLowerCase().includes(query)||String(ex.category||'').toLocaleLowerCase().includes(query)||String(ex.equipment||'').toLocaleLowerCase().includes(query))).sort((a,b)=>a.name.localeCompare(b.name)).slice(0,40);
+   results.innerHTML=matches.map(ex=>`<div class="finished-workout-picker-result"><span><strong>${esc(ex.name)}</strong><small>${esc(ex.category||'Exercise')} · ${esc(ex.equipment||'')}</small></span><button type="button" class="btn primary smallbtn" data-add-to-finished-workout="${esc(key)}" data-exercise-id="${esc(ex.id)}">＋ Add</button></div>`).join('')||'<span class="muted tiny">No matching exercises available in this workout.</span>';
+   results.querySelectorAll('[data-add-to-finished-workout]').forEach(button=>button.onclick=()=>{
+    const selectedGroup=groupLookup.get(button.dataset.addToFinishedWorkout);
+    const exercise=workoutExerciseById(button.dataset.exerciseId);
+    if(!selectedGroup||!exercise||exercise.archived||selectedGroup.items.some(item=>String(item.exerciseId)===String(exercise.id)))return;
+    const added={
+     id:makeId(),exerciseId:exercise.id,name:exercise.name,category:exercise.category||'',
+     sets:[],targetReps:'',completed:true,workoutName:selectedGroup.workoutName||selectedGroup.name,
+     ...(selectedGroup.sessionId?{sessionId:selectedGroup.sessionId}:{})
+    };
+    const insertAt=day.indexOf(selectedGroup.items[selectedGroup.items.length-1])+1;
+    day.splice(insertAt,0,added);
+    workoutLogs[selectedDate]=day;saveWorkoutData();renderDailyWorkout();
+    requestAnimationFrame(()=>document.querySelector(`[data-log-ex="${CSS.escape(added.id)}"]`)?.scrollIntoView({behavior:'smooth',block:'center'}));
+   });
+  };
+  input.oninput=renderResults;
+  const picker=input.closest('details');
+  picker?.addEventListener('toggle',()=>{if(picker.open){input.focus();renderResults();}});
+ });
+}
 function bodyweightExercise(ex){return /bodyweight/i.test(String(ex?.equipment||''));}
 function weighInForDate(date){const entries=weightLogs.filter(x=>{if(!x||!Number.isFinite(Number(x.weight))||String(x.date)>String(date))return false;const age=(new Date(date+'T12:00:00')-new Date(String(x.date)+'T12:00:00'))/86400000;return age>=0&&age<=14;}).sort((a,b)=>String(b.date).localeCompare(String(a.date))||(Number(b.loggedAt)||0)-(Number(a.loggedAt)||0));return entries.length?Number(entries[0].weight):null;}
 function progressRecords(exerciseId,days){const cutoff=days?new Date(Date.now()-days*86400000).toLocaleDateString('en-CA'):'0000-00-00',rows=[];Object.entries(workoutLogs).forEach(([date,items])=>{if(date<cutoff||!Array.isArray(items))return;items.filter(x=>String(x.exerciseId)===String(exerciseId)).forEach(item=>{const bw=bodyweightExercise(workoutExerciseById(exerciseId))?weighInForDate(date):null;const sets=(item.sets||[]).map(set=>{const reps=Number(set.reps)||0,external=Number(set.weight)||0,total=bodyweightExercise(workoutExerciseById(exerciseId))&&bw!==null?bw+external:external;return {reps,external,total,volume:reps*(bodyweightExercise(workoutExerciseById(exerciseId))&&bw!==null?total:external),bodyweight:bw};});rows.push({date,sets,name:item.name||workoutExerciseById(exerciseId)?.name||'Exercise'});});});return rows.sort((a,b)=>a.date.localeCompare(b.date));}
