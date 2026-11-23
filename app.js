@@ -1,5 +1,5 @@
 (()=>{
-const APP_VERSION=124;
+const APP_VERSION=125;
 const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'); let toastTimer=null; function showToast(message){const toast=$('appToast');if(!toast)return;toast.textContent=message;toast.classList.add('is-visible');toast.setAttribute('aria-hidden','false');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('is-visible');toast.setAttribute('aria-hidden','true')},2000)}
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const isGramUnit=unit=>['g','gram','grams'].includes(String(unit||'').trim().toLowerCase());
@@ -180,6 +180,7 @@ function renderDiary(){
  $('diaryEntries').querySelectorAll('.entry-drag-area').forEach(area=>area.addEventListener('contextmenu',e=>{e.preventDefault();const row=area.closest('[data-entry-id]');if(row)showEntryContextMenu(row.dataset.entryId,e.clientX,e.clientY)}));
  $('clearDay').disabled=!entries().length;
  renderDailyHistory();
+ renderWeeklyReports();
 }
 
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -390,17 +391,73 @@ function renderWeeklyReports(){
  const weeks=new Map();
  dates.forEach(date=>{const start=mondayOf(date),key=dateKey(start);if(!weeks.has(key))weeks.set(key,{start,dates:[]});weeks.get(key).dates.push(date);});
  const ordered=[...weeks.values()].sort((a,b)=>b.start-a.start);
+ const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+ const n=value=>Number.isFinite(Number(value))?Number(value):0;
+ const escDate=value=>esc(value);
  host.innerHTML=ordered.map(week=>{
   const start=week.start,end=new Date(start);end.setDate(end.getDate()+6);
-  const dayTotals=week.dates.map(date=>({date,total:totals(logs[date])}));
-  const sum=dayTotals.reduce((a,x)=>({kcal:a.kcal+x.total.kcal,protein:a.protein+x.total.protein,carbs:a.carbs+x.total.carbs,fat:a.fat+x.total.fat}),{kcal:0,protein:0,carbs:0,fat:0});
-  const count=dayTotals.length,avg={kcal:sum.kcal/count,protein:sum.protein/count,carbs:sum.carbs/count,fat:sum.fat/count};
   const weekStartKey=dateKey(start),weekEndKey=dateKey(end);
+  const dayRows=dayNames.map((day,index)=>{
+   const date=new Date(start);date.setDate(date.getDate()+index);const key=dateKey(date);
+   const items=Array.isArray(logs[key])?logs[key]:[];
+   return {day,date:key,total:items.length?totals(items):null,logged:items.length>0};
+  });
+  const loggedRows=dayRows.filter(row=>row.logged);
+  const sum=loggedRows.reduce((a,row)=>({kcal:a.kcal+row.total.kcal,protein:a.protein+row.total.protein,carbs:a.carbs+row.total.carbs,fat:a.fat+row.total.fat}),{kcal:0,protein:0,carbs:0,fat:0});
+  const count=loggedRows.length;
+  const avg={kcal:sum.kcal/count,protein:sum.protein/count,carbs:sum.carbs/count,fat:sum.fat/count};
   const weights=weightLogs.filter(x=>x&&String(x.date)>=weekStartKey&&String(x.date)<=weekEndKey&&Number.isFinite(Number(x.weight))).map(x=>Number(x.weight));
   const weightAvg=weights.length?weights.reduce((a,b)=>a+b,0)/weights.length:null;
   const label=`${start.toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${end.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}`;
-  const isCurrent= dateKey(mondayOf(today()))===dateKey(start);
-  return `<article class="weekly-report"><div class="weekly-report-head"><div class="weekly-report-title">${esc(label)}${isCurrent?' · Current week':''}</div><div class="weekly-report-days">${count} of 7 days logged</div></div><div class="weekly-report-grid"><div class="weekly-report-stat"><b>${Math.round(avg.kcal).toLocaleString()} kcal</b><span>Average calories / logged day</span></div><div class="weekly-report-stat"><b>${fmt(avg.protein)} g</b><span>Average protein / logged day</span></div><div class="weekly-report-stat"><b>${fmt(avg.carbs)} g</b><span>Average carbs / logged day</span></div><div class="weekly-report-stat"><b>${fmt(avg.fat)} g</b><span>Average fat / logged day</span></div></div><div class="weekly-report-foot">${Math.round(sum.kcal).toLocaleString()} kcal total across ${count} logged days${weightAvg===null?'':` · Average weigh-in ${fmt(weightAvg)} kg (${weights.length} ${weights.length===1?'entry':'entries'})`}</div></article>`;
+  const isCurrent=dateKey(mondayOf(today()))===weekStartKey;
+  const chartX=index=>28+index*47.5;
+  const caloriesMax=Math.max(1,n(macroTargets.kcal),...loggedRows.map(row=>n(row.total.kcal)));
+  const caloriesTarget=n(macroTargets.kcal);
+  const calorieTargetY=100-(caloriesTarget/caloriesMax)*78;
+  const calorieBars=dayRows.map((row,index)=>{
+   const x=chartX(index),value=row.logged?n(row.total.kcal):0,height=row.logged?Math.max(2,(value/caloriesMax)*78):0,y=100-height;
+   return `${row.logged?`<rect x="${x-10}" y="${y.toFixed(1)}" width="20" height="${height.toFixed(1)}" rx="4" fill="#e59a43"><title>${escDate(row.day)}: ${Math.round(value).toLocaleString()} kcal</title></rect><text x="${x}" y="${Math.max(12,y-5).toFixed(1)}" text-anchor="middle" class="weekly-chart-value">${Math.round(value)}</text>`:''}<text x="${x}" y="119" text-anchor="middle" class="weekly-chart-day">${row.day}</text>`;
+  }).join('');
+  const targetLine=caloriesTarget>0?`<line x1="14" y1="${calorieTargetY.toFixed(1)}" x2="340" y2="${calorieTargetY.toFixed(1)}" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4 4" opacity=".8"><title>Daily calorie target: ${Math.round(caloriesTarget)} kcal</title></line>`:'';
+  const macroValues=loggedRows.flatMap(row=>[row.total.protein,row.total.carbs,row.total.fat]).map(n);
+  const macroMax=Math.max(1,...macroValues);
+  const series=[
+   {key:'protein',color:'#4f9ee8',label:'Protein'},
+   {key:'carbs',color:'#e5a04b',label:'Carbs'},
+   {key:'fat',color:'#55b69a',label:'Fat'}
+  ];
+  const macroLines=series.map(seriesItem=>{
+   const points=dayRows.map((row,index)=>row.logged?{x:chartX(index),y:100-(n(row.total[seriesItem.key])/macroMax)*78,value:n(row.total[seriesItem.key]),day:row.day,index}:null).filter(Boolean);
+   let line='',previousIndex=-2;
+   points.forEach(point=>{line+=`${point.index===previousIndex+1?'L':'M'}${point.x.toFixed(1)},${point.y.toFixed(1)} `;previousIndex=point.index;});
+   const dots=points.map(point=>`<circle cx="${point.x.toFixed(1)}" cy="${point.y.toFixed(1)}" r="3.3" fill="${seriesItem.color}"><title>${seriesItem.label} · ${point.day}: ${fmt(point.value)} g</title></circle>`).join('');
+   return `${points.length>1?`<path d="${line.trim()}" fill="none" stroke="${seriesItem.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`:''}${dots}`;
+  }).join('');
+  const macroDayLabels=dayRows.map((row,index)=>`<text x="${chartX(index)}" y="119" text-anchor="middle" class="weekly-chart-day">${row.day}</text>`).join('');
+  const averageStat=(value,unit,label)=>`<div class="weekly-report-stat"><b>${unit==='kcal'?Math.round(value).toLocaleString():fmt(value)} ${unit}</b><span>${label}</span></div>`;
+  return `<article class="weekly-report">
+   <div class="weekly-report-head"><div class="weekly-report-title">${esc(label)}${isCurrent?' · Current week':''}</div><div class="weekly-report-days">${count} of 7 days logged</div></div>
+   <div class="weekly-report-section-title">Daily averages <span>logged days only</span></div>
+   <div class="weekly-report-grid">
+    ${averageStat(avg.kcal,'kcal','Calories / day')}
+    ${averageStat(avg.protein,'g','Protein / day')}
+    ${averageStat(avg.carbs,'g','Carbs / day')}
+    ${averageStat(avg.fat,'g','Fat / day')}
+   </div>
+   <div class="weekly-report-chart-card"><div class="weekly-report-chart-head"><strong>Calories by day</strong><span>kcal</span></div>
+    <svg class="weekly-report-chart" viewBox="0 0 354 126" role="img" aria-label="Daily calories for ${escDate(label)}">
+     <line x1="14" y1="100" x2="340" y2="100" class="weekly-chart-axis"/>${targetLine}${calorieBars}
+    </svg>
+    <div class="weekly-report-chart-legend"><span><i style="background:#e59a43"></i>Logged calories</span>${caloriesTarget>0?'<span><i class="weekly-target-key"></i>Daily target</span>':''}</div>
+   </div>
+   <div class="weekly-report-chart-card"><div class="weekly-report-chart-head"><strong>Macros by day</strong><span>grams</span></div>
+    <svg class="weekly-report-chart" viewBox="0 0 354 126" role="img" aria-label="Protein, carbohydrate and fat by day for ${escDate(label)}">
+     <line x1="14" y1="22" x2="340" y2="22" class="weekly-chart-gridline"/><line x1="14" y1="61" x2="340" y2="61" class="weekly-chart-gridline"/><line x1="14" y1="100" x2="340" y2="100" class="weekly-chart-axis"/>${macroLines}${macroDayLabels}
+    </svg>
+    <div class="weekly-report-chart-legend"><span><i style="background:#4f9ee8"></i>Protein</span><span><i style="background:#e5a04b"></i>Carbs</span><span><i style="background:#55b69a"></i>Fat</span></div>
+   </div>
+   <div class="weekly-report-foot">Weekly totals: ${Math.round(sum.kcal).toLocaleString()} kcal · P ${fmt(sum.protein)} g · C ${fmt(sum.carbs)} g · F ${fmt(sum.fat)} g${weightAvg===null?'':` · Average weigh-in ${fmt(weightAvg)} kg (${weights.length} ${weights.length===1?'entry':'entries'})`}</div>
+  </article>`;
  }).join('');
 }
 function renderHistory(){
